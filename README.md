@@ -1,11 +1,11 @@
 # Computer Graphics 203.3710
 ## Students Team data
 
-Name: 'Your real name'  
-Student Number: 'Your student number'
+Name: Or Ashkenazi  
+Student Number: 205711419
 
-Name: 'Your real name'  
-Student Number: 'Your student number'
+Name: Abed Idres
+Student Number: 316259357
 
 ### Lecturer
 *Roi Poranne*
