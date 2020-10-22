@@ -43,7 +43,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 int main(int argc, char **argv)
 {
 	int windowWidth = 1280, windowHeight = 720;
-	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Mesh Viewer");
+	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Or & Abed Project");
 	if (!window)
 		return 1;
 
@@ -56,8 +56,10 @@ int main(int argc, char **argv)
 	
 	ImGuiIO& io = SetupDearImgui(window);
 	glfwSetScrollCallback(window, ScrollCallback);
+	
     while (!glfwWindowShouldClose(window))
     {
+		//Main Loop
         glfwPollEvents();
 		StartFrame();
 		DrawImguiMenus(io, scene);
