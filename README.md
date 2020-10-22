@@ -1,8 +1,8 @@
 # Computer Graphics 203.3710
 ## Students Team data
 
-Name: 'Your real name'  
-Student Number: 'Your student number'
+Name: Or Ashkenazi  
+Student Number: 205711419
 
 Name: Abed Idres
 Student Number: 316259357
