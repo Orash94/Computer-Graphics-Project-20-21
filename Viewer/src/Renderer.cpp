@@ -33,8 +33,101 @@ void Renderer::PutPixel(int i, int j, const glm::vec3& color)
 
 void Renderer::DrawLine(const glm::ivec2& p1, const glm::ivec2& p2, const glm::vec3& color)
 {
+
 	// TODO: Implement bresenham algorithm
 	// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+
+	int x1 = (int)p1[0], y1 = (int)p2[0];
+	int x2 = (int)p1[1], y2 = (int)p2[1];
+	float x3 = p1[2], y3 = p2[2];
+
+	if (std::abs(y2 - x2) < std::abs(y1 - x1)) {
+		if (x1 > y1)
+		{
+			plotLineLow(y1, y2, y3, x1, x2, x3, color);
+		}
+		else
+		{
+			plotLineLow(x1, x2, x3, y1, y2, y3, color);
+		}
+	}
+	else
+	{
+		if (x2 > y2) {
+			plotLineHigh(y1, y2, y3, x1, x2, x3, color);
+		}
+		else
+		{
+			plotLineHigh(x1, x2, x3, y1, y2, y3, color);
+		}
+	}
+}
+
+float Renderer::getZOnLine(int x, int y, int x1, int x2, int x3, int y1, int y2, int y3)
+{
+	float divBeta = y2 * x1 - x2 * y2;
+	if (x1 == 0.0f || divBeta == 0.0f)
+		return -100000;
+	float beta = (y * x1 - x * x2) / divBeta;
+	float alpha = (x - y1 * beta) / x1;
+	float z = alpha * x3 + beta * y3;
+	return z;
+}
+
+void Renderer::plotLineLow(int x1, int x2, float x3, int y1, int y2, float y3, const glm::vec3& color)
+{
+	int diffX = y1 - x1;
+	int diffY = y2 - x2;
+
+	int i = 1;
+
+	if (diffY < 0) {
+		i = -1;
+		diffY = -diffY;
+	}
+
+	int a = 2 * diffY - diffX;
+	int x = x1;
+	int y = x2;
+
+	while (x < y1) {
+		float newZ = getZOnLine(x, y, x1, x2, x3, y1, y2, y3);
+		PutPixel(x, y, color);
+		if (a > 0) {
+			y += i;
+			a -= 2 * diffX;
+		}
+		a += 2 * diffY;
+		++x;
+	}
+}
+
+void Renderer::plotLineHigh(int x1, int x2, float x3, int y1, int y2, float y3, const glm::vec3& color)
+{
+	int diffX = y1 - x1;
+	int diffY = y2 - x2;
+
+	int i = 1;
+
+	if (diffX < 0) {
+		i = -1;
+		diffX = -diffX;
+	}
+
+	int a = 2 * diffX - diffY;
+	int x = x1;
+	int y = x2;
+
+	while (y < y2) {
+		float newZ = getZOnLine(x, y, x1, x2, x3, y1, y2, y3);
+		PutPixel(x, y, color);
+		if (a > 0) {
+			x += i;
+			a -= 2 * diffY;
+		}
+		a += 2 * diffX;
+		++y;
+	}
 }
 
 void Renderer::CreateBuffers(int w, int h)
@@ -171,7 +264,7 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 void Renderer::Render(const Scene& scene)
 {
 	// TODO: Replace this code with real scene rendering code
-	int half_width = viewport_width_ / 2;
+	/*int half_width = viewport_width_ / 2;
 	int half_height = viewport_height_ / 2;
 	int thickness = 15;
 	
@@ -179,7 +272,7 @@ void Renderer::Render(const Scene& scene)
 	{
 		for (int j = half_height - thickness; j < half_height + thickness; j++)
 		{
-			PutPixel(i, j, glm::vec3(1, 1, 0));
+			PutPixel(i, j, glm::vec3(1, 0, 0));
 		}
 	}
 
@@ -189,7 +282,9 @@ void Renderer::Render(const Scene& scene)
 		{
 			PutPixel(j, i, glm::vec3(1, 0, 1));
 		}
-	}
+	}*/
+	
+	DrawLine(glm::ivec3(100,0,0), glm::ivec3(100, 500, 500), glm::vec3(1, 0, 0));
 }
 
 int Renderer::GetViewportWidth() const
