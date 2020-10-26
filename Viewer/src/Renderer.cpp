@@ -37,97 +37,92 @@ void Renderer::DrawLine(const glm::ivec2& p1, const glm::ivec2& p2, const glm::v
 	// TODO: Implement bresenham algorithm
 	// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 
-	int x1 = (int)p1[0], y1 = (int)p2[0];
-	int x2 = (int)p1[1], y2 = (int)p2[1];
-	float x3 = p1[2], y3 = p2[2];
+	int x0 = (int)p1[0], y0 = (int)p1[1];
+	int x1 = (int)p2[0], y1 = (int)p2[1];
 
-	if (std::abs(y2 - x2) < std::abs(y1 - x1)) {
-		if (x1 > y1)
+	if (std::abs(y1 - y0) < std::abs(x1 - x0)) {
+		if (x0 > x1)
 		{
-			plotLineLow(y1, y2, y3, x1, x2, x3, color);
+			plotLineLow(x1, y1, x0, y0,color);
 		}
 		else
 		{
-			plotLineLow(x1, x2, x3, y1, y2, y3, color);
+			plotLineLow(x0, y0, x1, y1, color);
 		}
 	}
 	else
 	{
-		if (x2 > y2) {
-			plotLineHigh(y1, y2, y3, x1, x2, x3, color);
+		if (y0 > y1) {
+			plotLineHigh(x1,y1,x0,y0, color);
 		}
 		else
 		{
-			plotLineHigh(x1, x2, x3, y1, y2, y3, color);
+			plotLineHigh(x0,y0,x1,y1, color);
 		}
 	}
 }
 
-float Renderer::getZOnLine(int x, int y, int x1, int x2, int x3, int y1, int y2, int y3)
+void Renderer::plotLineLow(int x0, int y0,int  x1, int y1, const glm::vec3& color)
 {
-	float divBeta = y2 * x1 - x2 * y2;
-	if (x1 == 0.0f || divBeta == 0.0f)
-		return -100000;
-	float beta = (y * x1 - x * x2) / divBeta;
-	float alpha = (x - y1 * beta) / x1;
-	float z = alpha * x3 + beta * y3;
-	return z;
-}
+	int diffX = x1 - x0;
+	int diffY = y1 - y0;
 
-void Renderer::plotLineLow(int x1, int x2, float x3, int y1, int y2, float y3, const glm::vec3& color)
-{
-	int diffX = y1 - x1;
-	int diffY = y2 - x2;
-
-	int i = 1;
+	int yi = 1;
 
 	if (diffY < 0) {
-		i = -1;
+		yi = -1;
 		diffY = -diffY;
 	}
 
-	int a = 2 * diffY - diffX;
-	int x = x1;
-	int y = x2;
+	int d = (2 * diffY) - diffX;
+	int y = y0;
 
-	while (x < y1) {
-		float newZ = getZOnLine(x, y, x1, x2, x3, y1, y2, y3);
+	for (int x = x0;x <= x1; x++) {
 		PutPixel(x, y, color);
-		if (a > 0) {
-			y += i;
-			a -= 2 * diffX;
+		if (d > 0) {
+			y = y + yi;
+			d = d + (2 * (diffY - diffX));
 		}
-		a += 2 * diffY;
-		++x;
+		else
+		{
+			d = d + 2 * diffY;
+		}
 	}
 }
 
-void Renderer::plotLineHigh(int x1, int x2, float x3, int y1, int y2, float y3, const glm::vec3& color)
+void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& color)
 {
-	int diffX = y1 - x1;
-	int diffY = y2 - x2;
+	int diffX = x1 - x0;
+	int diffY = y1 - y0;
 
-	int i = 1;
+	int xi = 1;
 
 	if (diffX < 0) {
-		i = -1;
+		xi = -1;
 		diffX = -diffX;
 	}
 
-	int a = 2 * diffX - diffY;
-	int x = x1;
-	int y = x2;
+	int d = (2 * diffX) - diffY;
+	int x = x0;
 
-	while (y < y2) {
-		float newZ = getZOnLine(x, y, x1, x2, x3, y1, y2, y3);
+	for (int y = y0; y <= y1; y++) {
 		PutPixel(x, y, color);
-		if (a > 0) {
-			x += i;
-			a -= 2 * diffY;
+		if (d > 0) {
+			x = x + xi;
+			d = d + (2 * (diffX - diffY));
 		}
-		a += 2 * diffX;
-		++y;
+		else
+		{
+			d = d + 2 * diffX;
+		}
 	}
+}
+
+void Renderer::plotTriangle(const glm::vec2& v1, const glm::vec2& v2, const glm::vec2& v3, const glm::vec3& color)
+{
+	DrawLine( v1, v2, color);
+	DrawLine(v2, v3, color);
+	DrawLine(v1, v3, color);
 }
 
 void Renderer::CreateBuffers(int w, int h)
@@ -284,7 +279,7 @@ void Renderer::Render(const Scene& scene)
 		}
 	}*/
 	
-	DrawLine(glm::ivec3(100,0,0), glm::ivec3(100, 500, 500), glm::vec3(1, 0, 0));
+	plotTriangle(glm::ivec2(100,0), glm::ivec2(100, 500), glm::ivec2(500, 500), glm::vec3(1, 0, 0));
 }
 
 int Renderer::GetViewportWidth() const
