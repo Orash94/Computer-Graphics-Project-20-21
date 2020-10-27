@@ -279,7 +279,18 @@ void Renderer::Render(const Scene& scene)
 		}
 	}*/
 	
-	plotTriangle(glm::ivec2(100,0), glm::ivec2(100, 500), glm::ivec2(500, 500), glm::vec3(1, 0, 0));
+	int x0 = 600;
+	int y0 = 300;
+	DrawLine(glm::ivec2(x0, y0), glm::ivec2(x0, y0), glm::vec3(1, 0, 0));
+	float radius  = 200;
+	int ateration = 100;
+
+	
+	for (int i = 1; i<= ateration;i++) {
+		float x1 = x0 + radius * sin(2 * M_PI *i / ateration);
+		float y1 = y0 + radius * cos(2 * M_PI* i / ateration);
+		DrawLine(glm::ivec2(x0, y0), glm::ivec2(x1,  y1), glm::vec3(1, 0, 0));
+	}
 }
 
 int Renderer::GetViewportWidth() const
