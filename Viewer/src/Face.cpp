@@ -48,3 +48,8 @@ int Face::GetTextureIndex(int internal_index) const
 {
 	return texture_indices_[internal_index];
 }
+
+int Face::GetNumberOfVertexIndexes() const
+{
+	return vertex_indices_.size();
+}

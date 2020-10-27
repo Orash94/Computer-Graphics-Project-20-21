@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "MeshModel.h"
+#include "Renderer.h"
 #include <string>
 
 Scene::Scene() :
@@ -12,6 +13,7 @@ Scene::Scene() :
 void Scene::AddModel(const std::shared_ptr<MeshModel>& mesh_model)
 {
 	mesh_models_.push_back(mesh_model);
+	
 }
 
 int Scene::GetModelCount() const
@@ -27,6 +29,11 @@ MeshModel& Scene::GetModel(int index) const
 MeshModel& Scene::GetActiveModel() const
 {
 	return *mesh_models_[active_model_index_];
+}
+
+std::vector<std::shared_ptr<MeshModel>> Scene::GetModels() const
+{
+	return mesh_models_;
 }
 
 void Scene::AddCamera(const std::shared_ptr<Camera>& camera)
@@ -68,3 +75,4 @@ int Scene::GetActiveModelIndex() const
 {
 	return active_model_index_;
 }
+

@@ -27,3 +27,8 @@ const std::string& MeshModel::GetModelName() const
 {
 	return model_name_;
 }
+
+const glm::vec3& MeshModel::GetVertexAtIndex(int i) const
+{
+	return vertices_[i];
+}
