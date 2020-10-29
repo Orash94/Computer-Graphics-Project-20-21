@@ -94,11 +94,7 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 
 
 2 +3 - present a photo to show creativity and the requested circle 
-
 ![](/pictures/Final.png?raw=true)
-
-What the work flow really looked like...
-
 ![](/pictures/conspiracy101.png?raw=true)
 
 
