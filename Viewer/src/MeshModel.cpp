@@ -46,7 +46,7 @@ glm::fmat4x4  MeshModel::TansformationScale(const glm::fvec3 position)
 	glm::fvec4 vec3 = glm::fvec4(0, 0, z, 0);
 	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
 
-	return  glm::fmat4x4(vec1, vec2, vec3, vec4);
+	return  glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 
 }
 
@@ -61,7 +61,7 @@ glm::fmat4x4 MeshModel::TansformationTransition(const glm::fvec3 position)
 	glm::fvec4 vec3 = glm::fvec4(0, 0, 1.0f, z);
 	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
 
-	return  glm::fmat4x4(vec1, vec2, vec3, vec4);
+	return  glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
 glm::fmat4x4 MeshModel::TansformationRotateX(const float angle)
@@ -72,7 +72,7 @@ glm::fmat4x4 MeshModel::TansformationRotateX(const float angle)
 	glm::fvec4 vec3 = glm::fvec4(0, sin(angle), cos(angle), 0);
 	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
 
-	return  glm::fmat4x4(vec1, vec2, vec3, vec4);
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
 glm::fmat4x4 MeshModel::TansformationRotateY(const float angle)
@@ -83,7 +83,7 @@ glm::fmat4x4 MeshModel::TansformationRotateY(const float angle)
 	glm::fvec4 vec3 = glm::fvec4(-sin(angle), 0, cos(angle), 0);
 	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
 
-	return  glm::fmat4x4(vec1, vec2, vec3, vec4);
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
 glm::fmat4x4 MeshModel::TansformationRotateZ(const float angle)
@@ -93,7 +93,7 @@ glm::fmat4x4 MeshModel::TansformationRotateZ(const float angle)
 	glm::fvec4 vec3 = glm::fvec4(0, 0, 1.0f, 0);
 	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
 
-	return  glm::fmat4x4(vec1, vec2, vec3, vec4);
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
 glm::fvec3 MeshModel::Homogeneous2Euclidean(const glm::fvec4 vec)

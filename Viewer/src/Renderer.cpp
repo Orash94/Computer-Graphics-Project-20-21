@@ -31,7 +31,7 @@ void Renderer::PutPixel(int i, int j, const glm::vec3& color)
 	color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 }
 
-void Renderer::DrawLine(const glm::ivec2& p1, const glm::ivec2& p2, const glm::vec3& color)
+void Renderer::DrawLine(const glm::fvec2& p1, const glm::fvec2& p2, const glm::vec3& color)
 {
 
 	// TODO: Implement bresenham algorithm
@@ -118,7 +118,7 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	}
 }
 
-void Renderer::plotTriangle(const glm::vec2& v1, const glm::vec2& v2, const glm::vec2& v3, const glm::vec3& color)
+void Renderer::plotTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color)
 {
 	DrawLine( v1, v2, color);
 	DrawLine(v2, v3, color);
@@ -279,7 +279,8 @@ void Renderer::Render(const Scene& scene)
 		}
 	}*/
 	
-	int x0 = 600;
+	/* Drawing the circle */
+	int x0 = 500;
 	int y0 = 300;
 	DrawLine(glm::ivec2(x0, y0), glm::ivec2(x0, y0), glm::vec3(1, 0, 0));
 	float radius  = 200;
@@ -291,6 +292,26 @@ void Renderer::Render(const Scene& scene)
 		float y1 = y0 + radius * cos(2 * M_PI* i / ateration);
 		DrawLine(glm::ivec2(x0, y0), glm::ivec2(x1,  y1), glm::vec3(1, 0, 0));
 	}
+
+	// Drawing the trinagle that surrounds the circle, with the feeling of the illuminati
+	plotTriangle(glm::fvec2(150, 100), glm::fvec2(850, 100), glm::fvec2(500, 700), glm::vec3(0,0,0));
+
+	// Drawing the Star of David
+	plotTriangle(glm::fvec2(1000, 500), glm::fvec2(1150, 500), glm::fvec2(1075, 650), glm::vec3(0, 0, 1));
+	plotTriangle(glm::fvec2(1000, 600), glm::fvec2(1150, 600), glm::fvec2(1075, 450), glm::vec3(0, 0, 1));
+
+	// Drawing Cross
+	DrawLine(glm::fvec2(1000, 300), glm::fvec2(1150, 300), glm::vec3(1, 1, 0));
+	DrawLine(glm::fvec2(1075, 350), glm::fvec2(1075, 100), glm::vec3(1, 1, 0));
+
+
+	//Drawing the Bluetooth mark
+	plotTriangle(glm::fvec2(850, 600), glm::fvec2(850, 500), glm::fvec2(900, 550), glm::vec3(0, 1, 1));
+	plotTriangle(glm::fvec2(850, 500), glm::fvec2(850, 400), glm::fvec2(900, 450), glm::vec3(0, 1, 1));
+	DrawLine(glm::fvec2(800, 550), glm::fvec2(850, 500), glm::vec3(0, 1, 1));
+	DrawLine(glm::fvec2(800, 450), glm::fvec2(850, 500), glm::vec3(0, 1, 1));
+
+
 }
 
 int Renderer::GetViewportWidth() const
