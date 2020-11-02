@@ -19,7 +19,7 @@ private:
 	void DrawLine(const glm::fvec2& p1, const glm::fvec2& p2, const glm::vec3& color);
 	void plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& color);
 	void plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& color);
-	void plotTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color);
+	void DrawTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color);
 
 	void CreateBuffers(int w, int h);
 	void CreateOpenGLBuffer();

@@ -114,3 +114,8 @@ glm::fvec4 MeshModel::Euclidean2Homogeneous(const glm::fvec3 vec)
 	return glm::fvec4(x , y , z , 1);
 }
 
+std::vector<Face> MeshModel::getFaces() const
+{
+	return faces_;
+}
+

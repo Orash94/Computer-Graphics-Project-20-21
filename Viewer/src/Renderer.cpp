@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 #include "Renderer.h"
 #include "InitShader.h"
@@ -118,7 +119,7 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	}
 }
 
-void Renderer::plotTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color)
+void Renderer::DrawTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color)
 {
 	DrawLine( v1, v2, color);
 	DrawLine(v2, v3, color);
@@ -281,10 +282,37 @@ void Renderer::Render(const Scene& scene)
 	
 	/* Drawing the circle */
 	
-	for (int i = 0; i < scene.GetModelCount(); i++)
-	{
-		MeshModel mesh = scene.GetModel(i);
+	float add = 3;
+	float multi = 100;
+	if (scene.GetModelCount() > 0) {
+		for (int i = 0; i < scene.GetModelCount(); i++)
+		{
+			MeshModel mesh = scene.GetModel(i);
+			std::vector<Face> faces = mesh.getFaces();
+
+			for (int j = 0; j < mesh.GetFacesCount(); j++)
+			{
+				std::cout << "we are at j =" << j << std::endl;
+				Face face = faces[j];
+
+				int index0 = face.GetVertexIndex(0);
+				glm::vec3 v0 = mesh.GetVertexAtIndex(index0);
+				v0 = (v0 + add) * multi;
+
+				int index1 = face.GetVertexIndex(1);
+				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
+				v1 = (v1 + add) * multi;
+
+				int index2 = face.GetVertexIndex(2);
+				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
+				v2 = (v2 + add) * multi;
+
+				DrawTriangle(v0, v1, v2, glm::vec3(1, 0, 0));
+
+			}
+		}
 	}
+	
 	
 
 }

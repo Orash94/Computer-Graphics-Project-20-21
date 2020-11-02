@@ -21,7 +21,9 @@ public:
 
 	glm::fvec3 Homogeneous2Euclidean(const glm::fvec4 vec);
 	glm::fvec4 Euclidean2Homogeneous(const glm::fvec3 vec);
-
+	
+	std::vector<Face> getFaces() const;
+	
 private:
 	std::vector<Face> faces_;
 	std::vector<glm::vec3> vertices_;
