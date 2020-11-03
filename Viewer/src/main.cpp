@@ -208,7 +208,38 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	if (ImGui::Button("Clear")){
 		scene.cleanupScene();
 	}
+	static float scaleX = 1.0f, scaleY = 1.0f, scaleZ = 1.0f;
+	static float rotateX, rotateY, rotateZ;
+	static float translateX, translateY, translateZ;
+	ImGui::SliderFloat("Scale X", &scaleX, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Scale Y", &scaleY, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Scale Z", &scaleZ, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Rotate X", &rotateX, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Rotate Y", &rotateY, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Rotate Z", &rotateZ, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Translate X", &translateX, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Translate Y", &translateY, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SliderFloat("Translate Z", &translateZ, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	
+
 	ImGui::End();
+
+	//ImGui::Begin("WorldViewer Menu");
+	//static float scaleX = 1.0f, scaleY = 1.0f, scaleZ = 1.0f;
+	//static float rotateX, rotateY, rotateZ;
+	//static float translateX, translateY, translateZ;
+	//ImGui::SliderFloat("Scale X", &scaleX, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Scale Y", &scaleY, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Scale Z", &scaleZ, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Rotate X", &rotateX, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Rotate Y", &rotateY, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Rotate Z", &rotateZ, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Translate X", &translateX, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Translate Y", &translateY, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat("Translate Z", &translateZ, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+	//ImGui::End();
+
 
 	/**
 	 * Imgui demo - you can remove it once you are familiar with imgui
@@ -230,6 +261,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		ImGui::Checkbox("Another Window", &show_another_window);
 
 		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
 		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
 		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
