@@ -76,3 +76,8 @@ int Scene::GetActiveModelIndex() const
 	return active_model_index_;
 }
 
+void Scene::cleanupScene()
+{
+	mesh_models_.clear();
+}
+

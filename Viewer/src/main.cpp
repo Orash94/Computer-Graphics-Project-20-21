@@ -172,7 +172,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	 * MeshViewer menu
 	 */
 	ImGui::Begin("MeshViewer Menu");
-	
+
 	// Menu Bar
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -205,7 +205,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	// Controls
 	ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
 	// TODO: Add more controls as needed
-	
+	if (ImGui::Button("Clear")){
+		scene.cleanupScene();
+	}
 	ImGui::End();
 
 	/**

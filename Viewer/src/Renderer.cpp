@@ -5,6 +5,7 @@
 
 #include "Renderer.h"
 #include "InitShader.h"
+#include "Utils.h"
 
 #define INDEX(width,x,y,c) ((x)+(y)*(width))*3+(c)
 #define Z_INDEX(width,x,y) ((x)+(y)*(width))
@@ -289,23 +290,40 @@ void Renderer::Render(const Scene& scene)
 		{
 			MeshModel mesh = scene.GetModel(i);
 			std::vector<Face> faces = mesh.getFaces();
-
+			
+			glm::fmat4x4 transformation = Utils::TansformationShear(glm::fvec2(1.0,1.0));
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
-				std::cout << "we are at j =" << j << std::endl;
 				Face face = faces[j];
 
-				int index0 = face.GetVertexIndex(0);
+				int index0 = face.GetVertexIndex(0) - 1;
 				glm::vec3 v0 = mesh.GetVertexAtIndex(index0);
+				
+				glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(v0);
+				newv0 = transformation * newv0;
+				v0 = Utils::Homogeneous2Euclidean(newv0);
 				v0 = (v0 + add) * multi;
+				
 
-				int index1 = face.GetVertexIndex(1);
+
+				int index1 = face.GetVertexIndex(1) - 1;
 				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
+				
+				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
+				newv1 = transformation * newv1;
+				v1 = Utils::Homogeneous2Euclidean(newv1);
 				v1 = (v1 + add) * multi;
+				
 
-				int index2 = face.GetVertexIndex(2);
+
+				int index2 = face.GetVertexIndex(2) - 1;
 				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
+
+				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
+				newv2 = transformation * newv2;
+				v2 = Utils::Homogeneous2Euclidean(newv2);
 				v2 = (v2 + add) * multi;
+				
 
 				DrawTriangle(v0, v1, v2, glm::vec3(1, 0, 0));
 
