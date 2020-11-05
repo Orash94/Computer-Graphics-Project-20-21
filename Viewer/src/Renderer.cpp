@@ -283,15 +283,20 @@ void Renderer::Render(const Scene& scene)
 	
 	/* Drawing the circle */
 	
-	float add = 3;
-	float multi = 100;
+	float add = 500 ;
+	
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel mesh = scene.GetModel(i);
+			float proportion = 500/mesh.getDeltaMinMaxVertices();
+			
 			std::vector<Face> faces = mesh.getFaces();
 			
-			glm::fmat4x4 transformation = Utils::TansformationShear(glm::fvec2(1.0,1.0));
+			glm::fmat4x4 scale = Utils::TansformationScale(glm::fvec3(proportion, proportion, proportion));
+			glm::fmat4x4 translate = Utils::TansformationTransition(glm::fvec3(add, add, add));
+			glm::fmat4x4 transformation = translate * scale;
+
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
 				Face face = faces[j];
@@ -302,7 +307,6 @@ void Renderer::Render(const Scene& scene)
 				glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(v0);
 				newv0 = transformation * newv0;
 				v0 = Utils::Homogeneous2Euclidean(newv0);
-				v0 = (v0 + add) * multi;
 				
 
 
@@ -312,7 +316,6 @@ void Renderer::Render(const Scene& scene)
 				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
 				newv1 = transformation * newv1;
 				v1 = Utils::Homogeneous2Euclidean(newv1);
-				v1 = (v1 + add) * multi;
 				
 
 
@@ -322,7 +325,6 @@ void Renderer::Render(const Scene& scene)
 				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
 				newv2 = transformation * newv2;
 				v2 = Utils::Homogeneous2Euclidean(newv2);
-				v2 = (v2 + add) * multi;
 				
 
 				DrawTriangle(v0, v1, v2, glm::vec3(1, 0, 0));

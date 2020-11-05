@@ -12,6 +12,7 @@
 #include "Renderer.h"
 #include "Scene.h"
 #include "Utils.h"
+#include "MeshModel.h"
 
 /**
  * Fields
@@ -42,7 +43,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 int main(int argc, char **argv)
 {
-	int windowWidth = 800, windowHeight = 800;
+	int windowWidth = 1000, windowHeight = 1000;
 	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Or & Abed Project");
 	if (!window)
 		return 1;
@@ -208,37 +209,30 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	if (ImGui::Button("Clear")){
 		scene.cleanupScene();
 	}
-	static float scaleX = 1.0f, scaleY = 1.0f, scaleZ = 1.0f;
-	static float rotateX, rotateY, rotateZ;
-	static float translateX, translateY, translateZ;
-	ImGui::SliderFloat("Scale X", &scaleX, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Scale Y", &scaleY, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Scale Z", &scaleZ, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Rotate X", &rotateX, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Rotate Y", &rotateY, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Rotate Z", &rotateZ, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Translate X", &translateX, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Translate Y", &translateY, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::SliderFloat("Translate Z", &translateZ, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+	if (scene.GetModelCount() != 0) {
+		MeshModel model1 = scene.GetActiveModel();
+		float* scale = model1.getScale();
+		float* Rotate = model1.getRotate();
+		float* Translate = model1.getTranslate();
+		ImGui::SliderFloat3("Scale [x , y , z]", scale, -2.0f, 2.0f);
+		ImGui::SliderFloat3("Rotate [x , y , z]", Rotate, 0.0f, 359.9f);
+		ImGui::SliderFloat3("Translate [x , y , z]", Translate, 0.0f, 1.0f);
+	}
 	
 
-	ImGui::End();
-
-	//ImGui::Begin("WorldViewer Menu");
-	//static float scaleX = 1.0f, scaleY = 1.0f, scaleZ = 1.0f;
-	//static float rotateX, rotateY, rotateZ;
-	//static float translateX, translateY, translateZ;
 	//ImGui::SliderFloat("Scale X", &scaleX, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Scale Y", &scaleY, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Scale Z", &scaleZ, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Rotate X", &rotateX, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat2("Scale Y", &scaleY, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat3("Scale Z", &scaleZ, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	//ImGui::SliderFloat4("Rotate X", &rotateX, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
 	//ImGui::SliderFloat("Rotate Y", &rotateY, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
 	//ImGui::SliderFloat("Rotate Z", &rotateZ, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
 	//ImGui::SliderFloat("Translate X", &translateX, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 	//ImGui::SliderFloat("Translate Y", &translateY, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 	//ImGui::SliderFloat("Translate Z", &translateZ, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	
 
-	//ImGui::End();
+	ImGui::End();
 
 
 	/**

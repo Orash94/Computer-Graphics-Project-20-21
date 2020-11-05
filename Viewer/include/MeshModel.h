@@ -3,6 +3,7 @@
 #include <string>
 #include "Face.h"
 
+
 class MeshModel
 {
 public:
@@ -16,11 +17,17 @@ public:
 	
 
 	std::vector<Face> getFaces() const;
-	
+	float* getScale();
+	float* getRotate();
+	float* getTranslate();
+	float getDeltaMinMaxVertices();
+
 private:
+	float scale[3] = { 1.0f, 1.0f, 1.0f };;
+	float Rotate[3] = { 0.0f, 0.0f, 0.0f };;
+	float Translate[3] = { 0.0f, 0.0f, 0.0f };
 	glm::fmat4x4 ObjectTransformation;
 	glm::fmat4x4 WorldTransformation;
-
 	std::vector<Face> faces_;
 	std::vector<glm::vec3> vertices_;
 	std::vector<glm::vec3> normals_;
