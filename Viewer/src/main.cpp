@@ -202,35 +202,65 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		// TODO: Add more menubar items (if you want to)
 		ImGui::EndMainMenuBar();
 	}
+	static int selected = -1;
 
 	// Controls
-	ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
+	ImGui::ColorEdit3("Clear ", (float*)&clear_color);
 	// TODO: Add more controls as needed
-	if (ImGui::Button("Clear")){
+	if (ImGui::Button("Clear Screen and selection")){
+		selected = -1;
 		scene.cleanupScene();
 	}
+	
 
-	if (scene.GetModelCount() != 0) {
-		MeshModel model1 = scene.GetActiveModel();
-		float* scale = model1.getScale();
-		float* Rotate = model1.getRotate();
-		float* Translate = model1.getTranslate();
-		ImGui::SliderFloat3("Scale [x , y , z]", scale, -2.0f, 2.0f);
-		ImGui::SliderFloat3("Rotate [x , y , z]", Rotate, 0.0f, 359.9f);
-		ImGui::SliderFloat3("Translate [x , y , z]", Translate, 0.0f, 1.0f);
+	if (ImGui::TreeNode(" modul selection:"))
+	{	
+		for (int n = 0; n < scene.GetModelCount(); n++)
+		{
+			
+			//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
+			const std::string name = scene.GetModels()[n]->GetModelName() + "model";
+			// copying the contents of the
+			if (ImGui::Selectable(name.c_str(), selected == n))
+				selected = n;
+		}
+		if (scene.GetModelCount() ==0 ) {
+			ImGui::Text("please select one or more model");
+		}
+		ImGui::TreePop();
 	}
 	
-
-	//ImGui::SliderFloat("Scale X", &scaleX, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat2("Scale Y", &scaleY, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat3("Scale Z", &scaleZ, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat4("Rotate X", &rotateX, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Rotate Y", &rotateY, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Rotate Z", &rotateZ, 0.0f, 359.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Translate X", &translateX, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Translate Y", &translateY, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//ImGui::SliderFloat("Translate Z", &translateZ, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 	
+	if (selected != -1 && scene.GetModelCount()!=0) {
+		if (ImGui::TreeNode("modul Transformation"))
+		{
+			MeshModel model1 = scene.GetActiveModel();
+			float* scale = model1.getScale();
+			float* Rotate = model1.getRotate();
+			float* Translate = model1.getTranslate();
+			ImGui::SliderFloat3("Scale [x , y , z]", scale, -2.0f, 2.0f);
+			ImGui::SliderFloat3("Rotate [x , y , z]", Rotate, 0.0f, 359.9f);
+			ImGui::SliderFloat3("Translate [x , y , z]", Translate, 0.0f, 1.0f);
+			ImGui::TreePop();
+		}
+	}
+
+
+	
+	if (selected != -1 && scene.GetModelCount() != 0) {
+		if (ImGui::TreeNode("modul world Transformation:"))
+		{
+
+			MeshModel model1 = scene.GetActiveModel();
+			float* scale = model1.getScale();
+			float* Rotate = model1.getRotate();
+			float* Translate = model1.getTranslate();
+			ImGui::SliderFloat3("Scale [x , y , z]", scale, -2.0f, 2.0f);
+			ImGui::SliderFloat3("Rotate [x , y , z]", Rotate, 0.0f, 359.9f);
+			ImGui::SliderFloat3("Translate [x , y , z]", Translate, 0.0f, 1.0f);
+			ImGui::TreePop();
+		}
+	}	
 
 	ImGui::End();
 
