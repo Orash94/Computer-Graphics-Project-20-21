@@ -21,6 +21,7 @@ public:
 	float* getRotate();
 	float* getTranslate();
 	float getDeltaMinMaxVertices();
+	glm::vec3 getMiddleOfModel();
 
 private:
 	float scale[3] = { 1.0f, 1.0f, 1.0f };;

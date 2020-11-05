@@ -104,3 +104,47 @@ float MeshModel::getDeltaMinMaxVertices()
 
 }
 
+glm::vec3 MeshModel::getMiddleOfModel()
+{
+	float minX = FLT_MAX;
+	float minY = FLT_MAX;
+	float minZ = FLT_MAX;
+
+	float maxX = FLT_MIN;
+	float maxY = FLT_MIN;
+	float maxZ = FLT_MIN;
+
+	for (int i = 0; i <= vertices_.size() - 1; i++) {
+		glm::fvec3 vertic = vertices_[i];
+		float x = vertic[0];
+		float y = vertic[1];
+		float z = vertic[2];
+
+		if (x < minX) {
+			minX = x;
+		}
+		if (x > maxX) {
+			maxX = x;
+		}
+
+		if (y < minY) {
+			minY = y;
+		}
+		if (y > maxY) {
+			maxY = y;
+		}
+
+		if (z < minZ) {
+			minZ = z;
+		}
+		if (z > maxZ) {
+			maxZ = z;
+		}
+	}
+
+	float deltaX = -((minX + maxX) / 2);
+	float deltaY = -((minY + maxY) / 2);
+	float deltaZ = -((minZ + maxZ) / 2);
+	return glm::vec3(deltaX, deltaY, deltaZ);
+}
+

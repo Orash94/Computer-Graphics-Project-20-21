@@ -290,7 +290,7 @@ void Renderer::Render(const Scene& scene)
 		{
 			MeshModel mesh = scene.GetModel(i);
 			float proportion = 500/mesh.getDeltaMinMaxVertices();
-			
+			glm::vec3 middle = mesh.getMiddleOfModel();
 			std::vector<Face> faces = mesh.getFaces();
 			
 			glm::fmat4x4 scale = Utils::TansformationScale(glm::fvec3(proportion, proportion, proportion));
@@ -303,7 +303,7 @@ void Renderer::Render(const Scene& scene)
 
 				int index0 = face.GetVertexIndex(0) - 1;
 				glm::vec3 v0 = mesh.GetVertexAtIndex(index0);
-				
+				v0 += middle;
 				glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(v0);
 				newv0 = transformation * newv0;
 				v0 = Utils::Homogeneous2Euclidean(newv0);
@@ -312,7 +312,7 @@ void Renderer::Render(const Scene& scene)
 
 				int index1 = face.GetVertexIndex(1) - 1;
 				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
-				
+				v1 += middle;
 				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
 				newv1 = transformation * newv1;
 				v1 = Utils::Homogeneous2Euclidean(newv1);
@@ -321,7 +321,7 @@ void Renderer::Render(const Scene& scene)
 
 				int index2 = face.GetVertexIndex(2) - 1;
 				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
-
+				v2 += middle;
 				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
 				newv2 = transformation * newv2;
 				v2 = Utils::Homogeneous2Euclidean(newv2);
