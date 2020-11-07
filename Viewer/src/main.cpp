@@ -14,6 +14,7 @@
 #include "Utils.h"
 #include "MeshModel.h"
 
+
 /**
  * Fields
  */
@@ -260,7 +261,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		scene.cleanupScene();
 	}
 
-	if (ImGui::TreeNode("Active modul selection:"))
+	if (ImGui::TreeNode("Active model selection:"))
 	{	
 		
 
@@ -281,15 +282,18 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	
 	
 	if (model_selected != -1 && scene.GetModelCount()!=0) {
-		if (ImGui::TreeNode("modul Transformation"))
+		if (ImGui::TreeNode("model Transformation"))
 		{
 			MeshModel model1 = scene.GetActiveModel();
+			float& scaleX = model1.getScaleX();
 			float* scale = model1.getScale();
 			float* Rotate = model1.getRotate();
 			float* Translate = model1.getTranslate();
-			ImGui::SliderFloat3("Scale		[x,y,z]", scale, -2.0f, 2.0f);
+			ImGui::SliderFloat("Scale X", &scaleX, -2.0f, 2.0f);
+			ImGui::SliderFloat3("Scale		[x,y,z]",scale, -2.0f, 2.0f);
 			ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
 			ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
+			model1.setTransformationUpdates(scale, Rotate, Translate);
 			ImGui::TreePop();
 		}
 	}
