@@ -202,27 +202,76 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		// TODO: Add more menubar items (if you want to)
 		ImGui::EndMainMenuBar();
 	}
-	static int selected = -1;
 
-	// Controls
-	ImGui::ColorEdit3("Clear ", (float*)&clear_color);
-	// TODO: Add more controls as needed
-	if (ImGui::Button("Clear Screen and selection")){
-		selected = -1;
+	//// Controls
+	//ImGui::ColorEdit3("Clear ", (float*)&clear_color);
+	//// TODO: Add more controls as needed
+	
+	static int camera_selected = -1;
+	if (ImGui::TreeNode("Active camera selection:"))
+	{
+		for (int n = 0; n < scene.GetModelCount(); n++)
+		{
+
+			//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
+			const std::string name = scene.GetModels()[n]->GetModelName() + " camera";
+			// copying the contents of the
+			if (ImGui::Selectable(name.c_str(), camera_selected == n))
+				camera_selected = n;
+		}
+		if (scene.GetModelCount() == 0) {
+			ImGui::Text("please select one or more model");
+		}
+		ImGui::TreePop();
+	}
+
+	if (camera_selected != -1 && scene.GetModelCount() != 0) {
+		if (ImGui::TreeNode("Active camera params:"))
+		{
+			static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
+			ImGui::InputFloat3("Eye (x,y,z)", vecEye);
+			static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
+			ImGui::InputFloat3("At (x,y,z)", vecAt);
+			static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
+			ImGui::InputFloat3("Up (x,y,z)", vecUp);
+
+			ImGui::TreePop();
+		}
+	}
+
+	if (camera_selected != -1 && scene.GetModelCount() != 0) {
+		if (ImGui::TreeNode("Active camera Transformation:"))
+		{
+			static float scale[3] = { 1.0f,1.0f,1.0f };
+			static float Rotate[3] = { 0.0f,0.0f,0.0f };
+			static float Translate[3] = { 0.0f,0.0f,0.0f };
+			ImGui::SliderFloat3("Scale		[x,y,z]", scale, -2.0f, 2.0f);
+			ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
+			ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
+			ImGui::TreePop();
+		}
+	}
+	ImGui::Separator();
+
+	static int model_selected = -1;
+
+	if (ImGui::Button("Clear Screen and selection")) {
+		model_selected = -1;
 		scene.cleanupScene();
 	}
-	
 
-	if (ImGui::TreeNode(" modul selection:"))
+	if (ImGui::TreeNode("Active modul selection:"))
 	{	
+		
+
 		for (int n = 0; n < scene.GetModelCount(); n++)
 		{
 			
 			//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
-			const std::string name = scene.GetModels()[n]->GetModelName() + "model";
+			const std::string name = scene.GetModels()[n]->GetModelName() + " model";
 			// copying the contents of the
-			if (ImGui::Selectable(name.c_str(), selected == n))
-				selected = n;
+			if (ImGui::Selectable(name.c_str(), model_selected == n))
+				model_selected = n;
 		}
 		if (scene.GetModelCount() ==0 ) {
 			ImGui::Text("please select one or more model");
@@ -231,23 +280,23 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	}
 	
 	
-	if (selected != -1 && scene.GetModelCount()!=0) {
+	if (model_selected != -1 && scene.GetModelCount()!=0) {
 		if (ImGui::TreeNode("modul Transformation"))
 		{
 			MeshModel model1 = scene.GetActiveModel();
 			float* scale = model1.getScale();
 			float* Rotate = model1.getRotate();
 			float* Translate = model1.getTranslate();
-			ImGui::SliderFloat3("Scale [x , y , z]", scale, -2.0f, 2.0f);
-			ImGui::SliderFloat3("Rotate [x , y , z]", Rotate, 0.0f, 359.9f);
-			ImGui::SliderFloat3("Translate [x , y , z]", Translate, 0.0f, 1.0f);
+			ImGui::SliderFloat3("Scale		[x,y,z]", scale, -2.0f, 2.0f);
+			ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
+			ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
 			ImGui::TreePop();
 		}
 	}
 
 
 	
-	if (selected != -1 && scene.GetModelCount() != 0) {
+	if (model_selected != -1 && scene.GetModelCount() != 0) {
 		if (ImGui::TreeNode("modul world Transformation:"))
 		{
 
@@ -255,9 +304,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			float* scale = model1.getScale();
 			float* Rotate = model1.getRotate();
 			float* Translate = model1.getTranslate();
-			ImGui::SliderFloat3("Scale [x , y , z]", scale, -2.0f, 2.0f);
-			ImGui::SliderFloat3("Rotate [x , y , z]", Rotate, 0.0f, 359.9f);
-			ImGui::SliderFloat3("Translate [x , y , z]", Translate, 0.0f, 1.0f);
+			ImGui::SliderFloat3("Scale		[x,y,z]", scale, -2.0f, 2.0f);
+			ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
+			ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
 			ImGui::TreePop();
 		}
 	}	
