@@ -13,6 +13,7 @@
 #include "Scene.h"
 #include "Utils.h"
 #include "MeshModel.h"
+#include <iostream>
 
 
 /**
@@ -284,7 +285,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	if (model_selected != -1 && scene.GetModelCount()!=0) {
 		if (ImGui::TreeNode("model Transformation"))
 		{
-			MeshModel model1 = scene.GetActiveModel();
+			MeshModel& model1 = scene.GetActiveModel();
 			float& scaleX = model1.getScaleX();
 			float* scale = model1.getScale();
 			float* Rotate = model1.getRotate();
@@ -304,7 +305,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		if (ImGui::TreeNode("modul world Transformation:"))
 		{
 
-			MeshModel model1 = scene.GetActiveModel();
+			MeshModel& model1 = scene.GetActiveModel();
 			float* scale = model1.getScale();
 			float* Rotate = model1.getRotate();
 			float* Translate = model1.getTranslate();
