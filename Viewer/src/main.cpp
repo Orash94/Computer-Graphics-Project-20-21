@@ -305,9 +305,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Rotate X", &Rotate[0], -2.0f, 2.0f);
-				ImGui::SliderFloat("Rotate Y", &Rotate[1], -2.0f, 2.0f);
-				ImGui::SliderFloat("Rotate Z", &Rotate[2], -2.0f, 2.0f);
+				ImGui::SliderFloat("Rotate X", &Rotate[0], -4.0f, 4.0f);
+				ImGui::SliderFloat("Rotate Y", &Rotate[1], -4.0f, 4.0f);
+				ImGui::SliderFloat("Rotate Z", &Rotate[2], -4.0f, 4.0f);
 				if (ImGui::Button("reset")) {
 					Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
@@ -346,9 +346,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Rotate X", &worldRotate[0], -2.0f, 2.0f);
-				ImGui::SliderFloat("Rotate Y", &worldRotate[1], -2.0f, 2.0f);
-				ImGui::SliderFloat("Rotate Z", &worldRotate[2], -2.0f, 2.0f);
+				ImGui::SliderFloat("Rotate X", &worldRotate[0], -4.0f, 4.0f);
+				ImGui::SliderFloat("Rotate Y", &worldRotate[1], -4.0f, 4.0f);
+				ImGui::SliderFloat("Rotate Z", &worldRotate[2], -4.0f, 4.0f);
 				if (ImGui::Button("reset")) {
 					worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}

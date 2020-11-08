@@ -18,9 +18,12 @@ public:
 	static glm::fmat4x4 TransformationRotateY(const float angle);
 	static glm::fmat4x4 TransformationRotateZ(const float angle);
 	static glm::fmat4x4 TransformationShear(const glm::fvec2 vector);
+
 	static glm::fvec3 Homogeneous2Euclidean(const glm::fvec4 vec);
 	static glm::fvec4 Euclidean2Homogeneous(const glm::fvec3 vec);
 	static glm::fmat4x4 Utils::getIdMat();
 
+	static float degrees2Radians(float degree);
+	static float radians2Degrees(float radian);
 	static void resetMatrix(glm::fmat4x4& mat);
 };
