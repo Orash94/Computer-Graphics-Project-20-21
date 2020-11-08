@@ -45,17 +45,17 @@ std::vector<Face> MeshModel::getFaces() const
 	return faces_;
 }
 
-float* MeshModel::getScale() 
+glm::vec3 MeshModel::getScale()
 {
 	return scale;
 }
 
-float* MeshModel::getRotate()
+glm::vec3 MeshModel::getRotate()
 {
 	return Rotate;
 }
 
-float* MeshModel::getTranslate()
+glm::vec3 MeshModel::getTranslate()
 {
 	return Translate;
 }
@@ -108,13 +108,11 @@ void MeshModel:: setMinMax() {
 
 }
 
-void MeshModel::setTransformationUpdates(const float* nScale, const float* nRotate, const float* nTrasnlate)
+void MeshModel::setTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate)
 {
-	for (int i = 0; i < 3; i++) {
-		scale[i] = nScale[i];
-		Rotate[i] = nRotate[i];
-		Translate[i] = nTrasnlate[i];
-	}
+	scale = nScale;
+	Rotate = nRotate;
+	Translate = nTrasnlate;
 }
 
 void MeshModel::setObjectTransformation(const glm::fmat4x4 transform = Utils::getIdMat())

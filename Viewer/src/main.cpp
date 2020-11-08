@@ -286,14 +286,20 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		if (ImGui::TreeNode("model Transformation"))
 		{
 			MeshModel& model1 = scene.GetActiveModel();
-			float& scaleX = model1.getScaleX();
-			float* scale = model1.getScale();
-			float* Rotate = model1.getRotate();
-			float* Translate = model1.getTranslate();
-			ImGui::SliderFloat("Scale X", &scaleX, -2.0f, 2.0f);
-			ImGui::SliderFloat3("Scale		[x,y,z]",scale, -2.0f, 2.0f);
-			ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
-			ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
+			glm::vec3 scale = model1.getScale();
+			glm::vec3 Rotate = model1.getRotate();
+			glm::vec3 Translate = model1.getTranslate();
+			ImGui::SliderFloat("Scale X",&scale[0], -2.0f, 2.0f);
+			ImGui::SliderFloat("Scale Y", &scale[1], -2.0f, 2.0f);
+			ImGui::SliderFloat("Scale Z", &scale[2], -2.0f, 2.0f);
+			ImGui::SliderFloat("Rotate X", &Rotate[0], -2.0f, 2.0f);
+			ImGui::SliderFloat("Rotate Y", &Rotate[1], -2.0f, 2.0f);
+			ImGui::SliderFloat("Rotate Z", &Rotate[2], -2.0f, 2.0f);
+			ImGui::SliderFloat("Translate X", &Translate[0], -2.0f, 2.0f);
+			ImGui::SliderFloat("Translate Y", &Translate[1], -2.0f, 2.0f);
+			ImGui::SliderFloat("Translate Z", &Translate[2], -2.0f, 2.0f);
+			//ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
+			//ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
 			model1.setTransformationUpdates(scale, Rotate, Translate);
 			ImGui::TreePop();
 		}
@@ -302,16 +308,25 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 
 	
 	if (model_selected != -1 && scene.GetModelCount() != 0) {
-		if (ImGui::TreeNode("modul world Transformation:"))
+		if (ImGui::TreeNode("model world Transformation:"))
 		{
 
 			MeshModel& model1 = scene.GetActiveModel();
-			float* scale = model1.getScale();
-			float* Rotate = model1.getRotate();
-			float* Translate = model1.getTranslate();
-			ImGui::SliderFloat3("Scale		[x,y,z]", scale, -2.0f, 2.0f);
-			ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
-			ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
+			glm::vec3 scale = model1.getScale();
+			glm::vec3 Rotate = model1.getRotate();
+			glm::vec3 Translate = model1.getTranslate();
+			ImGui::SliderFloat("Scale X", &scale[0], -2.0f, 2.0f);
+			ImGui::SliderFloat("Scale Y", &scale[1], -2.0f, 2.0f);
+			ImGui::SliderFloat("Scale Z", &scale[2], -2.0f, 2.0f);
+			ImGui::SliderFloat("Rotate X", &Rotate[0], -2.0f, 2.0f);
+			ImGui::SliderFloat("Rotate Y", &Rotate[1], -2.0f, 2.0f);
+			ImGui::SliderFloat("Rotate Z", &Rotate[2], -2.0f, 2.0f);
+			ImGui::SliderFloat("Translate X", &Translate[0], -2.0f, 2.0f);
+			ImGui::SliderFloat("Translate Y", &Translate[1], -2.0f, 2.0f);
+			ImGui::SliderFloat("Translate Z", &Translate[2], -2.0f, 2.0f);
+			//ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
+			//ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
+			model1.setTransformationUpdates(scale, Rotate, Translate);
 			ImGui::TreePop();
 		}
 	}	
