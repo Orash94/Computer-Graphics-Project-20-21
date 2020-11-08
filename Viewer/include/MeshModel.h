@@ -17,19 +17,27 @@ public:
 	
 
 	std::vector<Face> getFaces() const;
+
 	glm::vec3 getScale();
 	glm::vec3 getRotate();
 	glm::vec3 getTranslate();
+	glm::fmat4x4 getObjectTransformation();
+
+	glm::vec3 getWorldScale();
+	glm::vec3 getWorldRotate();
+	glm::vec3 getWorldTranslate();
+	glm::fmat4x4 getWorldTransformation();
+
+
 	float getInitialScale();
 	void getMiddleOfModel();
 	void setMinMax();
 
-	void setTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
-
+	void setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
+	void setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
 	void setObjectTransformation(const glm::fmat4x4 transform);
 	void setWorldTransformation(const glm::fmat4x4 transform);
 
-	float& getScaleX();
 
 
 
@@ -41,6 +49,10 @@ private:
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 Rotate = glm::vec3(0, 0, 0);
 	glm::vec3 Translate = glm::vec3(0, 0, 0);
+
+	glm::vec3 WorldScale = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 WorldRotate = glm::vec3(0, 0, 0);
+	glm::vec3 WorldTranslate = glm::vec3(0, 0, 0);
 
 	glm::fmat4x4 ObjectTransformation;
 	glm::fmat4x4 WorldTransformation;

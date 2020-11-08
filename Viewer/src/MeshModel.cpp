@@ -60,6 +60,31 @@ glm::vec3 MeshModel::getTranslate()
 	return Translate;
 }
 
+glm::fmat4x4 MeshModel::getObjectTransformation()
+{
+	return ObjectTransformation;
+}
+
+glm::vec3 MeshModel::getWorldScale()
+{
+	return WorldScale;
+}
+
+glm::vec3 MeshModel::getWorldRotate()
+{
+	return WorldRotate;
+}
+
+glm::vec3 MeshModel::getWorldTranslate()
+{
+	return WorldTranslate;
+}
+
+glm::fmat4x4 MeshModel::getWorldTransformation()
+{
+	return WorldTransformation;
+}
+
 
 void MeshModel:: setMinMax() {
 
@@ -108,11 +133,36 @@ void MeshModel:: setMinMax() {
 
 }
 
-void MeshModel::setTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate)
+void MeshModel::setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate)
 {
 	scale = nScale;
 	Rotate = nRotate;
 	Translate = nTrasnlate;
+
+	glm::fmat4x4 id = Utils::getIdMat();
+	glm::fmat4x4 scale = Utils::TransformationScale(getScale());
+	glm::fmat4x4 translate = Utils::TransformationTransition(getTranslate());
+	glm::fmat4x4 rotateX = Utils::TransformationRotateX(getRotate()[0]);
+	glm::fmat4x4 rotateY = Utils::TransformationRotateY(getRotate()[1]);
+	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(getRotate()[2]);
+
+	setObjectTransformation(translate * scale * rotateZ * rotateY * rotateX * id);
+}
+
+void MeshModel::setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate)
+{
+	WorldScale = nScale;
+	WorldRotate = nRotate;
+	WorldTranslate = nTrasnlate;
+
+	glm::fmat4x4 id = Utils::getIdMat();
+	glm::fmat4x4 scale = Utils::TransformationScale(getWorldScale());
+	glm::fmat4x4 translate = Utils::TransformationTransition(getWorldTranslate());
+	glm::fmat4x4 rotateX = Utils::TransformationRotateX(getWorldRotate()[0]);
+	glm::fmat4x4 rotateY = Utils::TransformationRotateY(getWorldRotate()[1]);
+	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(getWorldRotate()[2]);
+
+	setWorldTransformation(translate * scale * rotateZ * rotateY * rotateX * id);
 }
 
 void MeshModel::setObjectTransformation(const glm::fmat4x4 transform = Utils::getIdMat())
@@ -126,10 +176,6 @@ void MeshModel::setWorldTransformation(const glm::fmat4x4 transform = Utils::get
 	WorldTransformation = transform;
 }
 
-float& MeshModel::getScaleX() 
-{
-	return scale[0];
-}
 
 float MeshModel::getInitialScale()
 {

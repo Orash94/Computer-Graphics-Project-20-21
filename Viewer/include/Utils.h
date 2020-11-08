@@ -12,12 +12,12 @@ public:
 	static std::shared_ptr<MeshModel> LoadMeshModel(const std::string& filePath);
 	static std::string GetFileName(const std::string& filePath);
 
-	static glm::fmat4x4 TansformationScale(const glm::fvec3 position);
-	static glm::fmat4x4 TansformationTransition(const glm::fvec3 position);
-	static glm::fmat4x4 TansformationRotateX(const float angle);
-	static glm::fmat4x4 TansformationRotateY(const float angle);
-	static glm::fmat4x4 TansformationRotateZ(const float angle);
-	static glm::fmat4x4 TansformationShear(const glm::fvec2 vector);
+	static glm::fmat4x4 TransformationScale(const glm::fvec3 position);
+	static glm::fmat4x4 TransformationTransition(const glm::fvec3 position);
+	static glm::fmat4x4 TransformationRotateX(const float angle);
+	static glm::fmat4x4 TransformationRotateY(const float angle);
+	static glm::fmat4x4 TransformationRotateZ(const float angle);
+	static glm::fmat4x4 TransformationShear(const glm::fvec2 vector);
 	static glm::fvec3 Homogeneous2Euclidean(const glm::fvec4 vec);
 	static glm::fvec4 Euclidean2Homogeneous(const glm::fvec3 vec);
 	static glm::fmat4x4 Utils::getIdMat();

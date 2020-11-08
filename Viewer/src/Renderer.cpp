@@ -288,14 +288,18 @@ void Renderer::Render(const Scene& scene)
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
-			MeshModel mesh = scene.GetModel(i);
+			MeshModel& mesh = scene.GetModel(i);
 			float proportion = 500/mesh.getInitialScale();
 			
 			std::vector<Face> faces = mesh.getFaces();
 			
-			glm::fmat4x4 scale = Utils::TansformationScale(glm::fvec3(proportion, proportion, proportion));
-			glm::fmat4x4 translate = Utils::TansformationTransition(glm::fvec3(add, add, add));
-			glm::fmat4x4 transformation = translate * scale;
+			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
+			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(add, add, add));
+			glm::fmat4x4 screenTransformation = translate * scale;
+
+			glm::fmat4x4 transformationMatrix = mesh.getWorldTransformation() * mesh.getObjectTransformation();
+
+
 
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
@@ -304,7 +308,8 @@ void Renderer::Render(const Scene& scene)
 				int index0 = face.GetVertexIndex(0) - 1;
 				glm::vec3 v0 = mesh.GetVertexAtIndex(index0);
 				glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(v0);
-				newv0 = transformation * newv0;
+
+				newv0 = screenTransformation * transformationMatrix * newv0;
 				v0 = Utils::Homogeneous2Euclidean(newv0);
 				
 
@@ -312,7 +317,7 @@ void Renderer::Render(const Scene& scene)
 				int index1 = face.GetVertexIndex(1) - 1;
 				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
 				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
-				newv1 = transformation * newv1;
+				newv1 = screenTransformation * transformationMatrix * newv1;
 				v1 = Utils::Homogeneous2Euclidean(newv1);
 				
 
@@ -320,7 +325,7 @@ void Renderer::Render(const Scene& scene)
 				int index2 = face.GetVertexIndex(2) - 1;
 				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
 				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
-				newv2 = transformation * newv2;
+				newv2 = screenTransformation * transformationMatrix * newv2;
 				v2 = Utils::Homogeneous2Euclidean(newv2);
 				
 

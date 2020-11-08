@@ -107,7 +107,7 @@ std::string Utils::GetFileName(const std::string& filePath)
 
 
 
-glm::fmat4x4  Utils::TansformationScale(const glm::fvec3 position)
+glm::fmat4x4  Utils::TransformationScale(const glm::fvec3 position)
 {
 	float x = position[0];
 	float y = position[1];
@@ -122,7 +122,7 @@ glm::fmat4x4  Utils::TansformationScale(const glm::fvec3 position)
 
 }
 
-glm::fmat4x4 Utils::TansformationTransition(const glm::fvec3 position)
+glm::fmat4x4 Utils::TransformationTransition(const glm::fvec3 position)
 {
 	float x = position[0];
 	float y = position[1];
@@ -136,7 +136,7 @@ glm::fmat4x4 Utils::TansformationTransition(const glm::fvec3 position)
 	return  glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
-glm::fmat4x4 Utils::TansformationRotateX(const float angle)
+glm::fmat4x4 Utils::TransformationRotateX(const float angle)
 {
 
 	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
@@ -147,7 +147,7 @@ glm::fmat4x4 Utils::TansformationRotateX(const float angle)
 	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
-glm::fmat4x4 Utils::TansformationRotateY(const float angle)
+glm::fmat4x4 Utils::TransformationRotateY(const float angle)
 {
 
 	glm::fvec4 vec1 = glm::fvec4(cos(angle), 0, sin(angle), 0);
@@ -158,7 +158,7 @@ glm::fmat4x4 Utils::TansformationRotateY(const float angle)
 	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
-glm::fmat4x4 Utils::TansformationRotateZ(const float angle)
+glm::fmat4x4 Utils::TransformationRotateZ(const float angle)
 {
 	glm::fvec4 vec1 = glm::fvec4(cos(angle), -sin(angle), 0, 0);
 	glm::fvec4 vec2 = glm::fvec4(sin(angle), cos(angle), 0, 0);
@@ -168,7 +168,7 @@ glm::fmat4x4 Utils::TansformationRotateZ(const float angle)
 	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
-glm::fmat4x4 Utils::TansformationShear(const glm::fvec2 vector)
+glm::fmat4x4 Utils::TransformationShear(const glm::fvec2 vector)
 {
 	float shearx = vector[0];
 	float sheary = vector[1];
