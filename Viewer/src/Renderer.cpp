@@ -265,7 +265,7 @@ void Renderer::Render(const Scene& scene)
 
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
-	int boundingBoxEdgeLength = glm::max(centerX, centerY);
+	int boundingBoxEdgeLength = glm::min(centerX, centerY);
 	
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
