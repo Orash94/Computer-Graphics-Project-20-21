@@ -46,10 +46,12 @@ we wanted for the  transformation to be displayed in the center of the screen , 
 
 
 
-the GUI is representing in tree structure, the user has to load a model, once is it loaded the GUI selects it as the active model and two option is opened, Object transformation and World transformation, each are identical GUI wise. each transformation has three options , scaling [2,-2] , rotating [-180 ,180] , translating [ 2 ,-2].
+the GUI is representing in tree structure, the user has to load a model, once is it loaded the GUI selects it as the active model and two option is opened, Object transformation and World transformation, each are identical GUI wise. each transformation has three options , scaling [2,-2] , rotating [-180 ,180] , translating [ -windowSize/2 ,windowSize/2].
 
 ## loading several models
 
 ![image info](./pictures/MeshViewer_yc7mqGrOlJ.png)
 
-The user can select the active model he want to work on by clicking the model name in the GUI and it applies  the transformation to the model.
+The user can select the active model he want to work on by clicking the model name in the GUI and then choosing the transformation.
+
+each object remembers his own parameters and thus transition between object is seamless.
