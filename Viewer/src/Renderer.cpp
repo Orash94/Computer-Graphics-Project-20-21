@@ -265,7 +265,7 @@ void Renderer::Render(const Scene& scene)
 
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
-	int boundingBoxEdgeLength = glm::min(centerX, centerY);
+	int boundingBoxEdgeLength = glm::max(centerX, centerY);
 	
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
@@ -277,7 +277,6 @@ void Renderer::Render(const Scene& scene)
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
-			glm::fmat4x4 screenTransformation = translate * scale;
 
 			glm::fmat4x4 transformationMatrix = mesh.getWorldTransformation() * mesh.getObjectTransformation();
 
@@ -291,7 +290,7 @@ void Renderer::Render(const Scene& scene)
 				glm::vec3 v0 = mesh.GetVertexAtIndex(index0);
 				glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(v0);
 
-				newv0 = screenTransformation * transformationMatrix * newv0;
+				newv0 = translate * transformationMatrix * scale * newv0;
 				v0 = Utils::Homogeneous2Euclidean(newv0);
 				
 
@@ -300,7 +299,7 @@ void Renderer::Render(const Scene& scene)
 				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
 				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
 
-				newv1 = screenTransformation * transformationMatrix * newv1;
+				newv1 = translate * transformationMatrix * scale * newv1;
 				v1 = Utils::Homogeneous2Euclidean(newv1);
 				
 
@@ -309,7 +308,7 @@ void Renderer::Render(const Scene& scene)
 				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
 				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
 
-				newv2 = screenTransformation * transformationMatrix * newv2;
+				newv2 = translate * transformationMatrix * scale * newv2;
 				v2 = Utils::Homogeneous2Euclidean(newv2);
 				
 

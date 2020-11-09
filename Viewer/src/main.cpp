@@ -172,6 +172,8 @@ void Cleanup(GLFWwindow* window)
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
+	int windowsWidth = (io.DisplaySize.x) / 2;
+	int windowsHeight = (io.DisplaySize.y) / 2;
 	/**
 	 * MeshViewer menu
 	 */
@@ -315,8 +317,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Translate X", &Translate[0], -2.0f, 2.0f);
-				ImGui::SliderFloat("Translate Y", &Translate[1], -2.0f, 2.0f);
+				ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
+				ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
 				ImGui::SliderFloat("Translate Z", &Translate[2], -2.0f, 2.0f);
 				if (ImGui::Button("Reset trasnalte")) {
 					Translate = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -356,8 +358,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Translate X", &worldTranslate[0], -2.0f, 2.0f);
-				ImGui::SliderFloat("Translate Y", &worldTranslate[1], -2.0f, 2.0f);
+				ImGui::SliderFloat("Translate X", &worldTranslate[0],-windowsWidth , windowsWidth);
+				ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
 				ImGui::SliderFloat("Translate Z", &worldTranslate[2], -2.0f, 2.0f);
 				if (ImGui::Button("Reset")) {
 					worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
