@@ -5,7 +5,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <nfd.h>
-
+#include <iostream>
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
@@ -14,6 +14,7 @@
 #include "Utils.h"
 #include "MeshModel.h"
 #include <iostream>
+#include <iomanip>
 
 
 /**
@@ -298,17 +299,17 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::SliderFloat("Scale X", &scale[0], -2.0f, 2.0f);
 				ImGui::SliderFloat("Scale Y", &scale[1], -2.0f, 2.0f);
 				ImGui::SliderFloat("Scale Z", &scale[2], -2.0f, 2.0f);
-				if (ImGui::Button("Reset")) {
+				if (ImGui::Button("Reset scale")) {
 					scale = glm::vec3(1.0f, 1.0f, 1.0f);
 				}
 
 			}
 			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Rotate X", &Rotate[0], -4.0f, 4.0f);
-				ImGui::SliderFloat("Rotate Y", &Rotate[1], -4.0f, 4.0f);
-				ImGui::SliderFloat("Rotate Z", &Rotate[2], -4.0f, 4.0f);
-				if (ImGui::Button("reset")) {
+				ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
+				ImGui::SliderFloat("Rotate Y", &Rotate[1], -180.0f, 180.0f);
+				ImGui::SliderFloat("Rotate Z", &Rotate[2], -180.0f, 180.0f);
+				if (ImGui::Button("Reset Rotating")) {
 					Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
 			}
@@ -317,7 +318,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::SliderFloat("Translate X", &Translate[0], -2.0f, 2.0f);
 				ImGui::SliderFloat("Translate Y", &Translate[1], -2.0f, 2.0f);
 				ImGui::SliderFloat("Translate Z", &Translate[2], -2.0f, 2.0f);
-				if (ImGui::Button("reset")) {
+				if (ImGui::Button("Reset trasnalte")) {
 					Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
 			}
@@ -346,10 +347,10 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Rotate X", &worldRotate[0], -4.0f, 4.0f);
-				ImGui::SliderFloat("Rotate Y", &worldRotate[1], -4.0f, 4.0f);
-				ImGui::SliderFloat("Rotate Z", &worldRotate[2], -4.0f, 4.0f);
-				if (ImGui::Button("reset")) {
+				ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
+				ImGui::SliderFloat("Rotate Y", &worldRotate[1], -180.0f, 180.0f);
+				ImGui::SliderFloat("Rotate Z", &worldRotate[2], -180.0f, 180.0f);
+				if (ImGui::Button("Reset")) {
 					worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
 			}
@@ -358,7 +359,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::SliderFloat("Translate X", &worldTranslate[0], -2.0f, 2.0f);
 				ImGui::SliderFloat("Translate Y", &worldTranslate[1], -2.0f, 2.0f);
 				ImGui::SliderFloat("Translate Z", &worldTranslate[2], -2.0f, 2.0f);
-				if (ImGui::Button("reset")) {
+				if (ImGui::Button("Reset")) {
 					worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
 			}

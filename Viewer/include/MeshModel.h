@@ -11,12 +11,14 @@ public:
 	virtual ~MeshModel();
 	const Face& GetFace(int index) const;
 	int GetFacesCount() const;
+	int GetVerticesCount() const;
 	const std::string& GetModelName() const;
 	const glm::vec3& GetVertexAtIndex(int i) const;
 
 	
 
 	std::vector<Face> getFaces() const;
+	void outputFacesAndVertices();
 
 	glm::vec3 getScale();
 	glm::vec3 getRotate();
@@ -31,7 +33,7 @@ public:
 
 	float getInitialScale();
 	void getMiddleOfModel();
-	void setMinMax();
+	void setMinMaxVertices();
 
 	void setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
 	void setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);

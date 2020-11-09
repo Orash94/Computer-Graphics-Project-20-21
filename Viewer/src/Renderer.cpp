@@ -260,41 +260,23 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 
 void Renderer::Render(const Scene& scene)
 {
-	// TODO: Replace this code with real scene rendering code
-	/*int half_width = viewport_width_ / 2;
-	int half_height = viewport_height_ / 2;
-	int thickness = 15;
-	
-	for(int i = 0; i < viewport_width_; i++)
-	{
-		for (int j = half_height - thickness; j < half_height + thickness; j++)
-		{
-			PutPixel(i, j, glm::vec3(1, 0, 0));
-		}
-	}
+	int windowsWidth = viewport_width_;
+	int windowsHeight = viewport_height_;
 
-	for (int i = 0; i < viewport_height_; i++)
-	{
-		for (int j = half_width - thickness; j < half_width + thickness; j++)
-		{
-			PutPixel(j, i, glm::vec3(1, 0, 1));
-		}
-	}*/
-	
-	/* Drawing the circle */
-	
-	float add = 500 ;
+	int centerX = windowsWidth / 2;
+	int centerY = windowsHeight / 2;
+	int boundingBoxEdgeLength = glm::min(centerX, centerY);
 	
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel& mesh = scene.GetModel(i);
-			float proportion = 500/mesh.getInitialScale();
+			float proportion = boundingBoxEdgeLength/mesh.getInitialScale();
 			
 			std::vector<Face> faces = mesh.getFaces();
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
-			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(add, add, add));
+			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
 			glm::fmat4x4 screenTransformation = translate * scale;
 
 			glm::fmat4x4 transformationMatrix = mesh.getWorldTransformation() * mesh.getObjectTransformation();
@@ -317,6 +299,7 @@ void Renderer::Render(const Scene& scene)
 				int index1 = face.GetVertexIndex(1) - 1;
 				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
 				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
+
 				newv1 = screenTransformation * transformationMatrix * newv1;
 				v1 = Utils::Homogeneous2Euclidean(newv1);
 				
@@ -325,6 +308,7 @@ void Renderer::Render(const Scene& scene)
 				int index2 = face.GetVertexIndex(2) - 1;
 				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
 				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
+
 				newv2 = screenTransformation * transformationMatrix * newv2;
 				v2 = Utils::Homogeneous2Euclidean(newv2);
 				

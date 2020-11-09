@@ -1,12 +1,12 @@
 #include <memory>
 #include <string>
 #define _USE_MATH_DEFINES
-#include <cmath>
 #include <iostream>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include "Utils.h"
+#include <cmath>
 
 glm::vec3 Utils::Vec3fFromStream(std::istream& issLine)
 {
@@ -196,12 +196,14 @@ glm::fmat4x4 Utils::getIdMat()
 
 float Utils::degrees2Radians(float degree)
 {
-	return 0.0f;
+	float pi = (2 * acos(0.0));
+	return degree*(pi / 180);
 }
 
 float Utils::radians2Degrees(float radian)
 {
-	return 0.0f;
+	float pi = (2 * acos(0.0));
+	return radian * (180 / pi);
 }
 
 glm::fvec3 Utils::Homogeneous2Euclidean(const glm::fvec4 vec)

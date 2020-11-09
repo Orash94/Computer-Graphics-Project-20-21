@@ -1,6 +1,8 @@
 #include "MeshModel.h"
 #include "Utils.h"
 #include <cmath>
+#include <iostream>
+#include <iomanip>
 
 MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, const std::string& model_name) :
 	faces_(faces),
@@ -10,8 +12,10 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 {
 	ObjectTransformation = Utils::getIdMat();
 	WorldTransformation = Utils::getIdMat();
-	setMinMax();
+	setMinMaxVertices();
 	getMiddleOfModel();
+	//outputFacesAndVertices();
+	
 }
 
 MeshModel::~MeshModel()
@@ -26,6 +30,11 @@ const Face& MeshModel::GetFace(int index) const
 int MeshModel::GetFacesCount() const
 {
 	return faces_.size();
+}
+
+int MeshModel::GetVerticesCount() const
+{
+	return vertices_.size();
 }
 
 const std::string& MeshModel::GetModelName() const
@@ -43,6 +52,37 @@ const glm::vec3& MeshModel::GetVertexAtIndex(int i) const
 std::vector<Face> MeshModel::getFaces() const
 {
 	return faces_;
+}
+
+void MeshModel::outputFacesAndVertices()
+{
+	std::cout << "\nVertices:" << std::endl;
+	for (int k = 0; k < GetVerticesCount(); k++)
+	{
+		glm::vec3 v = GetVertexAtIndex(k);
+		float x = v[0];
+		float y = v[1];
+		float z = v[2];
+
+		std::cout << "V" << k << " (";
+		std::cout << std::fixed << std::setprecision(5) << x << ",";
+		std::cout << std::fixed << std::setprecision(5) << y << ",";
+		std::cout << std::fixed << std::setprecision(5) << z << ",";
+		std::cout << ")" << std::endl;
+	}
+
+	std::cout << "Faces:" << std::endl;
+	for (int j = 0; j < GetFacesCount(); j++)
+	{
+		std::cout << "face#" << j << " include these vetices: ";
+		Face face = faces_[j];
+		for (int i = 0; i < 3; i++)
+		{
+			int index = face.GetVertexIndex(i) - 1;
+			std::cout << "V" << index << "  ";
+		}
+		std::cout<<std::endl;
+	}
 }
 
 glm::vec3 MeshModel::getScale()
@@ -86,7 +126,7 @@ glm::fmat4x4 MeshModel::getWorldTransformation()
 }
 
 
-void MeshModel:: setMinMax() {
+void MeshModel:: setMinMaxVertices() {
 
 	float minX = FLT_MAX;
 	float minY = FLT_MAX;
@@ -142,9 +182,9 @@ void MeshModel::setObjectTransformationUpdates(const glm::vec3 nScale, const glm
 	glm::fmat4x4 id = Utils::getIdMat();
 	glm::fmat4x4 scale = Utils::TransformationScale(getScale());
 	glm::fmat4x4 translate = Utils::TransformationTransition(getTranslate());
-	glm::fmat4x4 rotateX = Utils::TransformationRotateX(getRotate()[0]);
-	glm::fmat4x4 rotateY = Utils::TransformationRotateY(getRotate()[1]);
-	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(getRotate()[2]);
+	glm::fmat4x4 rotateX = Utils::TransformationRotateX(Utils::degrees2Radians(getRotate()[0]));
+	glm::fmat4x4 rotateY = Utils::TransformationRotateY(Utils::degrees2Radians(getRotate()[1]));
+	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(Utils::degrees2Radians(getRotate()[2]));
 
 	setObjectTransformation(translate * scale * rotateZ * rotateY * rotateX * id);
 }
@@ -158,9 +198,9 @@ void MeshModel::setWorldTransformationUpdates(const glm::vec3 nScale, const glm:
 	glm::fmat4x4 id = Utils::getIdMat();
 	glm::fmat4x4 scale = Utils::TransformationScale(getWorldScale());
 	glm::fmat4x4 translate = Utils::TransformationTransition(getWorldTranslate());
-	glm::fmat4x4 rotateX = Utils::TransformationRotateX(getWorldRotate()[0]);
-	glm::fmat4x4 rotateY = Utils::TransformationRotateY(getWorldRotate()[1]);
-	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(getWorldRotate()[2]);
+	glm::fmat4x4 rotateX = Utils::TransformationRotateX(Utils::degrees2Radians(getWorldRotate()[0]));
+	glm::fmat4x4 rotateY = Utils::TransformationRotateY(Utils::degrees2Radians(getWorldRotate()[1]));
+	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(Utils::degrees2Radians(getWorldRotate()[2]));
 
 	setWorldTransformation(translate * scale * rotateZ * rotateY * rotateX * id);
 }
