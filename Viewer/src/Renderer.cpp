@@ -174,8 +174,30 @@ void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x
 
 }
 
-void Renderer::DrawFaceVector(const glm::fvec3& v2, const Scene& scene, glm::fmat4x4 trasformation, const glm::vec3& color)
+void Renderer::DrawFaceNormal(MeshModel& mesh ,Face& face, const Scene& scene, glm::fmat4x4 trasformation, const glm::vec3& color)
 {
+	glm::vec3 vectorArray[3];
+
+	for (int k = 0; k < 3; k++) {
+		int index = face.GetVertexIndex(k) - 1;
+		vectorArray[k] = mesh.GetVertexAtIndex(index);
+	}
+	glm::fvec3 v0 = Utils::applyTransformationToVector(vectorArray[0], trasformation);
+	glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
+	glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
+	
+	glm::fvec3 center = (v0 + v1 + v2) / 3.0f;
+
+	glm::fvec3 normal = glm::cross((v1 - v0), (v2 - v0));
+
+	float EdgeLength = glm::distance(v0,v1);
+	float NormaleLength = glm::distance(center, center + normal);
+	float scale = EdgeLength / NormaleLength;
+
+	normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(scale, scale, scale)));
+	//normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(100, 100, 100)));
+	DrawLine(center, center + normal , color);
+
 }
 
 void Renderer::CreateBuffers(int w, int h)
@@ -331,42 +353,32 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 transformationMatrix = mesh.getWorldTransformation() * mesh.getObjectTransformation();
 
 			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
-			std::vector<Face> faces = mesh.getFaces();
+
+			//bounding box check
 			if (mesh.displayBoundingBox) {
 				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));
 			}
 
+			std::vector<Face> faces = mesh.getFaces();
+
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
-				Face face = faces[j];
+				Face& face = faces[j];
 
-				int index0 = face.GetVertexIndex(0) - 1;
-				glm::vec3 v0 = mesh.GetVertexAtIndex(index0);
-				glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(v0);
+				glm::vec3 vectorArray[3];
 
-				newv0 = finalTransformation * newv0;
-				v0 = Utils::Homogeneous2Euclidean(newv0);
+				for (int k = 0; k < 3; k++) {
+					int index = face.GetVertexIndex(k) - 1;
+					glm::vec3 v = mesh.GetVertexAtIndex(index);
+					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
+				}
 				
+				//face normals check
+				if (mesh.displayFaceNormals) {
+					DrawFaceNormal( mesh,face, scene, finalTransformation, glm::vec3(1, 0, 1));
+				}
 
-
-				int index1 = face.GetVertexIndex(1) - 1;
-				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
-				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
-
-				newv1 = finalTransformation * newv1;
-				v1 = Utils::Homogeneous2Euclidean(newv1);
-				
-
-
-				int index2 = face.GetVertexIndex(2) - 1;
-				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
-				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
-
-				newv2 = finalTransformation * newv2;
-				v2 = Utils::Homogeneous2Euclidean(newv2);
-				
-
-				DrawTriangle(v0, v1, v2, glm::vec3(1, 0, 0));
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
 
 			}
 		}

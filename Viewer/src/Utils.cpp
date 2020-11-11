@@ -194,6 +194,13 @@ glm::fmat4x4 Utils::getIdMat()
 	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
+glm::fvec3 Utils::applyTransformationToVector(const glm::fvec3 vec, glm::fmat4x4& mat)
+{
+	glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(vec);
+	newv0 = mat * newv0;
+	return  Utils::Homogeneous2Euclidean(newv0);
+}
+
 float Utils::degrees2Radians(float degree)
 {
 	float pi = (2 * acos(0.0));
