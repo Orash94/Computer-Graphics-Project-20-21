@@ -370,6 +370,10 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 			ImGui::TreePop();
 		}
+		ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
+
+		ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+
 	}	
 
 	ImGui::End();

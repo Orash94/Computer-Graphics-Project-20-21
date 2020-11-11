@@ -217,7 +217,7 @@ void MeshModel::setWorldTransformation(const glm::fmat4x4 transform = Utils::get
 }
 
 
-float MeshModel::getInitialScale()
+float MeshModel::getMaxDitancePoints()
 {
 	
 

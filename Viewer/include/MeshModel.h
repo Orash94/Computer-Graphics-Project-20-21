@@ -31,7 +31,7 @@ public:
 	glm::fmat4x4 getWorldTransformation();
 
 
-	float getInitialScale();
+	float getMaxDitancePoints();
 	void getMiddleOfModel();
 	void setMinMaxVertices();
 
@@ -41,8 +41,8 @@ public:
 	void setWorldTransformation(const glm::fmat4x4 transform);
 
 
-
-
+	bool displayBoundingBox = false;
+	bool displayFaceNormals = false;
 
 private:
 	//float scale[3] = { 1.0f, 1.0f, 1.0f };
