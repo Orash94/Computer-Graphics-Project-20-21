@@ -352,7 +352,7 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
 			glm::fmat4x4 transformationMatrix = mesh.getWorldTransformation() * mesh.getObjectTransformation();
 
-			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
+			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale   ;
 
 			//bounding box check
 			if (mesh.displayBoundingBox) {
@@ -369,7 +369,7 @@ void Renderer::Render(const Scene& scene)
 
 				for (int k = 0; k < 3; k++) {
 					int index = face.GetVertexIndex(k) - 1;
-					glm::vec3 v = mesh.GetVertexAtIndex(index);
+					glm::vec3 v = mesh.getCoordinateSystem() * mesh.GetVertexAtIndex(index);
 					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
 				}
 				

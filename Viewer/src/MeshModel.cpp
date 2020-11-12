@@ -14,6 +14,7 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 	WorldTransformation = Utils::getIdMat();
 	setMinMaxVertices();
 	getMiddleOfModel();
+	setFrame(glm::fvec3(0.0f, 0.0f, 0.0f), Utils::getIdMat());
 	//outputFacesAndVertices();
 	
 }
@@ -214,6 +215,34 @@ void MeshModel::setObjectTransformation(const glm::fmat4x4 transform = Utils::ge
 void MeshModel::setWorldTransformation(const glm::fmat4x4 transform = Utils::getIdMat())
 {
 	WorldTransformation = transform;
+	updateFrame(transform);
+}
+
+void MeshModel::setFrame(glm::fvec3 center, glm::fmat3x3 CoordinateSystem)
+{
+	this->center = center;
+	this->CoordinateSystem = CoordinateSystem;
+}
+
+void MeshModel::updateFrame( glm::fmat4x4 transform)
+{
+	center = Utils::applyTransformationToVector(center, transform);
+
+	glm::fvec3 v0 = Utils::applyTransformationToVector(glm::fvec3(1.0f,0.0f,0.0f) , transform);
+	glm::fvec3 v1 = Utils::applyTransformationToVector(glm::fvec3(0.0f,1.0f, 0.0f), transform);
+	glm::fvec3 v2 = Utils::applyTransformationToVector(glm::fvec3(0.0f, 0.0f,1.0f), transform);
+
+	CoordinateSystem = glm::fmat3x3(v0, v1, v2);
+}
+
+const glm::vec3& MeshModel::getCenter()
+{
+	return center;
+}
+
+const glm::fmat3x3& MeshModel::getCoordinateSystem()
+{
+	return CoordinateSystem;
 }
 
 
@@ -246,4 +275,5 @@ void MeshModel::getMiddleOfModel()
 	}
 
 }
+
 

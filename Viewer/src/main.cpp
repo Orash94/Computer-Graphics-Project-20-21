@@ -343,7 +343,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::SliderFloat("Scale X", &worldScale[0], -2.0f, 2.0f);
 				ImGui::SliderFloat("Scale Y", &worldScale[1], -2.0f, 2.0f);
 				ImGui::SliderFloat("Scale Z", &worldScale[2], -2.0f, 2.0f);
-				if (ImGui::Button("Reset")) {
+				if (ImGui::Button("Reset Scalling")) {
 					worldScale = glm::vec3(1.0f, 1.0f, 1.0f);
 				}
 			}
@@ -352,7 +352,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
 				ImGui::SliderFloat("Rotate Y", &worldRotate[1], -180.0f, 180.0f);
 				ImGui::SliderFloat("Rotate Z", &worldRotate[2], -180.0f, 180.0f);
-				if (ImGui::Button("Reset")) {
+				if (ImGui::Button("Reset Rotating")) {
 					worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
 			}
@@ -361,7 +361,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::SliderFloat("Translate X", &worldTranslate[0],-windowsWidth , windowsWidth);
 				ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
 				ImGui::SliderFloat("Translate Z", &worldTranslate[2], -2.0f, 2.0f);
-				if (ImGui::Button("Reset")) {
+				if (ImGui::Button("Reset Translating")) {
 					worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
 			}

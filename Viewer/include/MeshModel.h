@@ -40,14 +40,17 @@ public:
 	void setObjectTransformation(const glm::fmat4x4 transform);
 	void setWorldTransformation(const glm::fmat4x4 transform);
 
+	void setFrame(glm::fvec3 center, glm::fmat3x3 CoordinateSystem);
+	void updateFrame( glm::fmat4x4 transform);
+
+	const glm::vec3& getCenter();
+	const glm::fmat3x3& getCoordinateSystem();
 
 	bool displayBoundingBox = false;
 	bool displayFaceNormals = false;
 
 private:
-	//float scale[3] = { 1.0f, 1.0f, 1.0f };
-	//float Rotate[3] = { 0.0f, 0.0f, 0.0f };
-	//float Translate[3] = { 0.0f, 0.0f, 0.0f };
+	
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 Rotate = glm::vec3(0, 0, 0);
 	glm::vec3 Translate = glm::vec3(0, 0, 0);
@@ -71,4 +74,7 @@ private:
 	float maxY_ = FLT_MIN;
 	float maxZ_ = FLT_MIN;
 	
+
+	glm::vec3 center;
+	glm::fmat3x3 CoordinateSystem;
 };
