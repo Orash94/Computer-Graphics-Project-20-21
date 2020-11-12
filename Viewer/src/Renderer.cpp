@@ -174,17 +174,12 @@ void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x
 
 }
 
-void Renderer::DrawFaceNormal(MeshModel& mesh ,Face& face, const Scene& scene, glm::fmat4x4 trasformation, const glm::vec3& color)
+void Renderer::DrawFaceNormal(MeshModel& mesh , glm::vec3 vectorArray[3], const Scene& scene, glm::fmat4x4 trasformation, const glm::vec3& color)
 {
-	glm::vec3 vectorArray[3];
-
-	for (int k = 0; k < 3; k++) {
-		int index = face.GetVertexIndex(k) - 1;
-		vectorArray[k] = mesh.GetVertexAtIndex(index);
-	}
-	glm::fvec3 v0 = Utils::applyTransformationToVector(vectorArray[0], trasformation);
-	glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
-	glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
+	
+	glm::fvec3 v0 = vectorArray[0];
+	glm::fvec3 v1 = vectorArray[1];
+	glm::fvec3 v2 = vectorArray[2];
 	
 	glm::fvec3 center = (v0 + v1 + v2) / 3.0f;
 
@@ -375,7 +370,7 @@ void Renderer::Render(const Scene& scene)
 				
 				//face normals check
 				if (mesh.displayFaceNormals) {
-					DrawFaceNormal( mesh,face, scene, finalTransformation, glm::vec3(1, 0, 1));
+					DrawFaceNormal( mesh, vectorArray , scene, finalTransformation, glm::vec3(1, 0, 1));
 				}
 
 				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
