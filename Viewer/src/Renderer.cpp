@@ -127,6 +127,74 @@ void Renderer::DrawTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const gl
 	DrawLine(v1, v3, color);
 }
 
+void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x4 trasformation , const glm::vec3& color)
+{
+	float BoxEdge = model.getMaxDitancePoints()/2;
+	glm::fvec3 vecArray[8] = {
+	glm::fvec3(BoxEdge, BoxEdge, BoxEdge),
+	glm::fvec3(BoxEdge, BoxEdge, -BoxEdge),
+	glm::fvec3(BoxEdge, -BoxEdge, BoxEdge),
+	glm::fvec3(BoxEdge, -BoxEdge, -BoxEdge),
+	glm::fvec3(-BoxEdge, BoxEdge, BoxEdge),
+	glm::fvec3(-BoxEdge, BoxEdge, -BoxEdge),
+	glm::fvec3(-BoxEdge, -BoxEdge, BoxEdge),
+	glm::fvec3(-BoxEdge, -BoxEdge, -BoxEdge)
+	};
+	
+	for (int i = 0; i < 8; i++) {
+		glm::fvec4 newv0 = trasformation * Utils::Euclidean2Homogeneous(vecArray[i]);
+		vecArray[i] = Utils::Homogeneous2Euclidean(newv0);
+	}
+	/*cubes look like this:
+	   e-------f
+	  /|      /|
+	 / |     / |
+	a--|----b  |
+	|  g----|--h
+	| /     | /
+	c-------d*/
+
+	//face #1
+	DrawLine(vecArray[0], vecArray[1], color);
+	DrawLine(vecArray[0], vecArray[2], color);
+	DrawLine(vecArray[3], vecArray[1], color);
+	DrawLine(vecArray[3], vecArray[2], color);
+
+	//face #2
+	DrawLine(vecArray[7], vecArray[6], color);
+	DrawLine(vecArray[7], vecArray[5], color);
+	DrawLine(vecArray[4], vecArray[6], color);
+	DrawLine(vecArray[4], vecArray[5], color);
+
+	//connectors of two faces
+	DrawLine(vecArray[0], vecArray[4], color);
+	DrawLine(vecArray[1], vecArray[5], color);
+	DrawLine(vecArray[2], vecArray[6], color);
+	DrawLine(vecArray[3], vecArray[7], color);
+
+}
+
+void Renderer::DrawFaceNormal(MeshModel& mesh , glm::vec3 vectorArray[3], const Scene& scene, glm::fmat4x4 trasformation, const glm::vec3& color)
+{
+	
+	glm::fvec3 v0 = vectorArray[0];
+	glm::fvec3 v1 = vectorArray[1];
+	glm::fvec3 v2 = vectorArray[2];
+	
+	glm::fvec3 center = (v0 + v1 + v2) / 3.0f;
+
+	glm::fvec3 normal = glm::cross((v1 - v0), (v2 - v0));
+
+	float EdgeLength = glm::distance(v0,v1);
+	float NormaleLength = glm::distance(center, center + normal);
+	float scale = EdgeLength / NormaleLength;
+
+	normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(scale, scale, scale)));
+	//normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(100, 100, 100)));
+	DrawLine(center, center + normal , color);
+
+}
+
 void Renderer::CreateBuffers(int w, int h)
 {
 	CreateOpenGLBuffer(); //Do not remove this line.
@@ -272,47 +340,39 @@ void Renderer::Render(const Scene& scene)
 		{
 			MeshModel& mesh = scene.GetModel(i);
 			float proportion = 400.0f/mesh.getInitialScale();
-			
-			std::vector<Face> faces = mesh.getFaces();
+
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
-
 			glm::fmat4x4 transformationMatrix = mesh.getWorldTransformation() * mesh.getObjectTransformation();
 
+			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale   ;
 
+			//bounding box check
+			if (mesh.displayBoundingBox) {
+				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));
+			}
+
+			std::vector<Face> faces = mesh.getFaces();
 
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
-				Face face = faces[j];
+				Face& face = faces[j];
 
-				int index0 = face.GetVertexIndex(0) - 1;
-				glm::vec3 v0 = mesh.GetVertexAtIndex(index0);
-				glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(v0);
+				glm::vec3 vectorArray[3];
 
-				newv0 = translate * transformationMatrix * scale * newv0;
-				v0 = Utils::Homogeneous2Euclidean(newv0);
+				for (int k = 0; k < 3; k++) {
+					int index = face.GetVertexIndex(k) - 1;
+					glm::vec3 v = mesh.getCoordinateSystem() * mesh.GetVertexAtIndex(index);
+					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
+				}
 				
+				//face normals check
+				if (mesh.displayFaceNormals) {
+					DrawFaceNormal( mesh, vectorArray , scene, finalTransformation, glm::vec3(1, 0, 1));
+				}
 
-
-				int index1 = face.GetVertexIndex(1) - 1;
-				glm::vec3 v1 = mesh.GetVertexAtIndex(index1);
-				glm::fvec4 newv1 = Utils::Euclidean2Homogeneous(v1);
-
-				newv1 = translate * transformationMatrix * scale * newv1;
-				v1 = Utils::Homogeneous2Euclidean(newv1);
-				
-
-
-				int index2 = face.GetVertexIndex(2) - 1;
-				glm::vec3 v2 = mesh.GetVertexAtIndex(index2);
-				glm::fvec4 newv2 = Utils::Euclidean2Homogeneous(v2);
-
-				newv2 = translate * transformationMatrix * scale * newv2;
-				v2 = Utils::Homogeneous2Euclidean(newv2);
-				
-
-				DrawTriangle(v0, v1, v2, glm::vec3(1, 0, 0));
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
 
 			}
 		}
