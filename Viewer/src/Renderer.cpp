@@ -339,7 +339,7 @@ void Renderer::Render(const Scene& scene)
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel& mesh = scene.GetModel(i);
-			float proportion = 400.0f/mesh.getInitialScale();
+			float proportion = 400.0f/mesh.getMaxDitancePoints();
 
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
