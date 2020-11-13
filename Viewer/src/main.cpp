@@ -34,7 +34,7 @@ void StartFrame();
 void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& io);
 void Cleanup(GLFWwindow* window);
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
-
+void ChangeFrameSize(int width, int height, Renderer& renderer);
 /**
  * Function implementation
  */
@@ -43,10 +43,10 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 	// TODO: Handle mouse scroll here
 }
-
+int windowWidth = 1000, windowHeight = 1000;
 int main(int argc, char **argv)
 {
-	int windowWidth = 1000, windowHeight = 1000;
+	
 	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Or & Abed Project");
 	if (!window)
 		return 1;
@@ -130,7 +130,11 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	if (frameBufferWidth != renderer.GetViewportWidth() || frameBufferHeight != renderer.GetViewportHeight())
 	{
 		// TODO: Set new aspect ratio
+		ChangeFrameSize(frameBufferWidth, frameBufferHeight, renderer);
+		//renderer.SetViewport(frameBufferWidth, frameBufferHeight);
 	}
+
+
 
 	if (!io.WantCaptureKeyboard)
 	{
@@ -158,6 +162,17 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	glfwMakeContextCurrent(window);
 	glfwSwapBuffers(window);
+}
+
+
+void ChangeFrameSize(int width, int height, Renderer& renderer)
+{
+	windowWidth = width;
+	windowHeight = height;
+
+	glViewport(0, 0, windowWidth, windowHeight);
+	renderer.SetViewport(windowWidth, windowHeight);
+	
 }
 
 void Cleanup(GLFWwindow* window)

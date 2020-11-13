@@ -14,6 +14,7 @@ public:
 	void ClearColorBuffer(const glm::vec3& color);
 	int GetViewportWidth() const;
 	int GetViewportHeight() const;
+	void SetViewport(const int width, const int height);
 	
 private:
 	void PutPixel(const int i, const int j, const glm::vec3& color);

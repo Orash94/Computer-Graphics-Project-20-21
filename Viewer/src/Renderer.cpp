@@ -271,7 +271,7 @@ void Renderer::Render(const Scene& scene)
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel& mesh = scene.GetModel(i);
-			float proportion = boundingBoxEdgeLength/mesh.getInitialScale();
+			float proportion = 400.0f/mesh.getInitialScale();
 			
 			std::vector<Face> faces = mesh.getFaces();
 			
@@ -330,4 +330,11 @@ int Renderer::GetViewportWidth() const
 int Renderer::GetViewportHeight() const
 {
 	return viewport_height_;
+}
+
+void Renderer::SetViewport(int width, int height)
+{
+	viewport_height_ = height;
+	viewport_width_ = width;
+	CreateBuffers(width, height);
 }
