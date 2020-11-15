@@ -187,7 +187,7 @@ void MeshModel::setObjectTransformationUpdates(const glm::vec3 nScale, const glm
 	glm::fmat4x4 rotateY = Utils::TransformationRotateY(Utils::degrees2Radians(getRotate()[1]));
 	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(Utils::degrees2Radians(getRotate()[2]));
 
-	setObjectTransformation(translate * scale * rotateZ * rotateY * rotateX * id);
+	setObjectTransformation(translate * scale * rotateZ * rotateY * rotateX );
 }
 
 void MeshModel::setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate)
@@ -196,6 +196,7 @@ void MeshModel::setWorldTransformationUpdates(const glm::vec3 nScale, const glm:
 	WorldRotate = nRotate;
 	WorldTranslate = nTrasnlate;
 
+	
 	glm::fmat4x4 id = Utils::getIdMat();
 	glm::fmat4x4 scale = Utils::TransformationScale(getWorldScale());
 	glm::fmat4x4 translate = Utils::TransformationTransition(getWorldTranslate());
@@ -203,7 +204,8 @@ void MeshModel::setWorldTransformationUpdates(const glm::vec3 nScale, const glm:
 	glm::fmat4x4 rotateY = Utils::TransformationRotateY(Utils::degrees2Radians(getWorldRotate()[1]));
 	glm::fmat4x4 rotateZ = Utils::TransformationRotateZ(Utils::degrees2Radians(getWorldRotate()[2]));
 
-	setWorldTransformation(translate * scale * rotateZ * rotateY * rotateX * id);
+	//setWorldTransformation(translate * scale * rotateZ * rotateY * rotateX );
+	setWorldTransformation(glm::inverse(translate) * glm::inverse(scale) * glm::inverse(rotateZ) * glm::inverse(rotateY) * glm::inverse(rotateX));
 }
 
 void MeshModel::setObjectTransformation(const glm::fmat4x4 transform = Utils::getIdMat())

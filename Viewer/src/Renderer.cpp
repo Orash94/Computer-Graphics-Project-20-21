@@ -142,25 +142,24 @@ void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x
 	};
 	
 	for (int i = 0; i < 8; i++) {
-		glm::fvec4 newv0 = trasformation * Utils::Euclidean2Homogeneous(vecArray[i]);
-		vecArray[i] = Utils::Homogeneous2Euclidean(newv0);
+		vecArray[i] =  Utils::applyTransformationToVector(vecArray[i], trasformation);
 	}
 	/*cubes look like this:
 	   e-------f
 	  /|      /|
-	 / |     / |
+	 / |#1   / |
 	a--|----b  |
 	|  g----|--h
-	| /     | /
+	| / #2   | /
 	c-------d*/
 
-	//face #1
+	//face #1 up
 	DrawLine(vecArray[0], vecArray[1], color);
 	DrawLine(vecArray[0], vecArray[2], color);
 	DrawLine(vecArray[3], vecArray[1], color);
 	DrawLine(vecArray[3], vecArray[2], color);
 
-	//face #2
+	//face #2 down
 	DrawLine(vecArray[7], vecArray[6], color);
 	DrawLine(vecArray[7], vecArray[5], color);
 	DrawLine(vecArray[4], vecArray[6], color);
@@ -344,7 +343,7 @@ void Renderer::Render(const Scene& scene)
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
-			glm::fmat4x4 transformationMatrix = mesh.getWorldTransformation() * mesh.getObjectTransformation();
+			glm::fmat4x4 transformationMatrix = glm::inverse(mesh.getWorldTransformation()) * mesh.getObjectTransformation();
 
 			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale   ;
 
@@ -363,9 +362,10 @@ void Renderer::Render(const Scene& scene)
 
 				for (int k = 0; k < 3; k++) {
 					int index = face.GetVertexIndex(k) - 1;
-					glm::vec3 v = mesh.getCoordinateSystem() * mesh.GetVertexAtIndex(index);
+					glm::vec3 v =mesh.GetVertexAtIndex(index);
 					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
 				}
+				
 				
 				//face normals check
 				if (mesh.displayFaceNormals) {

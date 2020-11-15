@@ -311,16 +311,26 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			glm::vec3 scale = model1.getScale();
 			glm::vec3 Rotate = model1.getRotate();
 			glm::vec3 Translate = model1.getTranslate();
+
+			
 			if (ImGui::CollapsingHeader("Scalling", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Scale X", &scale[0], -2.0f, 2.0f);
-				ImGui::SliderFloat("Scale Y", &scale[1], -2.0f, 2.0f);
-				ImGui::SliderFloat("Scale Z", &scale[2], -2.0f, 2.0f);
+				static bool symmetric = false;
+				ImGui::Checkbox("symmetric", &symmetric);
+				if (symmetric) {
+					ImGui::SliderFloat("Scale", &scale[0], -2.0f, 2.0f);
+					scale = glm::vec3(scale[0], scale[0], scale[0]);
+				}
+				else {
+					ImGui::SliderFloat("Scale X", &scale[0], -2.0f, 2.0f);
+					ImGui::SliderFloat("Scale Y", &scale[1], -2.0f, 2.0f);
+					ImGui::SliderFloat("Scale Z", &scale[2], -2.0f, 2.0f);
+				}
 				if (ImGui::Button("Reset scale")) {
 					scale = glm::vec3(1.0f, 1.0f, 1.0f);
 				}
-
 			}
+
 			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 			{
 				ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
@@ -334,7 +344,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			{
 				ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
 				ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-				ImGui::SliderFloat("Translate Z", &Translate[2], -2.0f, 2.0f);
+				ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
 				if (ImGui::Button("Reset trasnalte")) {
 					Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
@@ -355,13 +365,22 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			glm::vec3 worldTranslate = model1.getWorldTranslate();
 			if (ImGui::CollapsingHeader("Scalling", ImGuiTreeNodeFlags_None))
 			{
-				ImGui::SliderFloat("Scale X", &worldScale[0], -2.0f, 2.0f);
-				ImGui::SliderFloat("Scale Y", &worldScale[1], -2.0f, 2.0f);
-				ImGui::SliderFloat("Scale Z", &worldScale[2], -2.0f, 2.0f);
-				if (ImGui::Button("Reset Scalling")) {
+				static bool symmetric = false;
+				ImGui::Checkbox("symmetric", &symmetric);
+				if (symmetric) {
+					ImGui::SliderFloat("Scale", &worldScale[0], -2.0f, 2.0f);
+					worldScale = glm::vec3(worldScale[0], worldScale[0], worldScale[0]);
+				}
+				else {
+					ImGui::SliderFloat("Scale X", &worldScale[0], -2.0f, 2.0f);
+					ImGui::SliderFloat("Scale Y", &worldScale[1], -2.0f, 2.0f);
+					ImGui::SliderFloat("Scale Z", &worldScale[2], -2.0f, 2.0f);
+				}
+				if (ImGui::Button("Reset scale")) {
 					worldScale = glm::vec3(1.0f, 1.0f, 1.0f);
 				}
 			}
+
 			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 			{
 				ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
@@ -375,7 +394,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			{
 				ImGui::SliderFloat("Translate X", &worldTranslate[0],-windowsWidth , windowsWidth);
 				ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-				ImGui::SliderFloat("Translate Z", &worldTranslate[2], -2.0f, 2.0f);
+				ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
 				if (ImGui::Button("Reset Translating")) {
 					worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 				}
