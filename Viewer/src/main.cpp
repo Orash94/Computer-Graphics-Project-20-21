@@ -219,6 +219,30 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Add"))
+		{
+			if (ImGui::MenuItem("Add Camera", "CTRL+T"))
+			{
+				/*nfdchar_t* outPath = NULL;
+				nfdresult_t result = NFD_OpenDialog("obj;", NULL, &outPath);
+				if (result == NFD_OKAY)
+				{
+					scene.AddModel(Utils::LoadMeshModel(outPath));
+					free(outPath);
+				}
+				else if (result == NFD_CANCEL)
+				{
+				}
+				else
+				{
+				}*/
+				
+				scene.AddCamera(std::make_shared<Camera>());
+
+			}
+			ImGui::EndMenu();
+		}
+
 		// TODO: Add more menubar items (if you want to)
 		ImGui::EndMainMenuBar();
 	}
