@@ -19,6 +19,8 @@ public:
 	static glm::fmat4x4 TransformationRotateZ(const float angle);
 	static glm::fmat4x4 TransformationShear(const glm::fvec2 vector);
 
+	static glm::fmat4x4 TransformationOrthographic();
+	static glm::fmat4x4 TransformationPerspective(const float d);
 	static glm::fvec3 Homogeneous2Euclidean(const glm::fvec4 vec);
 	static glm::fvec4 Euclidean2Homogeneous(const glm::fvec3 vec);
 	static glm::fmat4x4 Utils::getIdMat();

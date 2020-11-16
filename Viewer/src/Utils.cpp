@@ -184,6 +184,26 @@ glm::fmat4x4 Utils::TransformationShear(const glm::fvec2 vector)
 	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 }
 
+glm::fmat4x4 Utils::TransformationOrthographic()
+{
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 0, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 0);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::TransformationPerspective(const float d)
+{
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 0, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 1/d, 0);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
 glm::fmat4x4 Utils::getIdMat()
 {
 	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
