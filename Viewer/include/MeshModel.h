@@ -49,7 +49,7 @@ public:
 	bool displayBoundingBox = false;
 	bool displayFaceNormals = false;
 
-private:
+protected:
 	
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 Rotate = glm::vec3(0, 0, 0);
