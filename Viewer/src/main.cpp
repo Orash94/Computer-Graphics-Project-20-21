@@ -35,6 +35,7 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 void Cleanup(GLFWwindow* window);
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
 void ChangeFrameSize(int width, int height, Renderer& renderer);
+std::shared_ptr<Camera> MakeCamera();
 /**
  * Function implementation
  */
@@ -185,6 +186,15 @@ void Cleanup(GLFWwindow* window)
 	glfwTerminate();
 }
 
+std::shared_ptr<Camera> MakeCamera() {
+	
+	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/camera.obj")));
+	glm::vec3 nEye = glm::vec3(0, 0, 0);
+	glm::vec3 nAt = glm::vec3(0, 0, -1);
+	glm::vec3 nUp = glm::vec3(0, 1, 0);
+	return std::make_shared<Camera>(mesh, nEye, nAt, nUp);
+}
+
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
 	int windowsWidth = (io.DisplaySize.x) / 2;
@@ -236,8 +246,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				else
 				{
 				}*/
-				
-				scene.AddCamera(std::make_shared<Camera>());
+				;
+				scene.AddCamera(MakeCamera());
 
 			}
 			ImGui::EndMenu();
@@ -254,16 +264,18 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	static int camera_selected = -1;
 	if (ImGui::TreeNode("Active camera selection:"))
 	{
-		for (int n = 0; n < scene.GetModelCount(); n++)
+		for (int n = 0; n < scene.GetCameraCount(); n++)
 		{
 
 			//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
 			const std::string name = scene.GetModels()[n]->GetModelName() + " camera";
 			// copying the contents of the
-			if (ImGui::Selectable(name.c_str(), camera_selected == n))
+			if (ImGui::Selectable(name.c_str(), camera_selected == n)) {
 				camera_selected = n;
+				scene.SetActiveCameraIndex(n);
+			}
 		}
-		if (scene.GetModelCount() == 0) {
+		if (scene.GetCameraCount() == 0) {
 			ImGui::Text("please select one or more model");
 		}
 		ImGui::TreePop();
@@ -272,13 +284,26 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	if (camera_selected != -1 && scene.GetModelCount() != 0) {
 		if (ImGui::TreeNode("Active camera params:"))
 		{
+			Camera& cam = scene.GetActiveCamera();
+			glm::vec3 glmEye = cam.getEye();
+			glm::vec3 glmAt = cam.getAt();
+			glm::vec3 glmUp = cam.getUp();
 			static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
-			ImGui::InputFloat3("Eye (x,y,z)", vecEye);
 			static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
-			ImGui::InputFloat3("At (x,y,z)", vecAt);
 			static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
+			
+
+			for (int i = 0; i < 3; i++) {
+				vecEye[i] = glmEye[i];
+				vecAt[i] = glmAt[i];
+				vecUp[i] = glmUp[i];
+			}
+
+			ImGui::InputFloat3("Eye (x,y,z)", vecEye);
+			ImGui::InputFloat3("At (x,y,z)", vecAt);
 			ImGui::InputFloat3("Up (x,y,z)", vecUp);
 
+			cam.lookAt(glm::vec3(vecEye[0], vecEye[1], vecEye[2]), glm::vec3(vecAt[0], vecAt[1], vecAt[2]), glm::vec3(vecUp[0], vecUp[1], vecUp[2]));
 			ImGui::TreePop();
 		}
 	}

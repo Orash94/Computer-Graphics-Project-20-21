@@ -185,7 +185,7 @@ void Renderer::DrawFaceNormal(MeshModel& mesh , glm::vec3 vectorArray[3], const 
 
 	glm::fvec3 normal = glm::cross((v1 - v0), (v2 - v0));
 
-	float EdgeLength = glm::distance(v0,v1);
+	float EdgeLength = glm::distance(v0,v1)/4;
 	float NormaleLength = glm::distance(center, center + normal);
 	float scale = EdgeLength / NormaleLength;
 
