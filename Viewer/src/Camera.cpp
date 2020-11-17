@@ -12,8 +12,8 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	right = 10.0f;
 	bottom = -10.0f;
 	top = 10.0f;
-	near = 1.0f;
-	far = 10.0f;
+	_near = 1.0f;
+	_far = 10.0f;
 
 	fovy = 90.0f;
 	aspectRatio = 1.5f;
@@ -41,8 +41,8 @@ void Camera::SetViewVolumeCoordinates(const float right_, const float left_, con
 	left = left_;
 	top = top_;
 	bottom = bottom_;
-	near = near_;
-	far = far_;
+	_near = near_;
+	_far = far_;
 }
 
 glm::fmat4x4 Camera::lookAt(glm::vec3& eye, glm::vec3& at, glm::vec3& up)
@@ -68,6 +68,18 @@ const glm::mat4x4& Camera::GetProjectionTransformation() const
 const glm::mat4x4& Camera::GetViewTransformation() const
 {
 	return view_transformation_;
+}
+
+void Camera::setProjection(const int Projection)
+{
+	if (Projection == 1) {
+		OrthographicView = true;
+		PerspectiveView = false;
+	}
+	else {
+		OrthographicView = false;
+		PerspectiveView = true;
+	}
 }
 
 glm::vec3 Camera::getEye() const

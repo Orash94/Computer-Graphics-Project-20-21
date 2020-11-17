@@ -14,6 +14,7 @@ public:
 	const glm::mat4x4& GetProjectionTransformation() const;
 	const glm::mat4x4& GetViewTransformation() const;
 
+	void setProjection(const int Projection);
 
 	glm::vec3 getEye()const;
 	glm::vec3 getAt()const;
@@ -33,8 +34,8 @@ private:
 	float left;
 	float top;
 	float bottom;
-	float near;
-	float far;
+	float _near;
+	float _far;
 	float fovy;
 	float aspectRatio;
 

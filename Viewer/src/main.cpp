@@ -233,20 +233,6 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		{
 			if (ImGui::MenuItem("Add Camera", "CTRL+T"))
 			{
-				/*nfdchar_t* outPath = NULL;
-				nfdresult_t result = NFD_OpenDialog("obj;", NULL, &outPath);
-				if (result == NFD_OKAY)
-				{
-					scene.AddModel(Utils::LoadMeshModel(outPath));
-					free(outPath);
-				}
-				else if (result == NFD_CANCEL)
-				{
-				}
-				else
-				{
-				}*/
-				;
 				scene.AddCamera(MakeCamera());
 
 			}
@@ -260,205 +246,277 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	//// Controls
 	//ImGui::ColorEdit3("Clear ", (float*)&clear_color);
 	//// TODO: Add more controls as needed
-	
-	static int camera_selected = -1;
-	if (ImGui::TreeNode("Active camera selection:"))
+	if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 	{
-		for (int n = 0; n < scene.GetCameraCount(); n++)
+		static int camera_selected = -1;
+		if (ImGui::TreeNode("Active camera selection:"))
 		{
 
-			//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
-			const std::string name = scene.GetModels()[n]->GetModelName() + " camera";
-			// copying the contents of the
-			if (ImGui::Selectable(name.c_str(), camera_selected == n)) {
-				camera_selected = n;
-				scene.SetActiveCameraIndex(n);
+			if (scene.GetCameraCount() == 0) {
+				ImGui::Text("please add camera");
 			}
-		}
-		if (scene.GetCameraCount() == 0) {
-			ImGui::Text("please select one or more model");
-		}
-		ImGui::TreePop();
-	}
+			else {
+				for (int n = 0; n < scene.GetCameraCount(); n++)
+				{
 
-	if (camera_selected != -1 && scene.GetModelCount() != 0) {
-		if (ImGui::TreeNode("Active camera params:"))
-		{
-			Camera& cam = scene.GetActiveCamera();
-			glm::vec3 glmEye = cam.getEye();
-			glm::vec3 glmAt = cam.getAt();
-			glm::vec3 glmUp = cam.getUp();
-			static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
-			static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
-			static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
-			
+					//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
 
-			for (int i = 0; i < 3; i++) {
-				vecEye[i] = glmEye[i];
-				vecAt[i] = glmAt[i];
-				vecUp[i] = glmUp[i];
+					const std::string name = " camera #" + std::to_string(n + 1);
+					// copying the contents of the
+					if (ImGui::Selectable(name.c_str(), camera_selected == n)) {
+						camera_selected = n;
+						scene.SetActiveCameraIndex(n);
+					}
+				}
 			}
-
-			ImGui::InputFloat3("Eye (x,y,z)", vecEye);
-			ImGui::InputFloat3("At (x,y,z)", vecAt);
-			ImGui::InputFloat3("Up (x,y,z)", vecUp);
-
-			cam.lookAt(glm::vec3(vecEye[0], vecEye[1], vecEye[2]), glm::vec3(vecAt[0], vecAt[1], vecAt[2]), glm::vec3(vecUp[0], vecUp[1], vecUp[2]));
 			ImGui::TreePop();
 		}
-	}
 
-	if (camera_selected != -1 && scene.GetModelCount() != 0) {
-		if (ImGui::TreeNode("Active camera Transformation:"))
-		{
-			static float scale[3] = { 1.0f,1.0f,1.0f };
-			static float Rotate[3] = { 0.0f,0.0f,0.0f };
-			static float Translate[3] = { 0.0f,0.0f,0.0f };
-			ImGui::SliderFloat3("Scale		[x,y,z]", scale, -2.0f, 2.0f);
-			ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
-			ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
-			ImGui::TreePop();
-		}
-	}
-	ImGui::Separator();
+		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
+			if (ImGui::TreeNode("Active camera Projection Type:"))
+			{
+				static int Projection = 1;
+				ImGui::RadioButton("Orthographic", &Projection, 1); ImGui::SameLine();
+				ImGui::RadioButton("Perspective", &Projection, 0);
 
-	static int model_selected = -1;
-
-	if (ImGui::Button("Clear Screen and selection")) {
-		model_selected = -1;
-		scene.cleanupScene();
-	}
-
-	if (ImGui::TreeNode("Active model selection:"))
-	{	
-		
-
-		for (int n = 0; n < scene.GetModelCount(); n++)
-		{
-			
-			//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
-			const std::string name = scene.GetModels()[n]->GetModelName() + " model";
-			// copying the contents of the
-			if (ImGui::Selectable(name.c_str(), model_selected == n)) {
-				model_selected = n;
-				scene.SetActiveModelIndex(n);
+				scene.GetActiveCamera().setProjection(Projection);
+				ImGui::TreePop();
 			}
+
+			if (ImGui::TreeNode("Active camera params:"))
+			{
+				Camera cam = scene.GetActiveCamera();
+				glm::vec3 glmEye = cam.getEye();
+				glm::vec3 glmAt = cam.getAt();
+				glm::vec3 glmUp = cam.getUp();
+				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
+				static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
+				static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
+
+
+				for (int i = 0; i < 3; i++) {
+					vecEye[i] = glmEye[i];
+					vecAt[i] = glmAt[i];
+					vecUp[i] = glmUp[i];
+				}
+
+				ImGui::InputFloat3("Eye (x,y,z)", vecEye);
+				ImGui::InputFloat3("At (x,y,z)", vecAt);
+				ImGui::InputFloat3("Up (x,y,z)", vecUp);
+				ImGui::TreePop();
+			}
+		}
+
+		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
+			Camera& camera = scene.GetActiveCamera();
+			if (ImGui::TreeNode("model Transformation"))
+			{
+
+				glm::vec3 Rotate = camera.getRotate();
+				glm::vec3 Translate = camera.getTranslate();
+
+
+
+
+				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Y", &Rotate[1], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Z", &Rotate[2], -180.0f, 180.0f);
+					if (ImGui::Button("Reset Rotating")) {
+						Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+				if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					if (ImGui::Button("Reset trasnalte")) {
+						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+
+
 				
+				glm::fvec3 scale = glm::fvec3(1.0f, 1.0f, 1.0f);
+				camera.setObjectTransformationUpdates(scale, Rotate, Translate);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("model world Transformation:"))
+			{
+
+
+				glm::vec3 worldRotate = camera.getWorldRotate();
+				glm::vec3 worldTranslate = camera.getWorldTranslate();
+
+				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Y", &worldRotate[1], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Z", &worldRotate[2], -180.0f, 180.0f);
+					if (ImGui::Button("Reset Rotating")) {
+						worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+				if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					if (ImGui::Button("Reset Translating")) {
+						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+				glm::fvec3 worldScale = glm::fvec3(1.0f, 1.0f, 1.0f);
+				camera.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
+				ImGui::TreePop();
+			}
+			//TODO add function to update eye  at up according to transformations
+
 		}
-		if (scene.GetModelCount() ==0 ) {
-			ImGui::Text("please select one or more model");
-		}
-		ImGui::TreePop();
+
 	}
-	
-	
-	if (model_selected != -1 && scene.GetModelCount()!=0) {
-		MeshModel& model1 = scene.GetActiveModel();
-		if (ImGui::TreeNode("model Transformation"))
+	if (ImGui::CollapsingHeader("Models Actions", ImGuiTreeNodeFlags_None))
+	{
+		static int model_selected = -1;
+
+		if (ImGui::Button("Clear Screen and selection")) {
+			model_selected = -1;
+			scene.cleanupScene();
+		}
+
+		if (ImGui::TreeNode("Active model selection:"))
 		{
 
-			glm::vec3 scale = model1.getScale();
-			glm::vec3 Rotate = model1.getRotate();
-			glm::vec3 Translate = model1.getTranslate();
 
-			
-			if (ImGui::CollapsingHeader("Scalling", ImGuiTreeNodeFlags_None))
+			for (int n = 0; n < scene.GetModelCount(); n++)
 			{
-				static bool symmetric = false;
-				ImGui::Checkbox("symmetric", &symmetric);
-				if (symmetric) {
-					ImGui::SliderFloat("Scale", &scale[0], -2.0f, 2.0f);
-					scale = glm::vec3(scale[0], scale[0], scale[0]);
-				}
-				else {
-					ImGui::SliderFloat("Scale X", &scale[0], -2.0f, 2.0f);
-					ImGui::SliderFloat("Scale Y", &scale[1], -2.0f, 2.0f);
-					ImGui::SliderFloat("Scale Z", &scale[2], -2.0f, 2.0f);
-				}
-				if (ImGui::Button("Reset scale")) {
-					scale = glm::vec3(1.0f, 1.0f, 1.0f);
-				}
-			}
 
-			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
-			{
-				ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
-				ImGui::SliderFloat("Rotate Y", &Rotate[1], -180.0f, 180.0f);
-				ImGui::SliderFloat("Rotate Z", &Rotate[2], -180.0f, 180.0f);
-				if (ImGui::Button("Reset Rotating")) {
-					Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
+				//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
+				const std::string name = scene.GetModels()[n]->GetModelName() + " model";
+				// copying the contents of the
+				if (ImGui::Selectable(name.c_str(), model_selected == n)) {
+					model_selected = n;
+					scene.SetActiveModelIndex(n);
 				}
+
 			}
-			if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
-			{
-				ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
-				ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-				ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
-				if (ImGui::Button("Reset trasnalte")) {
-					Translate = glm::vec3(0.0f, 0.0f, 0.0f);
-				}
+			if (scene.GetModelCount() == 0) {
+				ImGui::Text("please select one or more model");
 			}
-			
-			
-			//ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
-			//ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
-			model1.setObjectTransformationUpdates(scale, Rotate, Translate);
 			ImGui::TreePop();
 		}
-	
-		if (ImGui::TreeNode("model world Transformation:"))
-		{
 
-			glm::vec3 worldScale = model1.getWorldScale();
-			glm::vec3 worldRotate = model1.getWorldRotate();
-			glm::vec3 worldTranslate = model1.getWorldTranslate();
-			if (ImGui::CollapsingHeader("Scalling", ImGuiTreeNodeFlags_None))
+
+		if (model_selected != -1 && scene.GetModelCount() != 0) {
+			MeshModel& model1 = scene.GetActiveModel();
+			if (ImGui::TreeNode("model Transformation"))
 			{
-				static bool symmetric = false;
-				ImGui::Checkbox("symmetric", &symmetric);
-				if (symmetric) {
-					ImGui::SliderFloat("Scale", &worldScale[0], -2.0f, 2.0f);
-					worldScale = glm::vec3(worldScale[0], worldScale[0], worldScale[0]);
+
+				glm::vec3 scale = model1.getScale();
+				glm::vec3 Rotate = model1.getRotate();
+				glm::vec3 Translate = model1.getTranslate();
+
+
+				if (ImGui::CollapsingHeader("Scalling", ImGuiTreeNodeFlags_None))
+				{
+					static bool symmetric = false;
+					ImGui::Checkbox("symmetric", &symmetric);
+					if (symmetric) {
+						ImGui::SliderFloat("Scale", &scale[0], -2.0f, 2.0f);
+						scale = glm::vec3(scale[0], scale[0], scale[0]);
+					}
+					else {
+						ImGui::SliderFloat("Scale X", &scale[0], -2.0f, 2.0f);
+						ImGui::SliderFloat("Scale Y", &scale[1], -2.0f, 2.0f);
+						ImGui::SliderFloat("Scale Z", &scale[2], -2.0f, 2.0f);
+					}
+					if (ImGui::Button("Reset scale")) {
+						scale = glm::vec3(1.0f, 1.0f, 1.0f);
+					}
 				}
-				else {
-					ImGui::SliderFloat("Scale X", &worldScale[0], -2.0f, 2.0f);
-					ImGui::SliderFloat("Scale Y", &worldScale[1], -2.0f, 2.0f);
-					ImGui::SliderFloat("Scale Z", &worldScale[2], -2.0f, 2.0f);
+
+				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Y", &Rotate[1], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Z", &Rotate[2], -180.0f, 180.0f);
+					if (ImGui::Button("Reset Rotating")) {
+						Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
 				}
-				if (ImGui::Button("Reset scale")) {
-					worldScale = glm::vec3(1.0f, 1.0f, 1.0f);
+				if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					if (ImGui::Button("Reset trasnalte")) {
+						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
 				}
+
+
+				//ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
+				//ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
+				model1.setObjectTransformationUpdates(scale, Rotate, Translate);
+				ImGui::TreePop();
 			}
 
-			if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+			if (ImGui::TreeNode("model world Transformation:"))
 			{
-				ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
-				ImGui::SliderFloat("Rotate Y", &worldRotate[1], -180.0f, 180.0f);
-				ImGui::SliderFloat("Rotate Z", &worldRotate[2], -180.0f, 180.0f);
-				if (ImGui::Button("Reset Rotating")) {
-					worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
+
+				glm::vec3 worldScale = model1.getWorldScale();
+				glm::vec3 worldRotate = model1.getWorldRotate();
+				glm::vec3 worldTranslate = model1.getWorldTranslate();
+				if (ImGui::CollapsingHeader("Scalling", ImGuiTreeNodeFlags_None))
+				{
+					static bool symmetric = false;
+					ImGui::Checkbox("symmetric", &symmetric);
+					if (symmetric) {
+						ImGui::SliderFloat("Scale", &worldScale[0], -2.0f, 2.0f);
+						worldScale = glm::vec3(worldScale[0], worldScale[0], worldScale[0]);
+					}
+					else {
+						ImGui::SliderFloat("Scale X", &worldScale[0], -2.0f, 2.0f);
+						ImGui::SliderFloat("Scale Y", &worldScale[1], -2.0f, 2.0f);
+						ImGui::SliderFloat("Scale Z", &worldScale[2], -2.0f, 2.0f);
+					}
+					if (ImGui::Button("Reset scale")) {
+						worldScale = glm::vec3(1.0f, 1.0f, 1.0f);
+					}
 				}
-			}
-			if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
-			{
-				ImGui::SliderFloat("Translate X", &worldTranslate[0],-windowsWidth , windowsWidth);
-				ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-				ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
-				if (ImGui::Button("Reset Translating")) {
-					worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
+
+				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Y", &worldRotate[1], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Z", &worldRotate[2], -180.0f, 180.0f);
+					if (ImGui::Button("Reset Rotating")) {
+						worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
 				}
+				if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					if (ImGui::Button("Reset Translating")) {
+						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+				//ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
+				//ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
+				model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
+				ImGui::TreePop();
 			}
-			//ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
-			//ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
-			model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
-			ImGui::TreePop();
+			ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
+
+			ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+
 		}
-		ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
-
-		ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
-
-	}	
-
+	}
 	ImGui::End();
 
 
