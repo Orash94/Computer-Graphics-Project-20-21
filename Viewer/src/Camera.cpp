@@ -7,8 +7,21 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	at = at_;
 	up = up_;
 	this->lookAt(eye, at, up);
-}
 
+	left = -10.0f;
+	right = 10.0f;
+	bottom = -10.0f;
+	top = 10.0f;
+	near = 1.0f;
+	far = 10.0f;
+
+	fovy = 90.0f;
+	aspectRatio = 1.5f;
+
+	OrthographicView = true;
+	PerspectiveView = false;
+}
+// _projFovy(90.0f), _projAspectRatio(1.5f)
 Camera::~Camera()
 {
 	
