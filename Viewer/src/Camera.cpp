@@ -35,6 +35,16 @@ void Camera::SetCameraLookAt(const glm::vec3& eye_, const glm::vec3& at_, const 
 
 }
 
+void Camera::SetViewVolumeCoordinates(const float right_, const float left_, const float top_, const float bottom_, const float near_, const float far_)
+{
+	right = right_;
+	left = left_;
+	top = top_;
+	bottom = bottom_;
+	near = near_;
+	far = far_;
+}
+
 glm::fmat4x4 Camera::lookAt(glm::vec3& eye, glm::vec3& at, glm::vec3& up)
 {
 	SetCameraLookAt(eye, at, up);
