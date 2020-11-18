@@ -333,7 +333,9 @@ void Renderer::Render(const Scene& scene)
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
 	int boundingBoxEdgeLength = glm::min(centerX, centerY);
-	
+
+
+	//rendering the MeshModels
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
@@ -371,6 +373,41 @@ void Renderer::Render(const Scene& scene)
 				if (mesh.displayFaceNormals) {
 					DrawFaceNormal( mesh, vectorArray , scene, finalTransformation, glm::vec3(1, 0, 1));
 				}
+
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
+
+			}
+		}
+
+	}
+
+	//rendering the  camers to the screen
+	if (scene.GetCameraCount() > 0) {
+		for (int i = 0; i < scene.GetCameraCount(); i++) {
+			Camera& tempCam = scene.GetCamera(i);
+			float proportion = 100.0f / tempCam.getMaxDitancePoints();
+
+			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
+			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
+			glm::fmat4x4 transformationMatrix = glm::inverse(tempCam.getWorldTransformation()) * tempCam.getObjectTransformation();
+
+			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
+
+			std::vector<Face> faces = tempCam.getFaces();
+
+			for (int j = 0; j < tempCam.GetFacesCount(); j++)
+			{
+				Face& face = faces[j];
+
+				glm::vec3 vectorArray[3];
+
+				for (int k = 0; k < 3; k++) {
+					int index = face.GetVertexIndex(k) - 1;
+					glm::vec3 v = tempCam.GetVertexAtIndex(index);
+					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
+				}
+
+
 
 				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
 

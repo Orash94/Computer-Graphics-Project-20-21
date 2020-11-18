@@ -43,6 +43,7 @@ void Camera::SetViewVolumeCoordinates(const float right_, const float left_, con
 	bottom = bottom_;
 	_near = near_;
 	_far = far_;
+
 }
 
 glm::fmat4x4 Camera::lookAt(glm::vec3& eye, glm::vec3& at, glm::vec3& up)
@@ -70,6 +71,14 @@ const glm::mat4x4& Camera::GetViewTransformation() const
 	return view_transformation_;
 }
 
+void Camera::SetPerspectiveData(const float near_, const float far_, const float _fovy, const float _aspectRatio)
+{
+	_near = near_;
+	_far = far_;
+	fovy = _fovy;
+	aspectRatio = _aspectRatio;
+}
+
 void Camera::setProjection(const int Projection)
 {
 	if (Projection == 1) {
@@ -95,4 +104,44 @@ glm::vec3 Camera::getAt() const
 glm::vec3 Camera::getUp() const
 {
 	return up;
+}
+
+float Camera::GetRight() const
+{
+	return right;
+}
+
+float Camera::GetLeft() const
+{
+	return left;
+}
+
+float Camera::GetTop() const
+{
+	return top;
+}
+
+float Camera::GetBottom() const
+{
+	return bottom;
+}
+
+float Camera::GetNear() const
+{
+	return _near;
+}
+
+float Camera::GetFar() const
+{
+	return _far;
+}
+
+float Camera::GetFovy() const
+{
+	return fovy;
+}
+
+float Camera::GetAspectRatio() const
+{
+	return aspectRatio;
 }

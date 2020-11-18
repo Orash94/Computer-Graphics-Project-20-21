@@ -50,10 +50,12 @@ int Scene::GetCameraCount() const
 	return cameras_.size();
 }
 
-Camera& Scene::GetCamera(int index)
+Camera& Scene::GetCamera(int index) const
 {
 	return *cameras_[index];
 }
+
+
 
 Camera& Scene::GetActiveCamera()
 {
