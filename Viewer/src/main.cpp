@@ -371,6 +371,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 
 			//TODO add function to update eye  at up according to transformations
 
+
 		}
 
 	}
