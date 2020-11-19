@@ -18,8 +18,9 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	fovy = 90.0f;
 	aspectRatio = 1.5f;
 
-	OrthographicView = true;
-	PerspectiveView = false;
+	OrthographicOrPerspective = true;
+	
+
 }
 // _projFovy(90.0f), _projAspectRatio(1.5f)
 Camera::~Camera()
@@ -43,7 +44,8 @@ void Camera::SetViewVolumeCoordinates(const float right_, const float left_, con
 	bottom = bottom_;
 	_near = near_;
 	_far = far_;
-
+	
+	view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(right, left, top, bottom, _near, _far);
 }
 
 glm::fmat4x4 Camera::lookAt(glm::vec3& eye, glm::vec3& at, glm::vec3& up)
@@ -53,11 +55,11 @@ glm::fmat4x4 Camera::lookAt(glm::vec3& eye, glm::vec3& at, glm::vec3& up)
 	glm::fvec3 x = glm::normalize(glm::cross(up, z));
 	glm::fvec3 y = glm::normalize(glm::cross(z, x));
 	glm::fvec4 t = glm::fvec4(0.0f, 0.0f, 0.0f, 1.0f);
-	glm::fmat4x4 c = glm::fmat4x4(
+	glm::fmat4x4 c =glm::transpose( glm::fmat4x4(
 		Utils::Euclidean2Homogeneous(x),
 		Utils::Euclidean2Homogeneous(y), 
 		Utils::Euclidean2Homogeneous( z), 
-		t);
+		t));
 	return c * Utils::TransformationTransition(-eye);
 }
 
@@ -77,18 +79,32 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	_far = far_;
 	fovy = _fovy;
 	aspectRatio = _aspectRatio;
+
+	//projection_transformation_=Utils::SetViewVolumePerspectiveTransformation
 }
 
 void Camera::setProjection(const int Projection)
 {
-	if (Projection == 1) {
-		OrthographicView = true;
-		PerspectiveView = false;
+	if (Projection == 0)
+		OrthographicOrPerspective = false;
+	else
+	{
+		OrthographicOrPerspective = true;
 	}
-	else {
-		OrthographicView = false;
-		PerspectiveView = true;
-	}
+}
+
+bool Camera::GetProjection() const
+{
+	return OrthographicOrPerspective;
+}
+
+void Camera::updateLookAt()
+{
+	glm::fmat4x4 transformation = glm::inverse(getWorldTransformation()) * getObjectTransformation();
+	at = Utils::applyTransformationToVector(at, transformation);
+	eye = Utils::applyTransformationToVector(eye, transformation);
+	up = Utils::applyTransformationToVector(up, transformation);
+
 }
 
 glm::vec3 Camera::getEye() const
@@ -145,3 +161,5 @@ float Camera::GetAspectRatio() const
 {
 	return aspectRatio;
 }
+
+

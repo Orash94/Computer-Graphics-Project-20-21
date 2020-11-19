@@ -347,8 +347,29 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
 			glm::fmat4x4 transformationMatrix = glm::inverse(mesh.getWorldTransformation()) * mesh.getObjectTransformation();
 
+
 			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale   ;
 
+			if (!scene.GetCamOrWorldView()) {//rendering the world view
+
+			}
+			else // rendering the active camera view
+			{
+				Camera& currentCam = scene.GetActiveCamera();
+				glm::fmat4x4 inverserCameraTransformation = glm::inverse(glm::inverse(currentCam.getWorldTransformation()) * currentCam.getObjectTransformation());
+				finalTransformation = inverserCameraTransformation * finalTransformation;
+				glm::fmat4x4 viewVolumeTransformation, projectionTransformation;
+				if (currentCam.GetProjection()) { // Orthographic
+					viewVolumeTransformation = currentCam.GetViewTransformation();
+					projectionTransformation = Utils::TransformationOrthographic();
+					finalTransformation = projectionTransformation * viewVolumeTransformation * finalTransformation;
+
+				}
+				else // Perspective
+				{
+
+				}
+			}
 			//bounding box check
 			if (mesh.displayBoundingBox) {
 				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));

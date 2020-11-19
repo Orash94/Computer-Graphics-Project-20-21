@@ -19,7 +19,7 @@ public:
 	void AddCamera(const std::shared_ptr<Camera>& camera);
 	int GetCameraCount() const;
 	Camera& GetCamera(int index) const;
-	Camera& GetActiveCamera();
+	Camera& GetActiveCamera() const;
 
 
 	void SetActiveCameraIndex(int index);
@@ -27,6 +27,10 @@ public:
 
 	void SetActiveModelIndex(int index);
 	int GetActiveModelIndex() const;
+
+	void SetCamOrWorldView(const bool view);
+	bool GetCamOrWorldView() const;
+	
 
 	void cleanupScene();
 
@@ -37,4 +41,5 @@ private:
 
 	int active_camera_index_;
 	int active_model_index_;
+	bool CamOrWorldView; //true for camera view, false for World
 };

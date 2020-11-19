@@ -16,6 +16,9 @@ public:
 
 	void SetPerspectiveData(const float near_, const float far_, const float _fovy, const float _aspectRatio);
 	void setProjection(const int Projection);
+	bool GetProjection() const;
+
+	void updateLookAt();
 
 	glm::vec3 getEye()const;
 	glm::vec3 getAt()const;
@@ -29,6 +32,8 @@ public:
 	float GetFar() const;
 	float GetFovy() const;
 	float GetAspectRatio() const;
+
+
 
 
 private:
@@ -48,6 +53,6 @@ private:
 	float fovy;
 	float aspectRatio;
 
-	bool OrthographicView;
-	bool PerspectiveView;
+	bool OrthographicOrPerspective; // true = Orthographic. false = perspective
+	
 };

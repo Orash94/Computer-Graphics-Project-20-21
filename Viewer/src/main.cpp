@@ -275,6 +275,15 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
 		
 			Camera& cam = scene.GetActiveCamera();
+			if (!scene.GetCamOrWorldView()) {
+				if (ImGui::Button("To Camera View"))
+					scene.SetCamOrWorldView(true);
+			}
+			else
+			{
+				if (ImGui::Button("To World View"))
+					scene.SetCamOrWorldView(false);
+			}
 			if (ImGui::TreeNode("Active camera params:"))
 			{
 				
@@ -343,7 +352,6 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					ImGui::InputFloat(" :Far ", &nFar);
 					ImGui::InputFloat(":Angle of Field of View Y ", &nFovy);
 					ImGui::InputFloat(" :Width", &nAspectRatio);
-
 					cam.SetPerspectiveData(nNear, nFar, nFovy, nAspectRatio);
 				}
 
@@ -354,7 +362,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 
 		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
 			Camera& camera = scene.GetActiveCamera();
-			if (ImGui::TreeNode("model Transformation"))
+			if (ImGui::TreeNode("Camera model Transformation"))
 			{
 
 				glm::vec3 Rotate = camera.getRotate();
@@ -389,7 +397,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("model world Transformation:"))
+			if (ImGui::TreeNode("Camera model world Transformation:"))
 			{
 
 
@@ -418,7 +426,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				camera.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 				ImGui::TreePop();
 			}
-			//TODO add function to update eye  at up according to transformations
+			camera.updateLookAt();
 
 		}
 
