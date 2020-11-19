@@ -13,8 +13,9 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 	ObjectTransformation = Utils::getIdMat();
 	WorldTransformation = Utils::getIdMat();
 	setMinMaxVertices();
-	getMiddleOfModel();
+	setModelInMiddle();
 	setFrame(glm::fvec3(0.0f, 0.0f, 0.0f), Utils::getIdMat());
+	setFaceAndVerteciesNormals();
 	//outputFacesAndVertices();
 	
 }
@@ -84,6 +85,16 @@ void MeshModel::outputFacesAndVertices()
 		}
 		std::cout<<std::endl;
 	}
+}
+
+std::vector<glm::vec3> MeshModel::getFacesNormals()
+{
+	return facesNormals_;
+}
+
+std::vector<glm::vec3> MeshModel::getVerticesNormals()
+{
+	return verticesNormals_;
 }
 
 glm::vec3 MeshModel::getScale()
@@ -174,6 +185,79 @@ void MeshModel:: setMinMaxVertices() {
 
 }
 
+void MeshModel::setFaceAndVerteciesNormals()
+{
+	int verticesCount_ = vertices_.size();
+	int faceCount = faces_.size();
+
+	int* verticesCount			= new int[verticesCount_];
+	glm::vec3* verticesSum		= new glm::vec3[verticesCount_];
+
+	//initialisation of arrays;
+	for (int j = 0; j < verticesCount_; j++)
+	{
+		verticesCount[j]	= 0;
+		verticesSum[j]		= glm::vec3(0,0,0);
+	}
+
+	//loop over all faces
+	for (int j = 0; j < GetFacesCount(); j++)
+	{
+		Face& face = faces_[j];
+
+		glm::vec3 vectorArray[3];
+
+		for (int k = 0; k < 3; k++) {
+			int index = face.GetVertexIndex(k) - 1;
+			verticesCount[index]++;
+			vectorArray[k] = GetVertexAtIndex(index);
+		}
+
+		glm::fvec3 v0 = vectorArray[0];
+		glm::fvec3 v1 = vectorArray[1];
+		glm::fvec3 v2 = vectorArray[2];
+
+		//calculate face normal
+		glm::fvec3 faceNormal = glm::cross((v1 - v0), (v2 - v0));
+
+
+		//add to face normal to  mesh model
+		facesNormals_.push_back(faceNormal);
+		
+
+		// add face normals to all three vertices in face
+		for (int k = 0; k < 3; k++) {
+			int index = face.GetVertexIndex(k) - 1;
+			verticesSum[index] += faceNormal;
+		}
+
+	}
+
+
+	// calculate vertices normals ; we take the sum of all adjesent face normals of vertex and we  devide by the number of
+	// faces
+	for (int j = 0; j < verticesCount_; j++)
+	{
+		float x = verticesSum[j][0];
+		float y = verticesSum[j][1]; 
+		float z = verticesSum[j][2];
+
+		if (verticesCount != 0) {
+
+			x /= verticesCount[j];
+			y /= verticesCount[j];
+			z /= verticesCount[j];
+
+			//add to vertex normal to  mesh model
+			verticesNormals_.push_back(glm::fvec3(x,y,z));
+		}
+		
+	}
+
+	delete[] verticesCount;
+	delete[] verticesSum;
+}
+
 void MeshModel::setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate)
 {
 	scale = nScale;
@@ -261,7 +345,8 @@ float MeshModel::getMaxDitancePoints()
 
 }
 
-void MeshModel::getMiddleOfModel()
+
+void MeshModel::setModelInMiddle()
 {
 	
 

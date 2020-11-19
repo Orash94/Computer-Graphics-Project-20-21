@@ -173,25 +173,49 @@ void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x
 
 }
 
-void Renderer::DrawFaceNormal(MeshModel& mesh , glm::vec3 vectorArray[3], const Scene& scene, glm::fmat4x4 trasformation, const glm::vec3& color)
+void Renderer::DrawFaceNormal(MeshModel& mesh,Face& face, int faceIndex, glm::fmat4x4 trasformation, const glm::vec3& color)
 {
-	
-	glm::fvec3 v0 = vectorArray[0];
-	glm::fvec3 v1 = vectorArray[1];
-	glm::fvec3 v2 = vectorArray[2];
+
+	glm::vec3 vectorArray[3];
+
+	for (int k = 0; k < 3; k++) {
+		int index = face.GetVertexIndex(k) - 1;
+		vectorArray[k] = mesh.GetVertexAtIndex(index);
+	}
+
+	glm::fvec3 v0 = Utils::applyTransformationToVector(vectorArray[0], trasformation);
+	glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
+	glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
 	
 	glm::fvec3 center = (v0 + v1 + v2) / 3.0f;
 
-	glm::fvec3 normal = glm::cross((v1 - v0), (v2 - v0));
+	glm::fmat4x4 normalTransform = glm::transpose(glm::inverse(trasformation));
 
-	float EdgeLength = glm::distance(v0,v1)/4;
-	float NormaleLength = glm::distance(center, center + normal);
-	float scale = EdgeLength / NormaleLength;
+	//glm::fvec3 normal = glm::cross((v1 - v0), (v2 - v0));
+	glm::fvec3 normal =mesh.getFacesNormals()[faceIndex];
+	glm::fvec4 normalHomog = Utils::Euclidean2Homogeneous(normal);
+	normal = Utils::Homogeneous2Euclidean( normalTransform  * normalHomog);
+	
+	
+	//float EdgeLength = glm::distance(v0,v1);
+	//normal = normal * EdgeLength;
+	normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(100000.0f, 100000.0f, 100000.0f)));
 
-	normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(scale, scale, scale)));
-	//normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(100, 100, 100)));
 	DrawLine(center, center + normal , color);
 
+}
+
+void Renderer::DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color)
+{
+	std::vector <glm::fvec3> VerticesNormals = mesh.getVerticesNormals();
+	
+	for (int i = 0; i < mesh.GetVerticesCount(); i++) {
+
+		glm::fvec3 v = Utils::applyTransformationToVector(mesh.GetVertexAtIndex(i), trasformation);
+		glm::fvec3 vn = Utils::applyTransformationToVector(VerticesNormals[i], trasformation);
+
+		DrawLine(v, vn, color);
+	}
 }
 
 void Renderer::CreateBuffers(int w, int h)
@@ -351,9 +375,14 @@ void Renderer::Render(const Scene& scene)
 			if (mesh.displayBoundingBox) {
 				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));
 			}
+			//vertices normals check
+			if (mesh.displayVerticesNormals) {
+				DrawVerticesNormal(mesh, finalTransformation, glm::vec3(0, 1, 1));
+			}
 
 			std::vector<Face> faces = mesh.getFaces();
 
+			//draw faces
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
 				Face& face = faces[j];
@@ -369,7 +398,7 @@ void Renderer::Render(const Scene& scene)
 				
 				//face normals check
 				if (mesh.displayFaceNormals) {
-					DrawFaceNormal( mesh, vectorArray , scene, finalTransformation, glm::vec3(1, 0, 1));
+					DrawFaceNormal(mesh, face, j, finalTransformation, glm::vec3(1, 0, 1));
 				}
 
 				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));

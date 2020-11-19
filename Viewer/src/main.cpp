@@ -283,12 +283,13 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::TreePop();
 			}
 
+			Camera& camera = scene.GetActiveCamera();
+
 			if (ImGui::TreeNode("Active camera params:"))
 			{
-				Camera cam = scene.GetActiveCamera();
-				glm::vec3 glmEye = cam.getEye();
-				glm::vec3 glmAt = cam.getAt();
-				glm::vec3 glmUp = cam.getUp();
+				glm::vec3 glmEye = camera.getEye();
+				glm::vec3 glmAt = camera.getAt();
+				glm::vec3 glmUp = camera.getUp();
 				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
@@ -305,18 +306,11 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::InputFloat3("Up (x,y,z)", vecUp);
 				ImGui::TreePop();
 			}
-		}
-
-		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
-			Camera& camera = scene.GetActiveCamera();
+	
 			if (ImGui::TreeNode("model Transformation"))
 			{
-
 				glm::vec3 Rotate = camera.getRotate();
 				glm::vec3 Translate = camera.getTranslate();
-
-
-
 
 				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 				{
@@ -373,6 +367,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				camera.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 				ImGui::TreePop();
 			}
+
+
 			//TODO add function to update eye  at up according to transformations
 
 		}
@@ -381,12 +377,13 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	if (ImGui::CollapsingHeader("Models Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int model_selected = -1;
-
-		if (ImGui::Button("Clear Screen and selection")) {
-			model_selected = -1;
-			scene.cleanupScene();
+		if (scene.GetModelCount() != 0) {
+			if (ImGui::Button("Clear Screen and selection")) {
+				model_selected = -1;
+				scene.cleanupScene();
+			}
 		}
-
+		
 		if (ImGui::TreeNode("Active model selection:"))
 		{
 
@@ -514,6 +511,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
 
 			ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+
+			ImGui::Checkbox("Display vertices Normals", &model1.displayVerticesNormals);
 
 		}
 	}

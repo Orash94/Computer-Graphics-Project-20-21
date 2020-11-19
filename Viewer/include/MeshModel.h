@@ -19,6 +19,8 @@ public:
 
 	std::vector<Face> getFaces() const;
 	void outputFacesAndVertices();
+	std::vector<glm::vec3> getFacesNormals();
+	std::vector<glm::vec3> getVerticesNormals();
 
 	glm::vec3 getScale();
 	glm::vec3 getRotate();
@@ -32,8 +34,11 @@ public:
 
 
 	float getMaxDitancePoints();
-	void getMiddleOfModel();
+
+	void setModelInMiddle();
 	void setMinMaxVertices();
+	void setFaceAndVerteciesNormals();
+
 
 	void setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
 	void setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
@@ -48,6 +53,7 @@ public:
 
 	bool displayBoundingBox = false;
 	bool displayFaceNormals = false;
+	bool displayVerticesNormals = false;
 
 protected:
 	
@@ -66,6 +72,10 @@ protected:
 	std::vector<glm::vec3> vertices_;
 	std::vector<glm::vec3> normals_;
 	std::string model_name_;
+
+
+	std::vector<glm::vec3> verticesNormals_;
+	std::vector<glm::vec3> facesNormals_;
 
 	float minX_ = FLT_MAX;
 	float minY_ = FLT_MAX;
