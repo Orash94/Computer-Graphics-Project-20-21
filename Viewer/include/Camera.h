@@ -33,7 +33,7 @@ public:
 	float GetFovy() const;
 	float GetAspectRatio() const;
 
-
+	void setCameraDirection();
 
 
 private:

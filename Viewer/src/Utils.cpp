@@ -206,8 +206,8 @@ glm::fmat4x4 Utils::TransformationPerspective(const float d)
 
 glm::fmat4x4 Utils::SetViewVolumeOrthographicTransformation(const float right, const float left, const float top, const float bottom, const float near, const float far)
 {
-	glm::fvec4 vec1 = glm::fvec4(2/(right-left), 0, 0, -((right+left)/(right - left)));
-	glm::fvec4 vec2 = glm::fvec4(0, 2/(top-bottom), 0, -((top + bottom) / (top - bottom)));
+	glm::fvec4 vec1 = glm::fvec4(2.0f/(right-left), 0, 0, -((right+left)/(right - left)));
+	glm::fvec4 vec2 = glm::fvec4(0, 2.0f/(top-bottom), 0, -((top + bottom) / (top - bottom)));
 	glm::fvec4 vec3 = glm::fvec4(0, 0, 2/(near - far), -((far + near) / (far - near)));
 	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
 

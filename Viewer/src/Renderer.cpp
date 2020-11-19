@@ -348,7 +348,7 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 transformationMatrix = glm::inverse(mesh.getWorldTransformation()) * mesh.getObjectTransformation();
 
 
-			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale   ;
+			glm::fmat4x4 finalTransformation =  transformationMatrix * scale   ;
 
 			if (!scene.GetCamOrWorldView()) {//rendering the world view
 
@@ -356,13 +356,16 @@ void Renderer::Render(const Scene& scene)
 			else // rendering the active camera view
 			{
 				Camera& currentCam = scene.GetActiveCamera();
-				glm::fmat4x4 inverserCameraTransformation = glm::inverse(glm::inverse(currentCam.getWorldTransformation()) * currentCam.getObjectTransformation());
-				finalTransformation = inverserCameraTransformation * finalTransformation;
+				glm::fmat4x4 inverserCameraTransformation = currentCam.lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
 				glm::fmat4x4 viewVolumeTransformation, projectionTransformation;
+
+
 				if (currentCam.GetProjection()) { // Orthographic
 					viewVolumeTransformation = currentCam.GetViewTransformation();
-					projectionTransformation = Utils::TransformationOrthographic();
-					finalTransformation = projectionTransformation * viewVolumeTransformation * finalTransformation;
+					//projectionTransformation = Utils::TransformationOrthographic();
+					glm::fmat4x4 CameraTransformation =  viewVolumeTransformation * inverserCameraTransformation ;
+					finalTransformation = CameraTransformation * finalTransformation;
+				
 
 				}
 				else // Perspective
@@ -386,7 +389,7 @@ void Renderer::Render(const Scene& scene)
 				for (int k = 0; k < 3; k++) {
 					int index = face.GetVertexIndex(k) - 1;
 					glm::vec3 v =mesh.GetVertexAtIndex(index);
-					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
+					vectorArray[k] = Utils::applyTransformationToVector(v , translate * finalTransformation);
 				}
 				
 				
@@ -403,7 +406,7 @@ void Renderer::Render(const Scene& scene)
 	}
 
 	//rendering the  camers to the screen
-	if (scene.GetCameraCount() > 0) {
+	if (scene.GetCameraCount() > 0 && !scene.GetCamOrWorldView()) {
 		for (int i = 0; i < scene.GetCameraCount(); i++) {
 			Camera& tempCam = scene.GetCamera(i);
 			float proportion = 100.0f / tempCam.getMaxDitancePoints();

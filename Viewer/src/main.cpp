@@ -330,12 +330,12 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					nNear = cam.GetNear();
 					nFar = cam.GetFar();
 
-					ImGui::InputFloat(":Right ", &nRight);
-					ImGui::InputFloat(":Left ", &nLeft);
-					ImGui::InputFloat(" :Top ", &nTop);
-					ImGui::InputFloat(" :Bottom", &nBottom);
-					ImGui::InputFloat(" :Near: ", &nNear);
-					ImGui::InputFloat(" :Far: ", &nFar);
+					ImGui::SliderFloat(":Right ", &nRight , 0.0f, 1.0f);
+					ImGui::SliderFloat(":Left ", &nLeft,  -1 , 0.0f);
+					ImGui::SliderFloat(" :Top ", &nTop, 0.0f, 1.0f);
+					ImGui::SliderFloat(" :Bottom", &nBottom, -1, 0.0f);
+					ImGui::SliderFloat(" :Near: ", &nNear , 1.0f, 20.f);
+					ImGui::SliderFloat(" :Far: ", &nFar, 5.0f, 50.f);
 
 					cam.SetViewVolumeCoordinates(nRight, nLeft, nTop, nBottom, nNear, nFar);
 					

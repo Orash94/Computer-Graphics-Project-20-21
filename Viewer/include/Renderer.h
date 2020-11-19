@@ -24,7 +24,6 @@ private:
 	void DrawTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color);
 	void DrawBoundingBox(MeshModel& model , const Scene& scene , glm::fmat4x4 trasformation , const glm::vec3& color);
 	void DrawFaceNormal(MeshModel& mesh, glm::vec3 vectorArray[3], const Scene& scene , glm::fmat4x4 trasformation  , const glm::vec3& color);
-
 	void CreateBuffers(int w, int h);
 	void CreateOpenGLBuffer();
 	void InitOpenGLRendering();
