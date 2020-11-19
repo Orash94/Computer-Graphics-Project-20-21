@@ -14,13 +14,27 @@ public:
 	const glm::mat4x4& GetProjectionTransformation() const;
 	const glm::mat4x4& GetViewTransformation() const;
 
+	void SetPerspectiveData(const float near_, const float far_, const float _fovy, const float _aspectRatio);
 	void setProjection(const int Projection);
+	bool GetProjection() const;
+
+	void updateLookAt();
 
 	glm::vec3 getEye()const;
 	glm::vec3 getAt()const;
 	glm::vec3 getUp()const;
 
-	
+	float GetRight() const;
+	float GetLeft() const;
+	float GetTop() const;
+	float GetBottom() const;
+	float GetNear() const;
+	float GetFar() const;
+	float GetFovy() const;
+	float GetAspectRatio() const;
+
+
+
 
 private:
 	glm::mat4x4 view_transformation_;
@@ -39,6 +53,6 @@ private:
 	float fovy;
 	float aspectRatio;
 
-	bool OrthographicView;
-	bool PerspectiveView;
+	bool OrthographicOrPerspective; // true = Orthographic. false = perspective
+	
 };

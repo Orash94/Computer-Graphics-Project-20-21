@@ -6,7 +6,8 @@
 
 Scene::Scene() :
 	active_camera_index_(0),
-	active_model_index_(0)
+	active_model_index_(0),
+	CamOrWorldView(false)
 {
 
 }
@@ -50,12 +51,14 @@ int Scene::GetCameraCount() const
 	return cameras_.size();
 }
 
-Camera& Scene::GetCamera(int index)
+Camera& Scene::GetCamera(int index) const
 {
 	return *cameras_[index];
 }
 
-Camera& Scene::GetActiveCamera()
+
+
+Camera& Scene::GetActiveCamera() const
 {
 	return *cameras_[active_camera_index_];
 }
@@ -83,5 +86,14 @@ int Scene::GetActiveModelIndex() const
 void Scene::cleanupScene()
 {
 	mesh_models_.clear();
+}
+
+void Scene::SetCamOrWorldView(const bool view) {
+	CamOrWorldView = view;
+}
+
+bool Scene::GetCamOrWorldView() const
+{
+	return CamOrWorldView;
 }
 

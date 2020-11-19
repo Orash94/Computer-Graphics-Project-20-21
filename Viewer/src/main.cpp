@@ -273,15 +273,18 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		}
 
 		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
-			if (ImGui::TreeNode("Active camera Projection Type:"))
-			{
-				static int Projection = 1;
-				ImGui::RadioButton("Orthographic", &Projection, 1); ImGui::SameLine();
-				ImGui::RadioButton("Perspective", &Projection, 0);
-
-				scene.GetActiveCamera().setProjection(Projection);
-				ImGui::TreePop();
+		
+			Camera& cam = scene.GetActiveCamera();
+			if (!scene.GetCamOrWorldView()) {
+				if (ImGui::Button("To Camera View"))
+					scene.SetCamOrWorldView(true);
 			}
+			else
+			{
+				if (ImGui::Button("To World View"))
+					scene.SetCamOrWorldView(false);
+			}
+<<<<<<< HEAD
 
 			Camera& camera = scene.GetActiveCamera();
 
@@ -290,6 +293,14 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				glm::vec3 glmEye = camera.getEye();
 				glm::vec3 glmAt = camera.getAt();
 				glm::vec3 glmUp = camera.getUp();
+=======
+			if (ImGui::TreeNode("Active camera params:"))
+			{
+				
+				glm::vec3 glmEye = cam.getEye();
+				glm::vec3 glmAt = cam.getAt();
+				glm::vec3 glmUp = cam.getUp();
+>>>>>>> master
 				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
@@ -304,10 +315,70 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::InputFloat3("Eye (x,y,z)", vecEye);
 				ImGui::InputFloat3("At (x,y,z)", vecAt);
 				ImGui::InputFloat3("Up (x,y,z)", vecUp);
+
+
+				for (int i = 0; i < 3; i++) {
+					glmEye[i] = vecEye[i];
+					glmAt[i] = vecAt[i];
+					glmUp[i] = vecUp[i];
+				}
+				cam.SetCameraLookAt(glmEye, glmAt, glmUp);
 				ImGui::TreePop();
 			}
+
+			if (ImGui::TreeNode("Active camera Projection Type:"))
+			{
+				static int Projection = 1;
+				ImGui::RadioButton("Orthographic", &Projection, 1); ImGui::SameLine();
+				ImGui::RadioButton("Perspective", &Projection, 0);
+
+				if (Projection) {
+					float nRight, nLeft, nTop, nBottom, nNear, nFar;
+					nRight = cam.GetRight();
+					nLeft = cam.GetLeft();
+					nTop = cam.GetTop();
+					nBottom = cam.GetBottom();
+					nNear = cam.GetNear();
+					nFar = cam.GetFar();
+
+					ImGui::InputFloat(":Right ", &nRight);
+					ImGui::InputFloat(":Left ", &nLeft);
+					ImGui::InputFloat(" :Top ", &nTop);
+					ImGui::InputFloat(" :Bottom", &nBottom);
+					ImGui::InputFloat(" :Near: ", &nNear);
+					ImGui::InputFloat(" :Far: ", &nFar);
+
+					cam.SetViewVolumeCoordinates(nRight, nLeft, nTop, nBottom, nNear, nFar);
+					
+				}
+				else
+				{
+					float nNear, nFar, nFovy, nAspectRatio;
+					nNear = cam.GetNear();
+					nFar = cam.GetFar();
+					nFovy = cam.GetFovy();
+					nAspectRatio = cam.GetAspectRatio();
+
+					ImGui::InputFloat(" :Near ", &nNear);
+					ImGui::InputFloat(" :Far ", &nFar);
+					ImGui::InputFloat(":Angle of Field of View Y ", &nFovy);
+					ImGui::InputFloat(" :Width", &nAspectRatio);
+					cam.SetPerspectiveData(nNear, nFar, nFovy, nAspectRatio);
+				}
+
+				scene.GetActiveCamera().setProjection(Projection);
+				ImGui::TreePop();
+			}
+<<<<<<< HEAD
 	
 			if (ImGui::TreeNode("model Transformation"))
+=======
+		}
+
+		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
+			Camera& camera = scene.GetActiveCamera();
+			if (ImGui::TreeNode("Camera model Transformation"))
+>>>>>>> master
 			{
 				glm::vec3 Rotate = camera.getRotate();
 				glm::vec3 Translate = camera.getTranslate();
@@ -338,7 +409,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("model world Transformation:"))
+			if (ImGui::TreeNode("Camera model world Transformation:"))
 			{
 
 
@@ -367,9 +438,13 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				camera.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 				ImGui::TreePop();
 			}
+<<<<<<< HEAD
 
 
 			//TODO add function to update eye  at up according to transformations
+=======
+			camera.updateLookAt();
+>>>>>>> master
 
 
 		}
