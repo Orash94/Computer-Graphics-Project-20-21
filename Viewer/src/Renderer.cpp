@@ -359,19 +359,10 @@ void Renderer::Render(const Scene& scene)
 				glm::fmat4x4 inverserCameraTransformation = currentCam.lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
 				glm::fmat4x4 viewVolumeTransformation, projectionTransformation;
 
-
-				if (currentCam.GetProjection()) { // Orthographic
-					viewVolumeTransformation = currentCam.GetViewTransformation();
-					//projectionTransformation = Utils::TransformationOrthographic();
-					glm::fmat4x4 CameraTransformation =  viewVolumeTransformation * inverserCameraTransformation ;
-					finalTransformation = CameraTransformation * finalTransformation;
+				viewVolumeTransformation = currentCam.GetViewTransformation();
+				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+				finalTransformation = CameraTransformation * finalTransformation;
 				
-
-				}
-				else // Perspective
-				{
-
-				}
 			}
 			//bounding box check
 			if (mesh.displayBoundingBox) {

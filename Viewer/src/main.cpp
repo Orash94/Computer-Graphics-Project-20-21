@@ -348,10 +348,10 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					nFovy = cam.GetFovy();
 					nAspectRatio = cam.GetAspectRatio();
 
-					ImGui::InputFloat(" :Near ", &nNear);
-					ImGui::InputFloat(" :Far ", &nFar);
-					ImGui::InputFloat(":Angle of Field of View Y ", &nFovy);
-					ImGui::InputFloat(" :Width", &nAspectRatio);
+					ImGui::SliderFloat(" :Near ", &nNear,0.1f, 200.0f);
+					ImGui::SliderFloat(" :Far ", &nFar, 200.1f, 500.0f);
+					ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.01f, 0.5f);
+					ImGui::SliderFloat(" :Width", &nAspectRatio, 0.1f, 100.0f);
 					cam.SetPerspectiveData(nNear, nFar, nFovy, nAspectRatio);
 				}
 

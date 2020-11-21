@@ -218,7 +218,7 @@ glm::fmat4x4 Utils::SetViewVolumePerspectiveTransformation(const float right, co
 {
 	glm::fvec4 vec1 = glm::fvec4(2*near/(right-left), 0, (right+left)/(right-left), 0);
 	glm::fvec4 vec2 = glm::fvec4(0, 2*near/(top - bottom), (top + bottom)/(top - bottom), 0);
-	glm::fvec4 vec3 = glm::fvec4(0, 0, -((far+near)/(far-near)), -((2*far*near)/(far-near)));
+	glm::fvec4 vec3 = glm::fvec4(0, 0, -1*((far+near)/(far-near)), -1*((2*far*near)/(far-near)));
 	glm::fvec4 vec4 = glm::fvec4(0, 0, -1.0f, 0);
 
 	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));

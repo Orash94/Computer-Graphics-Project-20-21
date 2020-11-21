@@ -8,22 +8,22 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	up = up_;
 	this->lookAt(eye, at, up);
 
-	left = -10.0f;
-	right = 10.0f;
-	bottom = -10.0f;
-	top = 10.0f;
-	_near = 3.0f;
-	_far = 10.0f;
+	left = -0.5f;
+	right = 0.5f;
+	bottom = -0.5f;
+	top = 0.5f;
+	_near = 0.5f;
+	_far = 1.0f;
 
-	fovy = 90.0f;
-	aspectRatio = 1.5f;
+	fovy = 0.1f;
+	aspectRatio = 1.0f;
 
 	OrthographicOrPerspective = true;
 	
 	setCameraDirection();
 	SetViewVolumeCoordinates(right,left,top,bottom,_near,_far);
+	SetPerspectiveData(_near, _far, fovy, aspectRatio);
 }
-// _projFovy(90.0f), _projAspectRatio(1.5f)
 Camera::~Camera()
 {
 	
@@ -46,7 +46,7 @@ void Camera::SetViewVolumeCoordinates(const float right_, const float left_, con
 	_near = near_;
 	_far = far_;
 	
-	view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(right, left, top, bottom, _near, _far);
+	view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(right, left, top, bottom, -_near, -_far);
 }
 
 
@@ -106,7 +106,10 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	fovy = _fovy;
 	aspectRatio = _aspectRatio;
 
-	//projection_transformation_=Utils::SetViewVolumePerspectiveTransformation
+	float height = glm::abs(glm::tan(Utils::degrees2Radians(fovy))) * _near;
+	float width = aspectRatio * height;
+
+	view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(width, -width, height, -height, -near_, -far_);
 }
 
 void Camera::setProjection(const int Projection)
