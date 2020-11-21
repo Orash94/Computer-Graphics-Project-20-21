@@ -15,14 +15,15 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	_near = 0.5f;
 	_far = 1.0f;
 
+	zoom = 1.0f;
 	fovy = 0.1f;
 	aspectRatio = 1.0f;
 
 	OrthographicOrPerspective = true;
 	
 	setCameraDirection();
-	SetViewVolumeCoordinates(right,left,top,bottom,_near,_far);
 	SetPerspectiveData(_near, _far, fovy, aspectRatio);
+	SetViewVolumeCoordinates(right, left, top, bottom, _near, _far);
 }
 Camera::~Camera()
 {
@@ -106,7 +107,7 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	fovy = _fovy;
 	aspectRatio = _aspectRatio;
 
-	float height = glm::abs(glm::tan(Utils::degrees2Radians(fovy))) * _near;
+	float height = glm::abs(glm::tan(Utils::degrees2Radians(fovy)/zoom)) * _near;
 	float width = aspectRatio * height;
 
 	view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(width, -width, height, -height, -near_, -far_);
@@ -120,6 +121,11 @@ void Camera::setProjection(const int Projection)
 	{
 		OrthographicOrPerspective = true;
 	}
+}
+
+void Camera::SetZoom(const float _zoom)
+{
+	zoom = _zoom;
 }
 
 bool Camera::GetProjection() const
@@ -189,6 +195,11 @@ float Camera::GetFovy() const
 float Camera::GetAspectRatio() const
 {
 	return aspectRatio;
+}
+
+float Camera::GetZoom() const
+{
+	return zoom;
 }
 
 

@@ -16,6 +16,7 @@ public:
 
 	void SetPerspectiveData(const float near_, const float far_, const float _fovy, const float _aspectRatio);
 	void setProjection(const int Projection);
+	void SetZoom(const float _zoom);
 	bool GetProjection() const;
 
 	void updateLookAt();
@@ -32,6 +33,8 @@ public:
 	float GetFar() const;
 	float GetFovy() const;
 	float GetAspectRatio() const;
+
+	float GetZoom() const;
 
 	void setCameraDirection();
 
@@ -52,6 +55,8 @@ private:
 	float _far;
 	float fovy;
 	float aspectRatio;
+
+	float zoom;
 
 	bool OrthographicOrPerspective; // true = Orthographic. false = perspective
 	
