@@ -331,28 +331,31 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					nNear = cam.GetNear();
 					nFar = cam.GetFar();
 
-					ImGui::InputFloat(":Right ", &nRight);
-					ImGui::InputFloat(":Left ", &nLeft);
-					ImGui::InputFloat(" :Top ", &nTop);
-					ImGui::InputFloat(" :Bottom", &nBottom);
-					ImGui::InputFloat(" :Near: ", &nNear);
-					ImGui::InputFloat(" :Far: ", &nFar);
+					ImGui::SliderFloat(":Right ", &nRight , 0.0f, 1.0f);
+					ImGui::SliderFloat(":Left ", &nLeft,  -1 , 0.0f);
+					ImGui::SliderFloat(" :Top ", &nTop, 0.0f, 1.0f);
+					ImGui::SliderFloat(" :Bottom", &nBottom, -1, 0.0f);
+					ImGui::SliderFloat(" :Near: ", &nNear , 1.0f, 20.f);
+					ImGui::SliderFloat(" :Far: ", &nFar, 5.0f, 50.f);
 
 					cam.SetViewVolumeCoordinates(nRight, nLeft, nTop, nBottom, nNear, nFar);
 					
 				}
 				else
 				{
-					float nNear, nFar, nFovy, nAspectRatio;
+					float nNear, nFar, nFovy, nAspectRatio, nZoom;
 					nNear = cam.GetNear();
 					nFar = cam.GetFar();
 					nFovy = cam.GetFovy();
 					nAspectRatio = cam.GetAspectRatio();
+					nZoom = cam.GetZoom();
 
-					ImGui::InputFloat(" :Near ", &nNear);
-					ImGui::InputFloat(" :Far ", &nFar);
-					ImGui::InputFloat(":Angle of Field of View Y ", &nFovy);
-					ImGui::InputFloat(" :Width", &nAspectRatio);
+					ImGui::SliderFloat(" :Near ", &nNear,0.1f, 200.0f);
+					ImGui::SliderFloat(" :Far ", &nFar, 200.1f, 500.0f);
+					ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.01f, 0.5f);
+					ImGui::SliderFloat(" :Width", &nAspectRatio, 0.1f, 100.0f);
+					ImGui::SliderFloat("Zoom: ", &nZoom, 1.0f, 16.0f);
+					cam.SetZoom(nZoom);
 					cam.SetPerspectiveData(nNear, nFar, nFovy, nAspectRatio);
 				}
 

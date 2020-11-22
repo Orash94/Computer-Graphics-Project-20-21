@@ -25,8 +25,6 @@ private:
 	void DrawBoundingBox(MeshModel& model , const Scene& scene , glm::fmat4x4 trasformation , const glm::vec3& color);
 	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation  , const glm::vec3& color);
 	void DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength);
-
-
 	void CreateBuffers(int w, int h);
 	void CreateOpenGLBuffer();
 	void InitOpenGLRendering();
