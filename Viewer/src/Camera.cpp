@@ -75,19 +75,7 @@ glm::fmat4x4 Camera::lookAt(glm::vec3& eye , glm::vec3& at, glm::vec3& up)
 
 	return glm::transpose(c) * translationMatrix;
 
-	/*
 	
-	glm::fvec3 z = glm::normalize( eye - at);
-	glm::fvec3 x = glm::normalize(glm::cross(up, z));
-	glm::fvec3 y = glm::normalize(glm::cross(z, x));
-	glm::fvec4 t = glm::fvec4(0.0f, 0.0f, 0.0f, 1.0f);
-	glm::fmat4x4 c =glm::transpose( glm::fmat4x4(
-		Utils::Euclidean2Homogeneous(x),
-		Utils::Euclidean2Homogeneous(y), 
-		Utils::Euclidean2Homogeneous( z), 
-		t));
-	return c * Utils::TransformationTransition(-eye);
-	*/
 }
 
 const glm::mat4x4& Camera::GetProjectionTransformation() const
@@ -107,7 +95,7 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	fovy = _fovy;
 	aspectRatio = _aspectRatio;
 
-	float height = glm::abs(glm::tan(Utils::degrees2Radians(fovy)/zoom)) * _near;
+	float height = glm::abs(glm::tan(glm::radians(fovy)/zoom)) * _near;
 	float width = aspectRatio * height;
 
 	view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(width, -width, height, -height, -near_, -far_);
