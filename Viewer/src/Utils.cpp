@@ -241,17 +241,6 @@ glm::fvec3 Utils::applyTransformationToVector(const glm::fvec3 vec, glm::fmat4x4
 	return  Utils::Homogeneous2Euclidean(newv0);
 }
 
-float Utils::degrees2Radians(float degree)
-{
-	float pi = (2 * acos(0.0));
-	return degree*(pi / 180);
-}
-
-float Utils::radians2Degrees(float radian)
-{
-	float pi = (2 * acos(0.0));
-	return radian * (180 / pi);
-}
 
 glm::fvec3 Utils::Homogeneous2Euclidean(const glm::fvec4 vec)
 {

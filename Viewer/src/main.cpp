@@ -197,8 +197,8 @@ std::shared_ptr<Camera> MakeCamera() {
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
-	int windowsWidth = (io.DisplaySize.x) / 2;
-	int windowsHeight = (io.DisplaySize.y) / 2;
+	float  windowsWidth = (io.DisplaySize.x) / 2;
+	float  windowsHeight = (io.DisplaySize.y) / 2;
 	/**
 	 * MeshViewer menu
 	 */
@@ -284,23 +284,13 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				if (ImGui::Button("To World View"))
 					scene.SetCamOrWorldView(false);
 			}
-<<<<<<< HEAD
-
-			Camera& camera = scene.GetActiveCamera();
-
-			if (ImGui::TreeNode("Active camera params:"))
-			{
-				glm::vec3 glmEye = camera.getEye();
-				glm::vec3 glmAt = camera.getAt();
-				glm::vec3 glmUp = camera.getUp();
-=======
 			if (ImGui::TreeNode("Active camera params:"))
 			{
 				
 				glm::vec3 glmEye = cam.getEye();
 				glm::vec3 glmAt = cam.getAt();
 				glm::vec3 glmUp = cam.getUp();
->>>>>>> master
+
 				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
@@ -369,16 +359,11 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				scene.GetActiveCamera().setProjection(Projection);
 				ImGui::TreePop();
 			}
-<<<<<<< HEAD
-	
-			if (ImGui::TreeNode("model Transformation"))
-=======
 		}
 
 		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
 			Camera& camera = scene.GetActiveCamera();
 			if (ImGui::TreeNode("Camera model Transformation"))
->>>>>>> master
 			{
 				glm::vec3 Rotate = camera.getRotate();
 				glm::vec3 Translate = camera.getTranslate();
@@ -438,13 +423,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				camera.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 				ImGui::TreePop();
 			}
-<<<<<<< HEAD
-
-
-			//TODO add function to update eye  at up according to transformations
-=======
 			camera.updateLookAt();
->>>>>>> master
 
 
 		}
@@ -459,6 +438,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				scene.cleanupScene();
 			}
 		}
+
+		ImGui::Separator();
 		
 		if (ImGui::TreeNode("Active model selection:"))
 		{
