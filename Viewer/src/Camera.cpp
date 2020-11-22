@@ -195,7 +195,7 @@ float Camera::GetZoom() const
 void Camera::setCameraDirection()
 {
 
-	glm::fmat4x4  transformation = Utils::TransformationRotateY(Utils::degrees2Radians(180.0f));
+	glm::fmat4x4  transformation = Utils::TransformationRotateY(glm::radians(180.0f));
 
 	for (int i = 0; i < GetVerticesCount();i++) {
 		 vertices_[i] = Utils::applyTransformationToVector(GetVertexAtIndex(i), transformation);

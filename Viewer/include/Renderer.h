@@ -23,7 +23,8 @@ private:
 	void plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& color);
 	void DrawTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color);
 	void DrawBoundingBox(MeshModel& model , const Scene& scene , glm::fmat4x4 trasformation , const glm::vec3& color);
-	void DrawFaceNormal(MeshModel& mesh, glm::vec3 vectorArray[3], const Scene& scene , glm::fmat4x4 trasformation  , const glm::vec3& color);
+	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation  , const glm::vec3& color);
+	void DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength);
 	void CreateBuffers(int w, int h);
 	void CreateOpenGLBuffer();
 	void InitOpenGLRendering();

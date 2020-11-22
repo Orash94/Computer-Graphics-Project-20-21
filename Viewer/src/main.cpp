@@ -197,8 +197,8 @@ std::shared_ptr<Camera> MakeCamera() {
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
-	int windowsWidth = (io.DisplaySize.x) / 2;
-	int windowsHeight = (io.DisplaySize.y) / 2;
+	float  windowsWidth = (io.DisplaySize.x) / 2;
+	float  windowsHeight = (io.DisplaySize.y) / 2;
 	/**
 	 * MeshViewer menu
 	 */
@@ -290,6 +290,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				glm::vec3 glmEye = cam.getEye();
 				glm::vec3 glmAt = cam.getAt();
 				glm::vec3 glmUp = cam.getUp();
+
 				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
@@ -367,12 +368,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			Camera& camera = scene.GetActiveCamera();
 			if (ImGui::TreeNode("Camera model Transformation"))
 			{
-
 				glm::vec3 Rotate = camera.getRotate();
 				glm::vec3 Translate = camera.getTranslate();
-
-
-
 
 				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 				{
@@ -431,18 +428,22 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			camera.updateLookAt();
 
+
 		}
 
 	}
 	if (ImGui::CollapsingHeader("Models Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int model_selected = -1;
-
-		if (ImGui::Button("Clear Screen and selection")) {
-			model_selected = -1;
-			scene.cleanupScene();
+		if (scene.GetModelCount() != 0) {
+			if (ImGui::Button("Clear Screen and selection")) {
+				model_selected = -1;
+				scene.cleanupScene();
+			}
 		}
 
+		ImGui::Separator();
+		
 		if (ImGui::TreeNode("Active model selection:"))
 		{
 
@@ -570,6 +571,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
 
 			ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+
+			ImGui::Checkbox("Display vertices Normals", &model1.displayVerticesNormals);
 
 		}
 	}

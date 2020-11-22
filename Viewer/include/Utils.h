@@ -30,7 +30,5 @@ public:
 
 	static glm::fvec3 applyTransformationToVector(const glm::fvec3 vec , glm::fmat4x4& mat);
 
-	static float degrees2Radians(float degree);
-	static float radians2Degrees(float radian);
 	static void resetMatrix(glm::fmat4x4& mat);
 };
