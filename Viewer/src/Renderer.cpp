@@ -193,19 +193,23 @@ glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 tra
 		float EdgeLength = glm::distance(v0, v1) / 4;
 		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f;
 		glm::vec3 Actualnormal = glm::normalize(glm::cross((v1 - v0), (v2 - v0)));
+		glm::vec3 normalizedNormal = Actualnormal;
 		Actualnormal = Actualnormal * EdgeLength;
 		//face normals check
 		if (mesh.displayFaceNormals) {
 			DrawLine(ActualCenter, ActualCenter + Actualnormal, glm::fvec3(1, 1, 1));
 		}
-		return Actualnormal;
+		return normalizedNormal;
 }
 
 void Renderer::DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color , float normalLength)
 {
 	for (int i = 0; i < mesh.GetVerticesCount(); i++) {
 		glm::fvec3 v = mesh.GetVertexAtIndex(i);
+		v = Utils::applyTransformationToVector(v, trasformation);
+
 		glm::fvec3 vn = mesh.getVerticesNormals()[i];
+		vn = vn * normalLength;
 		DrawLine(v, v + vn, color);
 	}
 	
@@ -365,7 +369,7 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 transformationMatrix = glm::inverse(mesh.getWorldTransformation()) * mesh.getObjectTransformation();
 
 
-			glm::fmat4x4 finalTransformation =  transformationMatrix * scale   ;
+			glm::fmat4x4 finalTransformation =   transformationMatrix * scale   ;
 
 			if (!scene.GetCamOrWorldView()) {//rendering the world view
 
@@ -382,15 +386,13 @@ void Renderer::Render(const Scene& scene)
 				
 			}
 
+			finalTransformation = translate * finalTransformation;
 			//bounding box check
 			if (mesh.displayBoundingBox) {
 				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));
 			}
 
 			std::vector<Face> faces = mesh.getFaces();
-
-
-
 
 			//draw faces
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
@@ -402,7 +404,7 @@ void Renderer::Render(const Scene& scene)
 				for (int k = 0; k < 3; k++) {
 					int index = face.GetVertexIndex(k) - 1;
 					glm::vec3 v =mesh.GetVertexAtIndex(index);
-					vectorArray[k] = Utils::applyTransformationToVector(v , translate * finalTransformation);
+					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
 				}
 
 				
@@ -418,7 +420,7 @@ void Renderer::Render(const Scene& scene)
 
 			//vertices normals check
 			if (mesh.displayVerticesNormals) {
-				DrawVerticesNormal(mesh, finalTransformation, glm::vec3(0, 1, 1), 100.0f);
+				DrawVerticesNormal(mesh, finalTransformation, glm::vec3(0, 0, 0.545), 40.0f);
 			}
 		}
 
