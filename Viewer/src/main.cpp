@@ -452,7 +452,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			{
 
 				//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
-				const std::string name = scene.GetModels()[n]->GetModelName() + " model";
+				const std::string name = " model #"+ std::to_string(n+1)+ ": " +scene.GetModels()[n]->GetModelName() ;
 				// copying the contents of the
 				if (ImGui::Selectable(name.c_str(), model_selected == n)) {
 					model_selected = n;
