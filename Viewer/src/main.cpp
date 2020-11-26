@@ -284,12 +284,19 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				if (ImGui::Button("To World View"))
 					scene.SetCamOrWorldView(false);
 			}
+
+			static int update = 1;
+			ImGui::RadioButton("Transformation", &update, 1); ImGui::SameLine();
+			ImGui::RadioButton("Lookat", &update, 0);
+			scene.GetActiveCamera().setLookAtOrTransformation(update);
+			//scene.GetActiveCamera().SetCameraLookAt();
 			if (ImGui::TreeNode("Active camera params:"))
 			{
 				
-				glm::vec3 glmEye = cam.getEye();
-				glm::vec3 glmAt = cam.getAt();
-				glm::vec3 glmUp = cam.getUp();
+				glm::vec3 glmEye = cam.getOriginalEye();
+				glm::vec3 glmAt = cam.getOriginalAt();
+				glm::vec3 glmUp = cam.getOriginalUp();
+
 
 				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
@@ -302,10 +309,40 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					vecUp[i] = glmUp[i];
 				}
 
-				ImGui::InputFloat3("Eye (x,y,z)", vecEye);
-				ImGui::InputFloat3("At (x,y,z)", vecAt);
-				ImGui::InputFloat3("Up (x,y,z)", vecUp);
-
+				static bool symmetriceye = false;
+				float minWindow=glm::min(windowsWidth, windowsHeight);
+				ImGui::Checkbox("symmetric", &symmetriceye);
+				if (symmetriceye) {
+					ImGui::SliderFloat("Eye", &vecEye[0], -minWindow, minWindow);
+					vecEye[1]=vecEye[0];
+					vecEye[2] = vecEye[0];
+				}
+				else {
+					ImGui::SliderFloat("Eye X", &vecEye[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Eye Y", &vecEye[1], -windowHeight, windowHeight);
+					ImGui::SliderFloat("Eye Z", &vecEye[2], -windowHeight, windowHeight);
+				}
+			
+				
+				if (ImGui::Button("Reset eye")) {
+					vecEye[0] = 0.f;
+					vecEye[1] = 0.f;
+					vecEye[2] = 0.f;
+				}
+				ImGui::SliderFloat("at X", &vecAt[0], -windowsWidth, windowsWidth);
+				ImGui::SliderFloat("at Y", &vecAt[1], -windowHeight, windowHeight);
+				ImGui::SliderFloat("at Z", &vecAt[2], -windowHeight, windowHeight);
+				if (ImGui::Button("Reset at")) {
+					vecAt[0] = 0.f;
+					vecAt[1] = 0.f;
+					vecAt[2] = -1.f;
+				}
+				ImGui::SliderFloat3("Up (x,y,z)", vecUp , -1.0, 1.0);
+				if (ImGui::Button("Reset up")) {
+					vecUp[0] = 0.f;
+					vecUp[1] = 1.f;
+					vecUp[2] = 0.f;
+				}
 
 				for (int i = 0; i < 3; i++) {
 					glmEye[i] = vecEye[i];

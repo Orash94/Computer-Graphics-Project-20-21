@@ -40,6 +40,22 @@ Here we show the Bounding Box, vertex normal, face normal , before and after app
 
 We show the difference between the orthographic projection the perspective projection, we can see when switching between the projections that the perspective projection is showing the cow's behind proportionally as more smaller than its front and that  is because its relative distance  to camera changes, compared to the orthographic  projection where the whole model is the same size .
 
+## changing the zoom
+
+![image info](./pictures/9svzBQE8os.gif)
+
+Changing the zoom in orthographic .
+
+## Rotate the camera in the camera’s frame around they(up) axis
+
+![image info](./pictures/jUiG1PA04N.gif)
+
+
+
+## Using LookAt
+
+![image info](./pictures/d9Ov1gl9n6.gif)
+
 
 
 ## Multiple models and cameras 
@@ -52,7 +68,7 @@ We show the difference between the orthographic projection the perspective proje
 
 ![image info](./pictures/MeshViewer_T8WJVGDCyp.png)
 
-**All rights reserved**. No part of this publication  of the **Art** may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of the publisher, except in the case of brief quotations embodied in critical reviews and certain other noncommercial uses permitted by copyright law. For permission requests, write to the publisher, addressed “Or and Abed: Professional goofballs” .
+**All rights reserved**. No part of this publication  of the **Art** may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of the publisher, except in the case of brief quotations embodied in critical reviews and certain other noncommercial uses permitted by copyright law. For permission requests, write to the publisher, addressed “Or and Abed: Professional goofballs”.
 
 ## window resizing 
 
