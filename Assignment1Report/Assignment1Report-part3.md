@@ -1,4 +1,4 @@
-
+##  Rotating the model
 
 ![image info](./pictures/efzqVk6VMi.gif)
 
@@ -42,7 +42,7 @@ We show the difference between the orthographic projection the perspective proje
 
 ## changing the zoom
 
-![image info](./pictures/9svzBQE8os.gif)
+![image info](./pictures/DZAs23k0Rg.gif)
 
 Changing the zoom in orthographic .
 

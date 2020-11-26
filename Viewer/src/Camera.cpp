@@ -101,26 +101,12 @@ void Camera::updateLookAt()
 	if (lookAtOrTransformation == true) {
 		glm::fmat4x4 transformation = glm::inverse(getWorldTransformation()) * getObjectTransformation();
 
-		glm::fvec3 objectRotation = this->getRotate();
-		glm::fmat4x4  OBjectRotationMatrix = Utils::TransformationRotateX(glm::radians(objectRotation[2])) 
-			*Utils::TransformationRotateX(glm::radians(objectRotation[1])) * 
-			Utils::TransformationRotateX(glm::radians(objectRotation[0]));
-
-		glm::fvec3 WorldRotation = this->getWorldRotate();
-		glm::fmat4x4  WorldRotationMatrix = Utils::TransformationRotateX(glm::radians(WorldRotation[2]))
-			*Utils::TransformationRotateX(glm::radians(WorldRotation[1])) *
-			Utils::TransformationRotateX(glm::radians(WorldRotation[0]));
-
-		//glm::fmat4x4 upTransformation = WorldRotationMatrix * OBjectRotationMatrix;
-		//glm::fmat4x4 upTransformation = glm::transpose(glm::inverse(transformation));
-
 		glm::fvec3 origin =Utils::applyTransformationToVector(glm::vec3(0, 0, 0), transformation);
 		glm::fvec3 upvector =Utils::applyTransformationToVector(glm::vec3(0, 1, 0), transformation);
 
 		up = glm::normalize(upvector - origin);
 		at = Utils::applyTransformationToVector(glm::vec3(0, 0, -1), transformation);
 		eye = Utils::applyTransformationToVector(glm::vec3(0, 0, 0), transformation);
-		//up = Utils::applyTransformationToVector(glm::vec3(0, 1, 0), upTransformation);
 
 	}
 }
