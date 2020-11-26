@@ -9,7 +9,7 @@ Scene::Scene() :
 	active_model_index_(0),
 	CamOrWorldView(false)
 {
-
+	showAxis = true;
 }
 
 void Scene::AddModel(const std::shared_ptr<MeshModel>& mesh_model)
@@ -86,6 +86,16 @@ int Scene::GetActiveModelIndex() const
 void Scene::cleanupScene()
 {
 	mesh_models_.clear();
+}
+
+bool Scene::getShowAxis() const
+{
+	return showAxis;
+}
+
+void Scene::setShowAxis(bool show)
+{
+	showAxis = show;
 }
 
 void Scene::SetCamOrWorldView(const bool view) {

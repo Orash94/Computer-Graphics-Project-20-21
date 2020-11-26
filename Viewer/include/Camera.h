@@ -11,7 +11,6 @@ public:
 
 	void SetCameraLookAt(const glm::vec3& eye_, const glm::vec3& at_, const glm::vec3& up_);
 	void SetViewVolumeCoordinates(const float right_, const float left_, const float top_, const float bottom_, const float near_, const float far_);
-	glm::fmat4x4 lookAt(const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up);
 	const glm::mat4x4& GetProjectionTransformation() const;
 	const glm::mat4x4& GetViewTransformation() const;
 
@@ -25,10 +24,6 @@ public:
 	glm::vec3 getEye()const;
 	glm::vec3 getAt()const;
 	glm::vec3 getUp()const;
-
-	glm::vec3 getOriginalEye()const;
-	glm::vec3 getOriginalAt()const;
-	glm::vec3 getOriginalUp()const;
 
 	float GetRight() const;
 	float GetLeft() const;
@@ -52,9 +47,6 @@ private:
 	glm::vec3 at;
 	glm::vec3 up;
 
-	glm::vec3 OriginalEye;
-	glm::vec3 OriginalAt;
-	glm::vec3 OriginalUp;
 
 	float right;
 	float left;

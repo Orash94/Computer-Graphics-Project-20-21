@@ -34,11 +34,14 @@ public:
 
 	void cleanupScene();
 
-	
+	bool getShowAxis() const ;
+
+	void setShowAxis(bool show);
+	bool showAxis;
 private:
 	std::vector<std::shared_ptr<MeshModel>> mesh_models_;
 	std::vector<std::shared_ptr<Camera>> cameras_;
-
+	
 	int active_camera_index_;
 	int active_model_index_;
 	bool CamOrWorldView; //true for camera view, false for World
