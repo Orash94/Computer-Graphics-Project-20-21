@@ -86,6 +86,7 @@ int Scene::GetActiveModelIndex() const
 void Scene::cleanupScene()
 {
 	mesh_models_.clear();
+	cameras_.clear();
 }
 
 bool Scene::getShowAxis() const
@@ -97,6 +98,27 @@ void Scene::setShowAxis(bool show)
 {
 	showAxis = show;
 }
+
+void Scene::deleteActiveCamera()
+{
+	cameras_.erase(cameras_.begin() + active_camera_index_);
+}
+
+void Scene::deleteActiveModel()
+{
+	mesh_models_.erase(mesh_models_.begin() + active_model_index_);
+}
+
+void Scene::clearCameras()
+{
+	cameras_.clear();
+}
+
+void Scene::clearModels()
+{
+	mesh_models_.clear();
+}
+
 
 void Scene::SetCamOrWorldView(const bool view) {
 	CamOrWorldView = view;

@@ -38,7 +38,7 @@ public:
 
 	void setModelInMiddle();
 	void setMinMaxVertices();
-	void setFaceAndVerteciesNormals();
+	void setVerteciesNormals();
 
 	void setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
 	void setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);

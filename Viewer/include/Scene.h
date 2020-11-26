@@ -38,6 +38,11 @@ public:
 
 	void setShowAxis(bool show);
 	bool showAxis;
+
+	void deleteActiveCamera();
+	void deleteActiveModel();
+	void clearCameras();
+	void clearModels();
 private:
 	std::vector<std::shared_ptr<MeshModel>> mesh_models_;
 	std::vector<std::shared_ptr<Camera>> cameras_;

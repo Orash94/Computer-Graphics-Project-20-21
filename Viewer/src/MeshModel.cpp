@@ -196,7 +196,7 @@ void MeshModel:: setMinMaxVertices() {
 
 }
 
-void MeshModel::setFaceAndVerteciesNormals()
+void MeshModel::setVerteciesNormals()
 {
 	verticesNormals_.clear();
 	int verticesCount = vertices_.capacity();

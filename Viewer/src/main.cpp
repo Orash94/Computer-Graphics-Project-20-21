@@ -197,8 +197,8 @@ std::shared_ptr<Camera> MakeCamera() {
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
-	float  windowsWidth = (io.DisplaySize.x) / 2;
-	float  windowsHeight = (io.DisplaySize.y) / 2;
+	float  windowsWidth = (float)(io.DisplaySize.x) / 2;
+	float  windowsHeight = (float)(io.DisplaySize.y) / 2;
 	/**
 	 * MeshViewer menu
 	 */
@@ -246,10 +246,21 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	//// Controls
 	//ImGui::ColorEdit3("Clear ", (float*)&clear_color);
 	//// TODO: Add more controls as needed
+	if (scene.GetModelCount() != 0 && scene.GetCameraCount() != 0) {
+		if (ImGui::Button("Clear Screen and selection")) {
+			scene.cleanupScene();
+		}
+	}
 	ImGui::Checkbox("Display Axis", &scene.showAxis);
 	if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int camera_selected = -1;
+		if (scene.GetCameraCount() != 0) {
+			if (ImGui::Button("Clear Cameras")) {
+				camera_selected = -1;
+				scene.clearCameras();
+			}
+		}
 		if (ImGui::TreeNode("Active camera selection:"))
 		{
 
@@ -268,11 +279,20 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						camera_selected = n;
 						scene.SetActiveCameraIndex(n);
 					}
+					
+						
 				}
 			}
 			ImGui::TreePop();
 		}
 
+		
+		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
+			if (ImGui::Button("delete")) {
+				camera_selected = -1;
+				scene.deleteActiveCamera();
+			}
+		}
 		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
 		
 			Camera& cam = scene.GetActiveCamera();
@@ -474,9 +494,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	{
 		static int model_selected = -1;
 		if (scene.GetModelCount() != 0) {
-			if (ImGui::Button("Clear Screen and selection")) {
+			if (ImGui::Button("Clear Models")) {
 				model_selected = -1;
-				scene.cleanupScene();
+				scene.clearModels();
 			}
 		}
 
@@ -503,8 +523,12 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			ImGui::TreePop();
 		}
-
-
+		if (model_selected != -1 && scene.GetModelCount() != 0) {
+			if (ImGui::Button("delete")) {
+				model_selected = -1;
+				scene.deleteActiveModel();
+			}
+		}
 		if (model_selected != -1 && scene.GetModelCount() != 0) {
 			MeshModel& model1 = scene.GetActiveModel();
 			if (ImGui::TreeNode("model Transformation"))

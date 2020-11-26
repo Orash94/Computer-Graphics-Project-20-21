@@ -190,10 +190,12 @@ glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 tra
 		
 
 	
-		float EdgeLength = glm::distance(v0, v1) / 4;
-		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f;
+		float EdgeLength = glm::distance(v0, v1) / 2; //normals length
+		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f; //center of face
 		glm::vec3 Actualnormal = glm::normalize(glm::cross((v1 - v0), (v2 - v0)));
+
 		glm::vec3 normalizedNormal = Actualnormal;
+
 		Actualnormal = Actualnormal * EdgeLength;
 		//face normals check
 		if (mesh.displayFaceNormals) {
@@ -376,10 +378,7 @@ void Renderer::Render(const Scene& scene)
 
 			glm::fmat4x4 finalTransformation =   transformationMatrix * scale   ;
 
-			if (!scene.GetCamOrWorldView()) {//rendering the world view
-
-			}
-			else // rendering the active camera view
+			if (scene.GetCamOrWorldView())  // rendering the active camera view
 			{
 				Camera& currentCam = scene.GetActiveCamera();
 				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
@@ -391,6 +390,7 @@ void Renderer::Render(const Scene& scene)
 				
 			}
 
+			//transfer objects to center screen with transalte transformation
 			finalTransformation = translate * finalTransformation;
 			//bounding box check
 			if (mesh.displayBoundingBox) {
@@ -406,6 +406,7 @@ void Renderer::Render(const Scene& scene)
 
 				glm::vec3 vectorArray[3];
 
+				//extract verices of face
 				for (int k = 0; k < 3; k++) {
 					int index = face.GetVertexIndex(k) - 1;
 					glm::vec3 v =mesh.GetVertexAtIndex(index);
@@ -421,7 +422,7 @@ void Renderer::Render(const Scene& scene)
 			}
 
 			//call function 
-			mesh.setFaceAndVerteciesNormals();
+			mesh.setVerteciesNormals();
 
 			//vertices normals check
 			if (mesh.displayVerticesNormals) {
@@ -441,6 +442,8 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
 
 			glm::fmat4x4 transformationMatrix;
+
+			//check if we are using LookAt or Transformation
 			if (tempCam.GetLookAtOrTransformation() == true) {
 				 transformationMatrix = glm::inverse(tempCam.getWorldTransformation()) * tempCam.getObjectTransformation();
 			}
