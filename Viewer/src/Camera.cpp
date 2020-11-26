@@ -103,7 +103,7 @@ void Camera::updateLookAt()
 
 		glm::fvec3 origin =Utils::applyTransformationToVector(glm::vec3(0, 0, 0), transformation);
 		glm::fvec3 upvector =Utils::applyTransformationToVector(glm::vec3(0, 1, 0), transformation);
-
+		//up is treated as normal
 		up = glm::normalize(upvector - origin);
 		at = Utils::applyTransformationToVector(glm::vec3(0, 0, -1), transformation);
 		eye = Utils::applyTransformationToVector(glm::vec3(0, 0, 0), transformation);
@@ -176,7 +176,7 @@ float Camera::GetZoom() const
 // initlise camera to look at negative z direction
 void Camera::setCameraDirection()
 {
-
+	
 	glm::fmat4x4  transformation = Utils::TransformationRotateY(glm::radians(180.0f));
 
 	for (int i = 0; i < GetVerticesCount();i++) {
