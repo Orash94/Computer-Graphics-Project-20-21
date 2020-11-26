@@ -7,9 +7,6 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	at = at_;
 	up = up_;
 
-	OriginalEye = eye_;
-	OriginalAt = at_;
-	OriginalUp = up_;
 	
 	left = -0.5f;
 	right = 0.5f;
@@ -38,14 +35,9 @@ Camera::~Camera()
 void Camera::SetCameraLookAt(const glm::vec3& eye_, const glm::vec3& at_, const glm::vec3& up_)
 {
 	if (lookAtOrTransformation == false) {
-		OriginalEye = eye_;
-		OriginalAt = at_;
-		OriginalUp = up_;
-
-		
-		eye =  OriginalEye;
-		at =  OriginalAt;
-		up = OriginalUp;
+		eye = eye_;
+		at = at_;
+		up = up_;
 	}
 }
 
@@ -59,32 +51,6 @@ void Camera::SetViewVolumeCoordinates(const float right_, const float left_, con
 	_far = far_;
 	
 	view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(right, left, top, bottom, -_near, -_far);
-}
-
-
-//return the inverse camera transform
-glm::fmat4x4 Camera::lookAt(const glm::vec3& eye , const glm::vec3& at,const glm::vec3& up)
-{
-	
-	glm::vec3 z = normalize(eye - at);
-	glm::vec3 x = normalize(glm::cross(up, z));
-	glm::vec3 y = normalize(glm::cross(z, x));
-
-	glm::mat4x4 c = glm::transpose(glm::mat4x4({
-		x[0], x[1], x[2], 0,
-		y[0], y[1], y[2], 0,
-		z[0], z[1], z[2], 0,
-		0, 0, 0, 1
-		}
-	));
-
-	glm::mat4x4 translationMatrix = glm::transpose(glm::mat4x4(
-		{ 1	,	0	,	0	,	-eye[0],
-			0	,	1	,	0	,	-eye[1],
-			0	,	0	,	1	,	-eye[2],
-			0	,	0	,	0	,	1 }));
-
-	return glm::transpose(c) * translationMatrix;
 }
 
 const glm::mat4x4& Camera::GetProjectionTransformation() const
@@ -134,13 +100,28 @@ void Camera::updateLookAt()
 {
 	if (lookAtOrTransformation == true) {
 		glm::fmat4x4 transformation = glm::inverse(getWorldTransformation()) * getObjectTransformation();
+
+		glm::fvec3 objectRotation = this->getRotate();
+		glm::fmat4x4  OBjectRotationMatrix = Utils::TransformationRotateX(glm::radians(objectRotation[2])) 
+			*Utils::TransformationRotateX(glm::radians(objectRotation[1])) * 
+			Utils::TransformationRotateX(glm::radians(objectRotation[0]));
+
+		glm::fvec3 WorldRotation = this->getWorldRotate();
+		glm::fmat4x4  WorldRotationMatrix = Utils::TransformationRotateX(glm::radians(WorldRotation[2]))
+			*Utils::TransformationRotateX(glm::radians(WorldRotation[1])) *
+			Utils::TransformationRotateX(glm::radians(WorldRotation[0]));
+
+		//glm::fmat4x4 upTransformation = WorldRotationMatrix * OBjectRotationMatrix;
+		//glm::fmat4x4 upTransformation = glm::transpose(glm::inverse(transformation));
+
+		glm::fvec3 origin =Utils::applyTransformationToVector(glm::vec3(0, 0, 0), transformation);
+		glm::fvec3 upvector =Utils::applyTransformationToVector(glm::vec3(0, 1, 0), transformation);
+
+		up = glm::normalize(upvector - origin);
 		at = Utils::applyTransformationToVector(glm::vec3(0, 0, -1), transformation);
 		eye = Utils::applyTransformationToVector(glm::vec3(0, 0, 0), transformation);
-		up = Utils::applyTransformationToVector(glm::vec3(0, 1, 0), transformation);
+		//up = Utils::applyTransformationToVector(glm::vec3(0, 1, 0), upTransformation);
 
-		OriginalEye = eye;
-		OriginalAt = glm::normalize(at - eye);
-		OriginalUp = glm::normalize(up - eye);
 	}
 }
 
@@ -159,20 +140,6 @@ glm::vec3 Camera::getUp() const
 	return up;
 }
 
-glm::vec3 Camera::getOriginalEye() const
-{
-	return OriginalEye;
-}
-
-glm::vec3 Camera::getOriginalAt() const
-{
-	return OriginalAt;
-}
-
-glm::vec3 Camera::getOriginalUp() const
-{
-	return OriginalUp;
-}
 
 float Camera::GetRight() const
 {

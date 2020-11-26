@@ -355,8 +355,12 @@ void Renderer::Render(const Scene& scene)
 	int centerY = windowsHeight / 2;
 	int boundingBoxEdgeLength = glm::min(centerX, centerY);
 
-	DrawLine(glm::fvec2(0, centerY), glm::fvec2(windowsWidth, centerY), glm::fvec3(0,0,0));
-	DrawLine(glm::fvec2(centerX, 0), glm::fvec2(centerX, windowsHeight), glm::fvec3(0, 0, 0));
+	
+	if (scene.getShowAxis()) {
+		DrawLine(glm::fvec2(0, centerY), glm::fvec2(windowsWidth, centerY), glm::fvec3(0, 0, 0));
+		DrawLine(glm::fvec2(centerX, 0), glm::fvec2(centerX, windowsHeight), glm::fvec3(0, 0, 0));
+	}
+	
 	//rendering the MeshModels
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
@@ -379,7 +383,7 @@ void Renderer::Render(const Scene& scene)
 			{
 				Camera& currentCam = scene.GetActiveCamera();
 				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
-				glm::fmat4x4 viewVolumeTransformation, projectionTransformation;
+				glm::fmat4x4 viewVolumeTransformation;
 
 				viewVolumeTransformation = currentCam.GetViewTransformation();
 				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;

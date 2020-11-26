@@ -246,6 +246,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	//// Controls
 	//ImGui::ColorEdit3("Clear ", (float*)&clear_color);
 	//// TODO: Add more controls as needed
+	ImGui::Checkbox("Display Axis", &scene.showAxis);
 	if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int camera_selected = -1;
@@ -293,9 +294,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			if (ImGui::TreeNode("Active camera params:"))
 			{
 				
-				glm::vec3 glmEye = cam.getOriginalEye();
-				glm::vec3 glmAt = cam.getOriginalAt();
-				glm::vec3 glmUp = cam.getOriginalUp();
+				glm::vec3 glmEye = cam.getEye();
+				glm::vec3 glmAt = cam.getAt();
+				glm::vec3 glmUp = cam.getUp();
 
 
 				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
