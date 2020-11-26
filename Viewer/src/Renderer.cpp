@@ -2,7 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
-
+#include "glm/ext.hpp"
 #include "Renderer.h"
 #include "InitShader.h"
 #include "Utils.h"
@@ -355,7 +355,8 @@ void Renderer::Render(const Scene& scene)
 	int centerY = windowsHeight / 2;
 	int boundingBoxEdgeLength = glm::min(centerX, centerY);
 
-
+	DrawLine(glm::fvec2(0, centerY), glm::fvec2(windowsWidth, centerY), glm::fvec3(0,0,0));
+	DrawLine(glm::fvec2(centerX, 0), glm::fvec2(centerX, windowsHeight), glm::fvec3(0, 0, 0));
 	//rendering the MeshModels
 	if (scene.GetModelCount() > 0) {
 		for (int i = 0; i < scene.GetModelCount(); i++)
@@ -377,7 +378,7 @@ void Renderer::Render(const Scene& scene)
 			else // rendering the active camera view
 			{
 				Camera& currentCam = scene.GetActiveCamera();
-				glm::fmat4x4 inverserCameraTransformation = currentCam.lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
 				glm::fmat4x4 viewVolumeTransformation, projectionTransformation;
 
 				viewVolumeTransformation = currentCam.GetViewTransformation();
@@ -434,7 +435,14 @@ void Renderer::Render(const Scene& scene)
 
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
-			glm::fmat4x4 transformationMatrix = glm::inverse(tempCam.getWorldTransformation()) * tempCam.getObjectTransformation();
+
+			glm::fmat4x4 transformationMatrix;
+			if (tempCam.GetLookAtOrTransformation() == true) {
+				 transformationMatrix = glm::inverse(tempCam.getWorldTransformation()) * tempCam.getObjectTransformation();
+			}
+			else {
+				transformationMatrix =  glm::inverse(glm::lookAt(tempCam.getEye(), tempCam.getAt(), tempCam.getUp()));
+			}
 
 			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
 
@@ -451,9 +459,6 @@ void Renderer::Render(const Scene& scene)
 					glm::vec3 v = tempCam.GetVertexAtIndex(index);
 					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
 				}
-
-				
-
 
 				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
 
