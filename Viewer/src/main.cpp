@@ -252,6 +252,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		}
 	}
 	ImGui::Checkbox("Display Axis", &scene.showAxis);
+
 	if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int camera_selected = -1;
@@ -630,12 +631,28 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 				ImGui::TreePop();
 			}
+
+			float MaxNormalLenthg = glm::min(windowsHeight, windowsWidth)/2;
+
 			ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
 
-			ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+			if (ImGui::CollapsingHeader("Face Normals", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+				ImGui::SliderFloat("Face Normals Length", &model1.FaceNormalsLength, 0, MaxNormalLenthg);
+			}
 
-			ImGui::Checkbox("Display vertices Normals", &model1.displayVerticesNormals);
+			if (ImGui::CollapsingHeader("vertices Normals", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display vertices Normals", &model1.displayVerticesNormals);
+				ImGui::SliderFloat("vertices Normals Length", &model1.VerticesNormalsLength, 0, MaxNormalLenthg);
+			}
 
+			if (ImGui::CollapsingHeader("vertices Normals Per Face", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display vertices Normals Per Face", &model1.displayVerticesNormalsPerFace);
+				ImGui::SliderFloat("vertices Normals Per Face Length", &model1.VerticesNormalsPerFaceLength, 0, MaxNormalLenthg);
+			}
 		}
 	}
 	ImGui::End();

@@ -22,6 +22,7 @@ public:
 	std::vector<glm::vec3> getFacesNormals();
 	std::vector<glm::vec3> getFacesCenters();
 	std::vector<glm::vec3> getVerticesNormals();
+	std::vector<glm::vec3> getVerticesNormalsPerFace();
 
 	glm::vec3 getScale();
 	glm::vec3 getRotate();
@@ -52,8 +53,15 @@ public:
 	const glm::fmat3x3& getCoordinateSystem();
 
 	bool displayBoundingBox = false;
+
 	bool displayFaceNormals = false;
+	float FaceNormalsLength = 100.0f;
+
 	bool displayVerticesNormals = false;
+	float VerticesNormalsLength = 100.0f;
+
+	bool displayVerticesNormalsPerFace = false;
+	float VerticesNormalsPerFaceLength = 100.0f;
 
 	float minX_ = FLT_MAX;
 	float minY_ = FLT_MAX;
