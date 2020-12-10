@@ -50,7 +50,7 @@ void Camera::SetViewVolumeCoordinates(const float right_, const float left_, con
 	_near = near_;
 	_far = far_;
 	
-	view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(right, left, top, bottom, -_near, -_far);
+	view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(right, left, top, bottom, _near, _far);
 }
 
 const glm::mat4x4& Camera::GetProjectionTransformation() const

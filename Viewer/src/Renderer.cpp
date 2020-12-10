@@ -569,7 +569,6 @@ void Renderer::Render(const Scene& scene)
 
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
-	int boundingBoxEdgeLength = glm::min(centerX, centerY);
 
 	
 	if (scene.getShowAxis()) {
@@ -601,7 +600,6 @@ void Renderer::Render(const Scene& scene)
 				viewVolumeTransformation = currentCam.GetViewTransformation();
 				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 				finalTransformation = CameraTransformation * finalTransformation;
-				
 			}
 
 			//transfer objects to center screen with transalte transformation
