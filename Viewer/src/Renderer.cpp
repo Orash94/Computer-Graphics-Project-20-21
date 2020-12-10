@@ -292,7 +292,7 @@ glm::vec3 Renderer::getDirectionVector(glm::vec3 v1, glm::vec3 v2)
 
 float Renderer::ZpointComputation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 insidePoint)
 {
-	glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
+	/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
 	float insideX = insidePoint[0];
 	if (insideX == 0)
 	{
@@ -314,6 +314,28 @@ float Renderer::ZpointComputation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm:
 	float z = p[2];
 
 
+	return z;*/
+
+
+	float top1 = (p2.y - p3.y) * (insidePoint.x - p3.x) + (p3.x - p2.x) * (insidePoint.y - p3.y);
+	float bottom1 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+	if (bottom1 == 0)
+	{
+		bottom1 += 0.00000000000000001;
+	}
+	float w1 = top1 / bottom1;
+
+	float top2 = (p3.y - p1.y) * (insidePoint.x - p3.x) + (p1.x - p3.x) * (insidePoint.y - p3.y);
+	float bottom2 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+	if (bottom2 == 0)
+	{
+		bottom2 += 0.00000000000000001;
+	}
+
+	float w2 = top2 / bottom2;
+	float w3 = 1 - w1 - w2;
+
+	float z = p1.z * w1 + p2.z * w2 + p3.z * w3;
 	return z;
 }
 
