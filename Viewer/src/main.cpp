@@ -199,6 +199,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
 	float  windowsWidth = (float)(io.DisplaySize.x) / 2;
 	float  windowsHeight = (float)(io.DisplaySize.y) / 2;
+	float minWindow = glm::min(windowsWidth, windowsHeight);
+	float maxWindow = glm::max(windowsWidth, windowsHeight);
+
 	/**
 	 * MeshViewer menu
 	 */
@@ -332,7 +335,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 
 				static bool symmetriceye = false;
-				float minWindow=glm::min(windowsWidth, windowsHeight);
+				
 				ImGui::Checkbox("symmetric", &symmetriceye);
 				if (symmetriceye) {
 					ImGui::SliderFloat("Eye", &vecEye[0], -minWindow, minWindow);
@@ -342,7 +345,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				else {
 					ImGui::SliderFloat("Eye X", &vecEye[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Eye Y", &vecEye[1], -windowHeight, windowHeight);
-					ImGui::SliderFloat("Eye Z", &vecEye[2], -windowHeight, windowHeight);
+					ImGui::SliderFloat("Eye Z", &vecEye[2], -maxWindow, maxWindow);
 				}
 			
 				
@@ -353,7 +356,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 				ImGui::SliderFloat("at X", &vecAt[0], -windowsWidth, windowsWidth);
 				ImGui::SliderFloat("at Y", &vecAt[1], -windowHeight, windowHeight);
-				ImGui::SliderFloat("at Z", &vecAt[2], -windowHeight, windowHeight);
+				ImGui::SliderFloat("at Z", &vecAt[2], -maxWindow, maxWindow);
 				if (ImGui::Button("Reset at")) {
 					vecAt[0] = 0.f;
 					vecAt[1] = 0.f;
@@ -443,7 +446,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset trasnalte")) {
 						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -476,7 +479,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset Translating")) {
 						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -571,7 +574,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset trasnalte")) {
 						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -621,7 +624,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset Translating")) {
 						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -629,6 +632,17 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				//ImGui::SliderFloat3("Rotate		[x,y,z]", Rotate, 0.0f, 359.9f);
 				//ImGui::SliderFloat3("Translate	[x,y,z]", Translate, 0.0f, 1.0f);
 				model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode("model color selection:")) {
+				glm::vec3 currMeshColor = model1.GetColor();
+				float Color[3] = { currMeshColor[0], currMeshColor[1],currMeshColor[2] };
+				ImGui::ColorEdit3("choose color", (float*)&Color);
+
+				for (int i = 0; i < 3; i++) {
+					currMeshColor[i] = Color[i];
+				}
+				model1.SetColor(currMeshColor);
 				ImGui::TreePop();
 			}
 

@@ -48,7 +48,8 @@ public:
 
 	void setFrame(glm::fvec3 center, glm::fmat3x3 CoordinateSystem);
 	void updateFrame( glm::fmat4x4 transform);
-
+	void SetColor(const glm::vec3 _color);
+	glm::vec3 GetColor()const;
 	const glm::vec3& getCenter();
 	const glm::fmat3x3& getCoordinateSystem();
 
@@ -95,7 +96,7 @@ protected:
 	std::vector<glm::vec3> facesNormals_;
 	std::vector<glm::vec3> facesCenters_;
 	
-	
+	glm::vec3 color;
 	
 
 	glm::vec3 center;

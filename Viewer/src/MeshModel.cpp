@@ -13,6 +13,7 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 	ObjectTransformation = Utils::getIdMat();
 	WorldTransformation = Utils::getIdMat();
 
+	color = glm::vec3(1, 0, 0);
 
 	setModelInMiddle();
 	setFrame(glm::fvec3(0.0f, 0.0f, 0.0f), Utils::getIdMat());
@@ -23,6 +24,16 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 
 MeshModel::~MeshModel()
 {
+}
+
+void MeshModel::SetColor(const glm::vec3 _color)
+{
+	color = _color;
+}
+
+glm::vec3 MeshModel::GetColor() const
+{
+	return color;
 }
 
 const Face& MeshModel::GetFace(int index) const

@@ -16,24 +16,29 @@ Renderer::Renderer(int viewport_width, int viewport_height) :
 {
 	InitOpenGLRendering();
 	CreateBuffers(viewport_width, viewport_height);
+	allocateZBuffer();
 }
 
 Renderer::~Renderer()
 {
 	delete[] color_buffer_;
+	delete[] Zbuffer;
 }
 
-void Renderer::PutPixel(int i, int j, const glm::vec3& color)
+void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 {
 	if (i < 0) return; if (i >= viewport_width_) return;
 	if (j < 0) return; if (j >= viewport_height_) return;
 	
-	color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
-	color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
-	color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+	if (Zbuffer[i][j] > z) {
+		color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+		color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+		color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+		Zbuffer[i][j] = z;
+	}
 }
 
-void Renderer::DrawLine(const glm::fvec2& p1, const glm::fvec2& p2, const glm::vec3& color)
+void Renderer::DrawLine(const glm::fvec3& p1, const glm::fvec3& p2, const glm::vec3& color)
 {
 
 	// TODO: Implement bresenham algorithm
@@ -42,33 +47,38 @@ void Renderer::DrawLine(const glm::fvec2& p1, const glm::fvec2& p2, const glm::v
 	int x0 = (int)p1[0], y0 = (int)p1[1];
 	int x1 = (int)p2[0], y1 = (int)p2[1];
 
+	float z1 = p1[0], z2 = p2[2];
+
 	if (std::abs(y1 - y0) < std::abs(x1 - x0)) {
 		if (x0 > x1)
 		{
-			plotLineLow(x1, y1, x0, y0,color);
+			plotLineLow(x1, y1, x0, y0, color, p1, p2);
 		}
 		else
 		{
-			plotLineLow(x0, y0, x1, y1, color);
+			plotLineLow(x0, y0, x1, y1, color, p1, p2);
 		}
 	}
 	else
 	{
 		if (y0 > y1) {
-			plotLineHigh(x1,y1,x0,y0, color);
+			plotLineHigh(x1, y1, x0, y0, color, p1, p2);
 		}
 		else
 		{
-			plotLineHigh(x0,y0,x1,y1, color);
+			plotLineHigh(x0, y0, x1, y1, color, p1, p2);
 		}
 	}
 }
 
-void Renderer::plotLineLow(int x0, int y0,int  x1, int y1, const glm::vec3& color)
+void Renderer::plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& color, glm::vec3 p1, glm::vec3 p2)
 {
 	int diffX = x1 - x0;
 	int diffY = y1 - y0;
 
+	glm::vec2 v1 = glm::vec2(p1.x, p1.y);
+	glm::vec2 v2 = glm::vec2(p2.x, p2.y);
+	float totaldist = glm::distance(v1, v2);
 	int yi = 1;
 
 	if (diffY < 0) {
@@ -80,7 +90,22 @@ void Renderer::plotLineLow(int x0, int y0,int  x1, int y1, const glm::vec3& colo
 	int y = y0;
 
 	for (int x = x0;x <= x1; x++) {
-		PutPixel(x, y, color);
+		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
+		float insideX = x;
+		if (insideX == 0)
+		{
+			insideX += 0.00001;
+		}
+		float alpha = p1[0] / insideX;
+		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
+		float z = p4[2];*/
+		glm::vec2 temp = glm::vec2(x, y);
+		float tempDist1= glm::distance(v1, temp);
+		float tempDist2 = glm::distance( temp, v2);
+		float normalDist1 = tempDist1 / totaldist;
+		float normalDist2 = tempDist2 / totaldist;
+		float z = normalDist1 * p1.z + normalDist2 * p2.z;
+		PutPixel(x, y, z, color);
 		if (d > 0) {
 			y = y + yi;
 			d = d + (2 * (diffY - diffX));
@@ -92,10 +117,14 @@ void Renderer::plotLineLow(int x0, int y0,int  x1, int y1, const glm::vec3& colo
 	}
 }
 
-void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& color)
+void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& color, glm::vec3 p1, glm::vec3 p2)
 {
 	int diffX = x1 - x0;
 	int diffY = y1 - y0;
+
+	glm::vec2 v1 = glm::vec2(p1.x, p1.y);
+	glm::vec2 v2 = glm::vec2(p2.x, p2.y);
+	float totaldist = glm::distance(v1, v2);
 
 	int xi = 1;
 
@@ -108,7 +137,23 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	int x = x0;
 
 	for (int y = y0; y <= y1; y++) {
-		PutPixel(x, y, color);
+		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
+		float insideX = x;
+		if (insideX == 0)
+		{
+			insideX += 0.00001;
+		}
+		float alpha = p1[0] / insideX;
+		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
+		float z = p4[2];*/
+
+		glm::vec2 temp = glm::vec2(x, y);
+		float tempDist1 = glm::distance(v1, temp);
+		float tempDist2 = glm::distance(temp, v2);
+		float normalDist1 = tempDist1 / totaldist;
+		float normalDist2 = tempDist2 / totaldist;
+		float z = normalDist1 * p1.z + normalDist2 * p2.z;
+		PutPixel(x, y, z, color);
 		if (d > 0) {
 			x = x + xi;
 			d = d + (2 * (diffX - diffY));
@@ -120,11 +165,12 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	}
 }
 
-void Renderer::DrawTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color)
+void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color)
 {
-	DrawLine( v1, v2, color);
-	DrawLine(v2, v3, color);
-	DrawLine(v1, v3, color);
+	DrawLine(v1, v2, glm::vec3(0, 0, 0));
+	DrawLine(v2, v3, glm::vec3(0, 0, 0));
+	DrawLine(v1, v3, glm::vec3(0, 0, 0));
+	ScanConversionTriangle(v1, v2, v3, color);
 }
 
 void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x4 trasformation , const glm::vec3& color)
@@ -172,6 +218,151 @@ void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x
 	DrawLine(vecArray[1], vecArray[5], color);
 	DrawLine(vecArray[2], vecArray[6], color);
 	DrawLine(vecArray[3], vecArray[7], color);
+
+}
+
+void Renderer::allocateZBuffer()
+{
+	Zbuffer = new float* [viewport_width_];
+	for (int i = 0; i < viewport_width_; i++)
+		Zbuffer[i] = new float[viewport_height_];
+
+	for (int i = 0; i < viewport_width_; i++)
+		for (int j = 0; j < viewport_height_; j++)
+			Zbuffer[i][j] = FLT_MAX;
+}
+
+void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
+{
+	float minX = getMin(p1.x, p2.x, p3.x);
+	float maxX = getMax(p1.x, p2.x, p3.x);
+	float minY = getMin(p1.y, p2.y, p3.y);
+	float maxY = getMax(p1.y, p2.y, p3.y);
+
+	for (int i = minX; i < maxX; i++) {
+		for (int j = minY; j < maxY; j++) {
+			if (isInsideTheTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, i, j))
+				//if (Zbuffer[i][j] >= ZpointComputation(p1, p2, p3, glm::vec2(i, j))) {
+				PutPixel(i, j, ZpointComputation(p1, p2, p3, glm::vec2(i, j)), color);
+			//	Zbuffer[i][j] = ZpointComputation(p1, p2, p3, glm::vec2(i, j));
+			//}
+		}
+
+	}
+
+}
+
+float Renderer::getMin(float x, float y, float z)
+{
+	float temp;
+	if (x < y)
+		temp = x;
+	else
+	{
+		temp = y;
+	}
+	if (z < temp)
+		temp = z;
+	return temp;
+}
+
+float Renderer::getMax(float x, float y, float z)
+{
+	float temp;
+	if (x > y)
+		temp = x;
+	else
+	{
+		temp = y;
+	}
+	if (z > temp)
+		temp = z;
+	return temp;
+}
+
+/*
+* Checking on which side of the half-plane created by the edges the point is
+*/
+bool Renderer::isInsideTheTriangle(float x1, float y1, float x2, float y2, float x3, float y3, int x, int y)
+{
+
+
+	float d1, d2, d3;
+	bool has_neg, has_pos;
+
+	d1 = area(x, y, x1, y1, x2, y2);
+	d2 = area(x, y, x2, y2, x3, y3);
+	d3 = area(x, y, x3, y3, x1, y1);
+
+	has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+	has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+	return !(has_neg && has_pos);
+}
+
+glm::vec3 Renderer::getDirectionVector(glm::vec3 v1, glm::vec3 v2)
+{
+	glm::vec3 directionVector = v1 - v2;
+	float min = getMin(std::abs(directionVector.x), std::abs(directionVector.y), std::abs(directionVector.z));
+	if (min == 0)
+		return directionVector;
+	directionVector = glm::vec3(directionVector[0] / min, directionVector[1] / min, directionVector[2] / min);
+	return directionVector;
+}
+
+float Renderer::ZpointComputation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 insidePoint)
+{
+	/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
+	float insideX = insidePoint[0];
+	if (insideX == 0)
+	{
+		insideX += 0.00001;
+	}
+	float alpha = p1[0] / insideX;
+	glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
+	float z4 = p4[2];
+
+	glm::vec3 v1v3DirectionVector = getDirectionVector(p1, p3);
+
+	alpha = p1[0] / insideX;
+	glm::vec3 p5 = p1 + glm::vec3(v1v3DirectionVector[0] * alpha, v1v3DirectionVector[1] * alpha, v1v3DirectionVector[2] * alpha);
+	float z5 = p5[2];
+
+	glm::vec3 v4v5DirectionVector = getDirectionVector(p4, p5);
+	alpha = p4[0] / insideX;
+	glm::vec3 p = p4 + glm::vec3(alpha * v4v5DirectionVector[0], alpha * v4v5DirectionVector[1], alpha * v4v5DirectionVector[2]);
+	float z = p[2];
+
+
+	return z;*/
+
+
+	float top1 = (p2.y - p3.y) * (insidePoint.x - p3.x) + (p3.x - p2.x) * (insidePoint.y - p3.y);
+	float bottom1 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+	if (bottom1 == 0)
+	{
+		bottom1 += 0.00000000000000001;
+	}
+	float w1 = top1 / bottom1;
+
+	float top2 = (p3.y - p1.y) * (insidePoint.x - p3.x) + (p1.x - p3.x) * (insidePoint.y - p3.y);
+	float bottom2 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+	if (bottom2 == 0)
+	{
+		bottom2 += 0.00000000000000001;
+	}
+
+	float w2 = top2 / bottom2;
+	float w3 = 1 - w1 - w2;
+
+	float z = p1.z * w1 + p2.z * w2 + p3.z * w3;
+	return z;
+}
+
+float Renderer::area(int x1, int y1, int x2, int y2, int x3, int y3)
+{
+
+	return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
 
 }
 
@@ -242,6 +433,7 @@ void Renderer::CreateBuffers(int w, int h)
 {
 	CreateOpenGLBuffer(); //Do not remove this line.
 	color_buffer_ = new float[3 * w * h];
+	allocateZBuffer();
 	ClearColorBuffer(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
@@ -364,7 +556,8 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			PutPixel(i, j, color);
+			Zbuffer[i][j] = FLT_MAX;
+			PutPixel(i, j, 4000, color);
 		}
 	}
 }
@@ -380,8 +573,8 @@ void Renderer::Render(const Scene& scene)
 
 	
 	if (scene.getShowAxis()) {
-		DrawLine(glm::fvec2(0, centerY), glm::fvec2(windowsWidth, centerY), glm::fvec3(0, 0, 0));
-		DrawLine(glm::fvec2(centerX, 0), glm::fvec2(centerX, windowsHeight), glm::fvec3(0, 0, 0));
+		DrawLine(glm::fvec3(0, centerY, 0), glm::fvec3(windowsWidth, centerY, 0), glm::fvec3(0, 0, 0));
+		DrawLine(glm::fvec3(centerX, 0, 0), glm::fvec3(centerX, windowsHeight, 0), glm::fvec3(0, 0, 0));
 	}
 	
 	//rendering the MeshModels
@@ -440,7 +633,7 @@ void Renderer::Render(const Scene& scene)
 				
 				
 
-				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor());
 			}
 
 			//call function 
