@@ -379,15 +379,12 @@ glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 tra
 		glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
 		glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
 		
-
-	
-		float EdgeLength = glm::distance(v0, v1) / 2; //normals length
 		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f; //center of face
 		glm::vec3 Actualnormal = glm::normalize(glm::cross((v1 - v0), (v2 - v0)));
 
 		glm::vec3 normalizedNormal = Actualnormal;
 
-		Actualnormal = Actualnormal * EdgeLength;
+		Actualnormal = Actualnormal * mesh.FaceNormalsLength;
 		//face normals check
 		if (mesh.displayFaceNormals) {
 			DrawLine(ActualCenter, ActualCenter + Actualnormal, glm::fvec3(1, 1, 1));
@@ -406,6 +403,30 @@ void Renderer::DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, c
 		DrawLine(v, v + vn, color);
 	}
 	
+}
+
+void Renderer::DrawVerticesNormalPerFace(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength)
+{
+	std::vector<Face> faces = mesh.getFaces();
+	std::vector < glm::vec3 > normals = mesh.getVerticesNormalsPerFace();
+
+	for (int j = 0; j < mesh.GetFacesCount(); j++)
+	{
+		Face& face = faces[j];
+
+		//extract vertices of face
+		for (int k = 0; k < 3; k++) {
+			int index = face.GetVertexIndex(k) - 1;
+			glm::vec3 v = mesh.GetVertexAtIndex(index);
+			glm::vec3 vertex = Utils::applyTransformationToVector(v, trasformation);
+
+			int normalIndex = face.GetNormalIndex(k) - 1;
+			glm::vec3 normal = normals[normalIndex];
+			normal = Utils::applyTransformationToNormal(normal,trasformation) * normalLength;
+			DrawLine(vertex, vertex + normal, color);
+		}
+
+	}
 }
 
 void Renderer::CreateBuffers(int w, int h)
@@ -535,8 +556,8 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			Zbuffer[i][j] = 502.0f;
-			PutPixel(i, j, 501, color);
+			Zbuffer[i][j] = FLT_MAX;
+			PutPixel(i, j, 4000, color);
 		}
 	}
 }
@@ -610,6 +631,7 @@ void Renderer::Render(const Scene& scene)
 				glm::fvec3  faceNormal = DrawFaceNormal(mesh ,face, finalTransformation, glm::vec3(1, 0, 1));
 				mesh.setFaceNormal(j ,faceNormal);
 				
+				
 
 				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor());
 			}
@@ -619,7 +641,12 @@ void Renderer::Render(const Scene& scene)
 
 			//vertices normals check
 			if (mesh.displayVerticesNormals) {
-				DrawVerticesNormal(mesh, finalTransformation, glm::vec3(0, 0, 0.545), 40.0f);
+				DrawVerticesNormal(mesh, finalTransformation, glm::vec3(0, 0, 0.545), mesh.VerticesNormalsLength);
+			}
+
+			//vertices normals per face check
+			if (mesh.displayVerticesNormalsPerFace) {
+				DrawVerticesNormalPerFace(mesh, finalTransformation, glm::vec3(0, 0.545, 0.545), mesh.VerticesNormalsPerFaceLength);
 			}
 		}
 

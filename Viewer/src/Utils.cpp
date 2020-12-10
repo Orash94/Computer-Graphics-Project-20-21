@@ -241,6 +241,14 @@ glm::fvec3 Utils::applyTransformationToVector(const glm::fvec3 vec, glm::fmat4x4
 	return  Utils::Homogeneous2Euclidean(newv0);
 }
 
+glm::fvec3 Utils::applyTransformationToNormal(const glm::fvec3 vec, glm::fmat4x4& mat)
+{
+	glm::vec3 vertex = applyTransformationToVector(vec, mat);
+	glm::vec3 zero = applyTransformationToVector(glm::fvec3(0,0,0), mat);
+	glm::vec3 normal = glm::normalize(vertex - zero);
+	return normal;
+}
+
 
 glm::fvec3 Utils::Homogeneous2Euclidean(const glm::fvec4 vec)
 {

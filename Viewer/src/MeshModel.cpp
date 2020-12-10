@@ -114,6 +114,11 @@ std::vector<glm::vec3> MeshModel::getVerticesNormals()
 	return verticesNormals_;
 }
 
+std::vector<glm::vec3> MeshModel::getVerticesNormalsPerFace()
+{
+	return normals_;
+}
+
 std::vector<glm::vec3> MeshModel::getFacesCenters()
 {
 	return facesCenters_;

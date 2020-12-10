@@ -199,6 +199,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
 	float  windowsWidth = (float)(io.DisplaySize.x) / 2;
 	float  windowsHeight = (float)(io.DisplaySize.y) / 2;
+	float minWindow = glm::min(windowsWidth, windowsHeight);
+	float maxWindow = glm::max(windowsWidth, windowsHeight);
+
 	/**
 	 * MeshViewer menu
 	 */
@@ -252,6 +255,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		}
 	}
 	ImGui::Checkbox("Display Axis", &scene.showAxis);
+
 	if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int camera_selected = -1;
@@ -331,7 +335,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 
 				static bool symmetriceye = false;
-				float minWindow=glm::min(windowsWidth, windowsHeight);
+				
 				ImGui::Checkbox("symmetric", &symmetriceye);
 				if (symmetriceye) {
 					ImGui::SliderFloat("Eye", &vecEye[0], -minWindow, minWindow);
@@ -341,7 +345,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				else {
 					ImGui::SliderFloat("Eye X", &vecEye[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Eye Y", &vecEye[1], -windowHeight, windowHeight);
-					ImGui::SliderFloat("Eye Z", &vecEye[2], -windowHeight, windowHeight);
+					ImGui::SliderFloat("Eye Z", &vecEye[2], -maxWindow, maxWindow);
 				}
 			
 				
@@ -352,7 +356,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 				ImGui::SliderFloat("at X", &vecAt[0], -windowsWidth, windowsWidth);
 				ImGui::SliderFloat("at Y", &vecAt[1], -windowHeight, windowHeight);
-				ImGui::SliderFloat("at Z", &vecAt[2], -windowHeight, windowHeight);
+				ImGui::SliderFloat("at Z", &vecAt[2], -maxWindow, maxWindow);
 				if (ImGui::Button("Reset at")) {
 					vecAt[0] = 0.f;
 					vecAt[1] = 0.f;
@@ -442,7 +446,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset trasnalte")) {
 						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -475,7 +479,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset Translating")) {
 						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -570,7 +574,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset trasnalte")) {
 						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -620,7 +624,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset Translating")) {
 						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -641,12 +645,28 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				model1.SetColor(currMeshColor);
 				ImGui::TreePop();
 			}
+
+			float MaxNormalLenthg = glm::min(windowsHeight, windowsWidth)/2;
+
 			ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
 
-			ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+			if (ImGui::CollapsingHeader("Face Normals", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+				ImGui::SliderFloat("Face Normals Length", &model1.FaceNormalsLength, 0, MaxNormalLenthg);
+			}
 
-			ImGui::Checkbox("Display vertices Normals", &model1.displayVerticesNormals);
+			if (ImGui::CollapsingHeader("vertices Normals", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display vertices Normals", &model1.displayVerticesNormals);
+				ImGui::SliderFloat("vertices Normals Length", &model1.VerticesNormalsLength, 0, MaxNormalLenthg);
+			}
 
+			if (ImGui::CollapsingHeader("vertices Normals Per Face", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display vertices Normals Per Face", &model1.displayVerticesNormalsPerFace);
+				ImGui::SliderFloat("vertices Normals Per Face Length", &model1.VerticesNormalsPerFaceLength, 0, MaxNormalLenthg);
+			}
 		}
 	}
 	ImGui::End();

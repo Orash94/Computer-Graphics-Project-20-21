@@ -29,6 +29,7 @@ public:
 
 
 	static glm::fvec3 applyTransformationToVector(const glm::fvec3 vec , glm::fmat4x4& mat);
+	static glm::fvec3 applyTransformationToNormal(const glm::fvec3 vec, glm::fmat4x4& mat);
 
 	static void resetMatrix(glm::fmat4x4& mat);
 };
