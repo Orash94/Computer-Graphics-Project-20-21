@@ -639,6 +639,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					currMeshColor[i] = Color[i];
 				}
 				model1.SetColor(currMeshColor);
+				ImGui::TreePop();
 			}
 			ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
 

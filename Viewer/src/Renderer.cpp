@@ -76,6 +76,9 @@ void Renderer::plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& col
 	int diffX = x1 - x0;
 	int diffY = y1 - y0;
 
+	glm::vec2 v1 = glm::vec2(p1.x, p1.y);
+	glm::vec2 v2 = glm::vec2(p2.x, p2.y);
+	float totaldist = glm::distance(v1, v2);
 	int yi = 1;
 
 	if (diffY < 0) {
@@ -87,7 +90,7 @@ void Renderer::plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& col
 	int y = y0;
 
 	for (int x = x0;x <= x1; x++) {
-		glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
+		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
 		float insideX = x;
 		if (insideX == 0)
 		{
@@ -95,8 +98,13 @@ void Renderer::plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& col
 		}
 		float alpha = p1[0] / insideX;
 		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-		float z = p4[2];
-
+		float z = p4[2];*/
+		glm::vec2 temp = glm::vec2(x, y);
+		float tempDist1= glm::distance(v1, temp);
+		float tempDist2 = glm::distance( temp, v2);
+		float normalDist1 = tempDist1 / totaldist;
+		float normalDist2 = tempDist2 / totaldist;
+		float z = normalDist1 * p1.z + normalDist2 * p2.z;
 		PutPixel(x, y, z, color);
 		if (d > 0) {
 			y = y + yi;
@@ -114,6 +122,10 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	int diffX = x1 - x0;
 	int diffY = y1 - y0;
 
+	glm::vec2 v1 = glm::vec2(p1.x, p1.y);
+	glm::vec2 v2 = glm::vec2(p2.x, p2.y);
+	float totaldist = glm::distance(v1, v2);
+
 	int xi = 1;
 
 	if (diffX < 0) {
@@ -125,7 +137,7 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	int x = x0;
 
 	for (int y = y0; y <= y1; y++) {
-		glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
+		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
 		float insideX = x;
 		if (insideX == 0)
 		{
@@ -133,7 +145,14 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 		}
 		float alpha = p1[0] / insideX;
 		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-		float z = p4[2];
+		float z = p4[2];*/
+
+		glm::vec2 temp = glm::vec2(x, y);
+		float tempDist1 = glm::distance(v1, temp);
+		float tempDist2 = glm::distance(temp, v2);
+		float normalDist1 = tempDist1 / totaldist;
+		float normalDist2 = tempDist2 / totaldist;
+		float z = normalDist1 * p1.z + normalDist2 * p2.z;
 		PutPixel(x, y, z, color);
 		if (d > 0) {
 			x = x + xi;
@@ -204,11 +223,12 @@ void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x
 
 void Renderer::allocateZBuffer()
 {
-	Zbuffer = new float* [viewport_height_];
-	for (int i = 0; i < viewport_height_; i++)
-		Zbuffer[i] = new float[viewport_width_];
-	for (int i = 0; i < viewport_height_; i++)
-		for (int j = 0; j < viewport_width_; j++)
+	Zbuffer = new float* [viewport_width_];
+	for (int i = 0; i < viewport_width_; i++)
+		Zbuffer[i] = new float[viewport_height_];
+
+	for (int i = 0; i < viewport_width_; i++)
+		for (int j = 0; j < viewport_height_; j++)
 			Zbuffer[i][j] = FLT_MAX;
 }
 
@@ -515,8 +535,8 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			Zbuffer[i][j] = FLT_MAX;
-			PutPixel(i, j, 1001, color);
+			Zbuffer[i][j] = 502.0f;
+			PutPixel(i, j, 501, color);
 		}
 	}
 }
@@ -532,8 +552,8 @@ void Renderer::Render(const Scene& scene)
 
 	
 	if (scene.getShowAxis()) {
-		DrawLine(glm::fvec3(0, centerY, FLT_MIN), glm::fvec3(windowsWidth, centerY, FLT_MIN), glm::fvec3(0, 0, 0));
-		DrawLine(glm::fvec3(centerX, 0, FLT_MIN), glm::fvec3(centerX, windowsHeight, FLT_MIN), glm::fvec3(0, 0, 0));
+		DrawLine(glm::fvec3(0, centerY, 0), glm::fvec3(windowsWidth, centerY, 0), glm::fvec3(0, 0, 0));
+		DrawLine(glm::fvec3(centerX, 0, 0), glm::fvec3(centerX, windowsHeight, 0), glm::fvec3(0, 0, 0));
 	}
 	
 	//rendering the MeshModels
