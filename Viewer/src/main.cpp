@@ -36,6 +36,7 @@ void Cleanup(GLFWwindow* window);
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
 void ChangeFrameSize(int width, int height, Renderer& renderer);
 std::shared_ptr<Camera> MakeCamera();
+std::shared_ptr<Light> MakeLight();
 /**
  * Function implementation
  */
@@ -195,6 +196,12 @@ std::shared_ptr<Camera> MakeCamera() {
 	return std::make_shared<Camera>(mesh, nEye, nAt, nUp);
 }
 
+std::shared_ptr<Light> MakeLight()
+{
+	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/demo.obj")));
+	return std::make_shared<Light>(mesh);
+}
+
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
 	float  windowsWidth = (float)(io.DisplaySize.x) / 2;
@@ -234,10 +241,14 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 
 		if (ImGui::BeginMenu("Add"))
 		{
-			if (ImGui::MenuItem("Add Camera", "CTRL+T"))
+			if (ImGui::MenuItem("Add Camera", "CTRL+C"))
 			{
 				scene.AddCamera(MakeCamera());
 
+			}
+			if (ImGui::MenuItem("Add Light", "CTRL+L"))
+			{
+				scene.AddLight(MakeLight());
 			}
 			ImGui::EndMenu();
 		}
@@ -256,6 +267,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	}
 	ImGui::Checkbox("Display Axis", &scene.showAxis);
 
+
+	//---------------------------------Camera --------------------------
 	if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int camera_selected = -1;
@@ -494,6 +507,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		}
 
 	}
+	//---------------------------------Model --------------------------
 	if (ImGui::CollapsingHeader("Models Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int model_selected = -1;
@@ -643,6 +657,10 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					currMeshColor[i] = Color[i];
 				}
 				model1.SetColor(currMeshColor);
+
+				ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
+				ImGui::ColorEdit3("diffuse color", (float*)&model1.diffuseColor);
+				ImGui::ColorEdit3("specular color", (float*)&model1.specularColor);
 				ImGui::TreePop();
 			}
 
@@ -667,6 +685,127 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::Checkbox("Display vertices Normals Per Face", &model1.displayVerticesNormalsPerFace);
 				ImGui::SliderFloat("vertices Normals Per Face Length", &model1.VerticesNormalsPerFaceLength, 0, MaxNormalLenthg);
 			}
+		}
+	}
+
+	//---------------------------------Light --------------------------
+	if (ImGui::CollapsingHeader("Light Actions", ImGuiTreeNodeFlags_None))
+	{
+		static int light_selected = -1;
+		if (scene.GetLightCount() != 0) {
+			if (ImGui::Button("Clear Lights")) {
+				light_selected = -1;
+				scene.ClearLights();
+			}
+		}
+
+		ImGui::Separator();
+
+		if (ImGui::TreeNode("Active lights selection:"))
+		{
+
+
+			for (int n = 0; n < scene.GetLightCount(); n++)
+			{
+
+				//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
+				const std::string name = " light #" + std::to_string(n + 1) ;
+				// copying the contents of the
+				if (ImGui::Selectable(name.c_str(), light_selected == n)) {
+					light_selected = n;
+					scene.SetActiveLightIndex(n);
+				}
+
+			}
+			if (scene.GetLightCount() == 0) {
+				ImGui::Text("please select one or more lights");
+			}
+			ImGui::TreePop();
+		}
+		if (light_selected != -1 && scene.GetLightCount() != 0) {
+			if (ImGui::Button("delete")) {
+				light_selected = -1;
+				scene.deleteActiveLight();
+			}
+		}
+		if (light_selected != -1 && scene.GetLightCount() != 0) {
+			MeshModel& model1 = scene.GetActiveLight();
+			if (ImGui::TreeNode("light Transformation"))
+			{
+
+				glm::vec3 Rotate = model1.getRotate();
+				glm::vec3 Translate = model1.getTranslate();
+
+
+				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Y", &Rotate[1], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Z", &Rotate[2], -180.0f, 180.0f);
+					if (ImGui::Button("Reset Rotating")) {
+						Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+				if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -maxWindow, maxWindow);
+					if (ImGui::Button("Reset trasnalte")) {
+						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+
+
+				
+				model1.setObjectTransformationUpdates(glm::fvec3(1,1,1), Rotate, Translate);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("model world Transformation:"))
+			{
+
+				glm::vec3 worldScale = model1.getWorldScale();
+				glm::vec3 worldRotate = model1.getWorldRotate();
+				glm::vec3 worldTranslate = model1.getWorldTranslate();
+
+				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Y", &worldRotate[1], -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Z", &worldRotate[2], -180.0f, 180.0f);
+					if (ImGui::Button("Reset Rotating")) {
+						worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+				if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
+					if (ImGui::Button("Reset Translating")) {
+						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+				}
+				model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode("model color selection:")) {
+				glm::vec3 currMeshColor = model1.GetColor();
+				float Color[3] = { currMeshColor[0], currMeshColor[1],currMeshColor[2] };
+				ImGui::ColorEdit3("choose color", (float*)&Color);
+
+				for (int i = 0; i < 3; i++) {
+					currMeshColor[i] = Color[i];
+				}
+				model1.SetColor(currMeshColor);
+
+				ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
+				ImGui::ColorEdit3("diffuse color", (float*)&model1.diffuseColor);
+				ImGui::ColorEdit3("specular color", (float*)&model1.specularColor);
+				ImGui::TreePop();
+			}
+
 		}
 	}
 	ImGui::End();

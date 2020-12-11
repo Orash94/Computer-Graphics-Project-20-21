@@ -73,6 +73,9 @@ public:
 
 	std::map<int, std::vector<int>> vertcisAdjacent;
 
+	glm::vec3 ambientColor;
+	glm::vec3 diffuseColor;
+	glm::vec3 specularColor;
 protected:
 	
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);

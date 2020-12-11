@@ -5,6 +5,7 @@
 
 #include "Camera.h"
 #include "MeshModel.h"
+#include "Light.h"
 
 class Scene {
 public:
@@ -21,12 +22,19 @@ public:
 	Camera& GetCamera(int index) const;
 	Camera& GetActiveCamera() const;
 
+	void AddLight(const std::shared_ptr<Light>& light);
+	int GetLightCount() const;
+	Light& GetLight(int index) const;
+	Light& GetActiveLight() const;
 
 	void SetActiveCameraIndex(int index);
 	int GetActiveCameraIndex() const;
 
 	void SetActiveModelIndex(int index);
 	int GetActiveModelIndex() const;
+
+	void SetActiveLightIndex(int index);
+	int GetActiveLightIndex() const;
 
 	void SetCamOrWorldView(const bool view);
 	bool GetCamOrWorldView() const;
@@ -41,13 +49,19 @@ public:
 
 	void deleteActiveCamera();
 	void deleteActiveModel();
+	void deleteActiveLight();
+	
 	void clearCameras();
 	void clearModels();
+	void ClearLights();
 private:
 	std::vector<std::shared_ptr<MeshModel>> mesh_models_;
 	std::vector<std::shared_ptr<Camera>> cameras_;
-	
+	std::vector<std::shared_ptr<Light>> Lights_;
+
 	int active_camera_index_;
 	int active_model_index_;
+	int active_light_index_;
+
 	bool CamOrWorldView; //true for camera view, false for World
 };
