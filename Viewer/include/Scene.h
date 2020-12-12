@@ -56,6 +56,9 @@ public:
 	void ClearLights();
 
 	glm::fvec3 backgroundColor = glm::fvec3(0.8f, 0.8f, 0.8f);
+	bool gaussianBlurring = false;
+	bool bloom = false;
+	bool fogEffect = false;
 private:
 	std::vector<std::shared_ptr<MeshModel>> mesh_models_;
 	std::vector<std::shared_ptr<Camera>> cameras_;

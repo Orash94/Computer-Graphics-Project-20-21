@@ -690,7 +690,39 @@ void Renderer::Render(const Scene& scene)
 			}
 		}
 	}
-	
+
+	//rendering the  lights to the screen
+	if (scene.GetLightCount() > 0 ) {
+		for (int i = 0; i < scene.GetLightCount(); i++) {
+			Light& tempLight = scene.GetLight(i);
+			float proportion = 50.0f / tempLight.getMaxDitancePoints();
+
+			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
+			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
+
+			glm::fmat4x4 transformationMatrix = glm::inverse(tempLight.getWorldTransformation())* tempLight.getObjectTransformation();
+
+			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
+
+			std::vector<Face> faces = tempLight.getFaces();
+
+			for (int j = 0; j < tempLight.GetFacesCount(); j++)
+			{
+				Face& face = faces[j];
+
+				glm::vec3 vectorArray[3];
+
+				for (int k = 0; k < 3; k++) {
+					int index = face.GetVertexIndex(k) - 1;
+					glm::vec3 v = tempLight.GetVertexAtIndex(index);
+					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
+				}
+
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
+
+			}
+		}
+	}
 	
 
 }

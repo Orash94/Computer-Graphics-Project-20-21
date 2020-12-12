@@ -277,8 +277,14 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			if (ImGui::CollapsingHeader("Scene Actions", ImGuiTreeNodeFlags_None))
 			{
 				ImGui::ColorEdit3("background color", (float*)&scene.backgroundColor);
-				if (ImGui::Button("Reset up")) {
+				if (ImGui::Button("Reset color")) {
 					scene.backgroundColor = glm::fvec3(0.8f, 0.8f, 0.8f);
+				}
+				if (ImGui::CollapsingHeader("Post Proccessing ", ImGuiTreeNodeFlags_None))
+				{
+					ImGui::Checkbox("Gaussian blurring", &scene.gaussianBlurring);
+					ImGui::Checkbox("Bloom", &scene.bloom);
+					ImGui::Checkbox("Fog effect", &scene.fogEffect);
 				}
 
 			}
@@ -463,6 +469,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					{
 						glm::vec3 Rotate = camera.getRotate();
 						glm::vec3 Translate = camera.getTranslate();
+						glm::fvec3 scale = camera.getScale();
 
 						if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 						{
@@ -483,9 +490,6 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							}
 						}
 
-
-				
-						glm::fvec3 scale = glm::fvec3(1.0f, 1.0f, 1.0f);
 						camera.setObjectTransformationUpdates(scale, Rotate, Translate);
 						ImGui::TreePop();
 					}
@@ -750,6 +754,14 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					ImGui::TreePop();
 				}
 				if (light_selected != -1 && scene.GetLightCount() != 0) {
+					ImGui::Checkbox("Power ", &scene.GetActiveLight().power);
+					ImGui::SameLine();
+					if (scene.GetActiveLight().power) {
+						ImGui::Text(" ON");
+					}
+					else {
+						ImGui::Text(" OFF");
+					}
 					if (ImGui::Button("delete")) {
 						light_selected = -1;
 						scene.deleteActiveLight();
@@ -762,17 +774,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 
 						glm::vec3 Rotate = model1.getRotate();
 						glm::vec3 Translate = model1.getTranslate();
+						glm::vec3 scale = model1.getScale();
 
-
-						if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
-						{
-							ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
-							ImGui::SliderFloat("Rotate Y", &Rotate[1], -180.0f, 180.0f);
-							ImGui::SliderFloat("Rotate Z", &Rotate[2], -180.0f, 180.0f);
-							if (ImGui::Button("Reset Rotating")) {
-								Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
-							}
-						}
 						if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
 						{
 							ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
@@ -782,10 +785,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 								Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 							}
 						}
-
-
-				
-						model1.setObjectTransformationUpdates(glm::fvec3(1,1,1), Rotate, Translate);
+						
+						model1.setObjectTransformationUpdates(scale, Rotate, Translate);
 						ImGui::TreePop();
 					}
 
@@ -796,6 +797,16 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						glm::vec3 worldRotate = model1.getWorldRotate();
 						glm::vec3 worldTranslate = model1.getWorldTranslate();
 
+						if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
+						{
+							ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
+							ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
+							ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
+							if (ImGui::Button("Reset trasnalte")) {
+								worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
+							}
+						}
+
 						if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 						{
 							ImGui::SliderFloat("Rotate X", &worldRotate[0], -180.0f, 180.0f);
@@ -805,15 +816,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 								worldRotate = glm::vec3(0.0f, 0.0f, 0.0f);
 							}
 						}
-						if (ImGui::CollapsingHeader("Translating", ImGuiTreeNodeFlags_None))
-						{
-							ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
-							ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-							ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
-							if (ImGui::Button("Reset Translating")) {
-								worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
-							}
-						}
+
 						model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 						ImGui::TreePop();
 					}
