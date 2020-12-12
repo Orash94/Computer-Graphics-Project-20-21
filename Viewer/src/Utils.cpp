@@ -249,6 +249,24 @@ glm::fvec3 Utils::applyTransformationToNormal(const glm::fvec3 vec, glm::fmat4x4
 	return normal;
 }
 
+float Utils::getDegreeBetweenTwoVectors(const glm::fvec3 vec1, const glm::fvec3 vec2)
+{
+	glm::fvec3 v1 = glm::normalize(vec1);
+	glm::fvec3 v2 = glm::normalize(vec2);
+	
+	return glm::angle(v1, v2);
+}
+
+glm::fvec3 Utils::twoVectorsComponentMulti(const glm::fvec3 vec1, const glm::fvec3 vec2)
+{
+	glm::fvec3 v = glm::fvec3(0, 0, 0);
+
+	v.x = vec1.x * vec2.x;
+	v.x = vec1.y * vec2.y;
+	v.x = vec1.z * vec2.z;
+	return v;
+}
+
 
 glm::fvec3 Utils::Homogeneous2Euclidean(const glm::fvec4 vec)
 {

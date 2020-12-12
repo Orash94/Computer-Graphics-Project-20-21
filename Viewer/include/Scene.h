@@ -54,6 +54,8 @@ public:
 	void clearCameras();
 	void clearModels();
 	void ClearLights();
+
+	glm::fvec3 backgroundColor = glm::fvec3(0.8f, 0.8f, 0.8f);
 private:
 	std::vector<std::shared_ptr<MeshModel>> mesh_models_;
 	std::vector<std::shared_ptr<Camera>> cameras_;

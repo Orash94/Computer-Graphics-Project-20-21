@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include <string>
 #include "MeshModel.h"
 #include <memory>
@@ -31,5 +32,7 @@ public:
 	static glm::fvec3 applyTransformationToVector(const glm::fvec3 vec , glm::fmat4x4& mat);
 	static glm::fvec3 applyTransformationToNormal(const glm::fvec3 vec, glm::fmat4x4& mat);
 
+	static float getDegreeBetweenTwoVectors(const glm::fvec3 vec1, const glm::fvec3 vec2);
+	static glm::fvec3 twoVectorsComponentMulti(const glm::fvec3 vec1, const glm::fvec3 vec2);
 	static void resetMatrix(glm::fmat4x4& mat);
 };
