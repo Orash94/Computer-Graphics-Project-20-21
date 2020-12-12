@@ -2,7 +2,7 @@
 
 Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_):MeshModel(mesh)
 {
-
+	type = MeshModel::modelType::Camera;
 	eye = eye_;
 	at = at_;
 	up = up_;
@@ -22,7 +22,6 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 
 	lookAtOrTransformation = true;
 	OrthographicOrPerspective = true;
-	
 	setCameraDirection();
 	SetPerspectiveData(_near, _far, fovy, aspectRatio);
 	SetViewVolumeCoordinates(right, left, top, bottom, _near, _far);

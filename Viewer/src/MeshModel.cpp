@@ -143,7 +143,7 @@ glm::vec3 MeshModel::getTranslate()
 	return Translate;
 }
 
-glm::fmat4x4 MeshModel::getObjectTransformation()
+glm::fmat4x4 MeshModel::getObjectTransformation() const
 {
 	return ObjectTransformation;
 }
@@ -163,7 +163,7 @@ glm::vec3 MeshModel::getWorldTranslate()
 	return WorldTranslate;
 }
 
-glm::fmat4x4 MeshModel::getWorldTransformation()
+glm::fmat4x4 MeshModel::getWorldTransformation() const
 {
 	return WorldTransformation;
 }
@@ -333,7 +333,6 @@ void MeshModel::setFrame(glm::fvec3 center, glm::fmat3x3 CoordinateSystem)
 
 void MeshModel::updateFrame( glm::fmat4x4 transform)
 {
-	center = Utils::applyTransformationToVector(center, transform);
 
 	glm::fvec3 v0 = Utils::applyTransformationToVector(glm::fvec3(1.0f,0.0f,0.0f) , transform);
 	glm::fvec3 v1 = Utils::applyTransformationToVector(glm::fvec3(0.0f,1.0f, 0.0f), transform);
@@ -342,9 +341,10 @@ void MeshModel::updateFrame( glm::fmat4x4 transform)
 	CoordinateSystem = glm::fmat3x3(v0, v1, v2);
 }
 
-const glm::vec3& MeshModel::getCenter()
+const glm::vec3& MeshModel::getCenter() const
 {
-	return center;
+	glm::fmat4x4 transformationMatrix = glm::inverse(getWorldTransformation()) * getObjectTransformation();
+	return Utils::applyTransformationToVector(center , transformationMatrix);
 }
 
 const glm::fmat3x3& MeshModel::getCoordinateSystem()

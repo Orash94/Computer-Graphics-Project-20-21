@@ -2,7 +2,7 @@
 
 Light::Light(MeshModel& mesh):MeshModel(mesh)
 {
-	
+	type = MeshModel::modelType::Light;
 }
 
 Light::~Light()
@@ -45,7 +45,7 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 	return Is;
 }
 
-glm::fvec3 Light::calculateColor(MeshModel& mesh, glm::fvec3 Normal, glm::fvec3 MeshPoint, glm::fvec3 modelcenter,  glm::fvec3 lightcenter, glm::fvec3 cameraCenter, float Alpha )
+glm::fvec3 Light::calculateColor(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
 {
 	
 	glm::fvec3 Ia = calculateAmbient(mesh.ambientColor, ambientColor);

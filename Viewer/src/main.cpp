@@ -241,6 +241,23 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 
 		if (ImGui::BeginMenu("Add"))
 		{
+			if (ImGui::MenuItem("Add Object", "CTRL+O"))
+			{
+				nfdchar_t* outPath = NULL;
+				nfdresult_t result = NFD_OpenDialog("obj;", NULL, &outPath);
+				if (result == NFD_OKAY)
+				{
+					scene.AddModel(Utils::LoadMeshModel(outPath));
+					free(outPath);
+				}
+				else if (result == NFD_CANCEL)
+				{
+				}
+				else
+				{
+				}
+
+			}
 			if (ImGui::MenuItem("Add Camera", "CTRL+C"))
 			{
 				scene.AddCamera(MakeCamera());
@@ -250,6 +267,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			{
 				scene.AddLight(MakeLight());
 			}
+			
 			ImGui::EndMenu();
 		}
 
@@ -691,6 +709,28 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						ImGui::TreePop();
 					}
 
+					if (ImGui::TreeNode("Shading options:")) {
+						
+						static int shadingType = -1;
+						if (ImGui::Selectable("flat shading", shadingType == 0)) {
+							model1.shadingType = MeshModel::shadingType::Flat;
+							shadingType = 0;
+						};
+						if (ImGui::Selectable("gauraud shading", shadingType == 1)) {
+							model1.shadingType = MeshModel::shadingType::Gauraud;
+							shadingType = 1;
+						};
+						if (ImGui::Selectable("phong shading", shadingType == 2)) {
+							model1.shadingType = MeshModel::shadingType::Phong;
+							shadingType = 2;
+						};
+						if (ImGui::Selectable("none", shadingType == 3)) {
+							model1.shadingType = MeshModel::shadingType::None;
+							shadingType = 3;
+						};
+						ImGui::TreePop();
+					}
+
 					float MaxNormalLenthg = glm::min(windowsHeight, windowsWidth)/2;
 
 					ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
@@ -754,6 +794,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					ImGui::TreePop();
 				}
 				if (light_selected != -1 && scene.GetLightCount() != 0) {
+
 					ImGui::Checkbox("Power ", &scene.GetActiveLight().power);
 					ImGui::SameLine();
 					if (scene.GetActiveLight().power) {
@@ -762,6 +803,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					else {
 						ImGui::Text(" OFF");
 					}
+
 					if (ImGui::Button("delete")) {
 						light_selected = -1;
 						scene.deleteActiveLight();

@@ -90,18 +90,10 @@ void Renderer::plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& col
 	int y = y0;
 
 	for (int x = x0;x <= x1; x++) {
-		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
-		float insideX = x;
-		if (insideX == 0)
-		{
-			insideX += 0.00001;
-		}
-		float alpha = p1[0] / insideX;
-		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-		float z = p4[2];*/
+		
 		glm::vec2 temp = glm::vec2(x, y);
 		float tempDist1= glm::distance(v1, temp);
-		float tempDist2 = glm::distance( temp, v2);
+		float tempDist2 = glm::distance( v2, temp);
 		float normalDist1 = tempDist1 / totaldist;
 		float normalDist2 = tempDist2 / totaldist;
 		float z = normalDist1 * p1.z + normalDist2 * p2.z;
@@ -137,16 +129,7 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	int x = x0;
 
 	for (int y = y0; y <= y1; y++) {
-		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
-		float insideX = x;
-		if (insideX == 0)
-		{
-			insideX += 0.00001;
-		}
-		float alpha = p1[0] / insideX;
-		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-		float z = p4[2];*/
-
+		
 		glm::vec2 temp = glm::vec2(x, y);
 		float tempDist1 = glm::distance(v1, temp);
 		float tempDist2 = glm::distance(temp, v2);
@@ -165,12 +148,34 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	}
 }
 
-void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color)
+void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color ,const  MeshModel& mesh, const Scene& scene ,const Face& face)
 {
+	
+
+
+	//here we need to distinguise between the three types of shading
+
+	if (mesh.type == MeshModel::modelType::Light) {
+		ScanConversionTriangle(v1, v2, v3, color);
+	}
+	else {
+		if (mesh.shadingType == MeshModel::shadingType::Flat) {
+			ScanConversionTriangleFlatShading(v1, v2, v3, mesh , scene , face);
+		}
+		else if (mesh.shadingType == MeshModel::shadingType::Gauraud) {
+			ScanConversionTriangleGouraudShading(v1, v2, v3, mesh, scene , face);
+		}
+		else if (mesh.shadingType == MeshModel::shadingType::Phong) {
+			ScanConversionTrianglePhongShading(v1, v2, v3, mesh, scene , face);
+		}
+		else if (mesh.shadingType == MeshModel::shadingType::None) {
+			ScanConversionTriangle(v1, v2, v3, color);
+		}
+	}
 	DrawLine(v1, v2, glm::vec3(0, 0, 0));
 	DrawLine(v2, v3, glm::vec3(0, 0, 0));
 	DrawLine(v1, v3, glm::vec3(0, 0, 0));
-	ScanConversionTriangle(v1, v2, v3, color);
+	
 }
 
 void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x4 trasformation , const glm::vec3& color)
@@ -242,10 +247,9 @@ void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
 			if (isInsideTheTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, i, j))
-				//if (Zbuffer[i][j] >= ZpointComputation(p1, p2, p3, glm::vec2(i, j))) {
+				
 				PutPixel(i, j, ZpointComputation(p1, p2, p3, glm::vec2(i, j)), color);
-			//	Zbuffer[i][j] = ZpointComputation(p1, p2, p3, glm::vec2(i, j));
-			//}
+			
 		}
 
 	}
@@ -364,6 +368,45 @@ float Renderer::area(int x1, int y1, int x2, int y2, int x3, int y3)
 
 	return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
 
+}
+
+void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
+{
+	float minX = getMin(v1.x, v2.x, v3.x);
+	float maxX = getMax(v1.x, v2.x, v3.x);
+	float minY = getMin(v1.y, v2.y, v3.y);
+	float maxY = getMax(v1.y, v2.y, v3.y);
+
+	glm::fvec3 triangleCenter = (v1 + v2 + v3) / 3.0f;
+	glm::fvec3 color = glm::fvec3(1, 1, 1);
+	for (int k = 0; k < scene.GetLightCount(); k++) {
+		Light light = scene.GetLight(k);
+		if (scene.GetCamOrWorldView()) {
+			//camera view
+			color = light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+		}
+		else {
+			//world view
+			color = light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), glm::fvec3(0,0,-1000.0f), light.alpha);
+		}
+	}
+
+	for (int i = minX; i < maxX; i++) {
+		for (int j = minY; j < maxY; j++) {
+			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
+			}
+		}
+
+	}
+}
+
+void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
+{
+}
+
+void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
+{
 }
 
 glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 trasformation, const glm::vec3& color)
@@ -631,7 +674,7 @@ void Renderer::Render(const Scene& scene)
 				
 				
 
-				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor());
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor(), mesh , scene , face);
 			}
 
 			//call function 
@@ -671,6 +714,17 @@ void Renderer::Render(const Scene& scene)
 
 			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
 
+			if (scene.GetCamOrWorldView())  // rendering the active camera view
+			{
+				Camera& currentCam = scene.GetActiveCamera();
+				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+				glm::fmat4x4 viewVolumeTransformation;
+
+				viewVolumeTransformation = currentCam.GetViewTransformation();
+				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+				finalTransformation = CameraTransformation * finalTransformation;
+			}
+
 			std::vector<Face> faces = tempCam.getFaces();
 
 			for (int j = 0; j < tempCam.GetFacesCount(); j++)
@@ -685,7 +739,7 @@ void Renderer::Render(const Scene& scene)
 					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
 				}
 
-				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(0.5f, 0.5f, 0.5f) , tempCam, scene , face);
 
 			}
 		}
@@ -702,7 +756,20 @@ void Renderer::Render(const Scene& scene)
 
 			glm::fmat4x4 transformationMatrix = glm::inverse(tempLight.getWorldTransformation())* tempLight.getObjectTransformation();
 
-			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
+			glm::fmat4x4 finalTransformation = transformationMatrix * scale;
+
+			if (scene.GetCamOrWorldView())  // rendering the active camera view
+			{
+				Camera& currentCam = scene.GetActiveCamera();
+				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+				glm::fmat4x4 viewVolumeTransformation;
+
+				viewVolumeTransformation = currentCam.GetViewTransformation();
+				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+				finalTransformation = CameraTransformation * finalTransformation;
+			}
+
+			finalTransformation = translate * finalTransformation;
 
 			std::vector<Face> faces = tempLight.getFaces();
 
@@ -718,7 +785,7 @@ void Renderer::Render(const Scene& scene)
 					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
 				}
 
-				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 1, 1) , tempLight, scene , face);
 
 			}
 		}

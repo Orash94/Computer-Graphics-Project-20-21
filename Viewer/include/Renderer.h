@@ -21,7 +21,7 @@ private:
 	void DrawLine(const glm::fvec3& p1, const glm::fvec3& p2, const glm::vec3& color);
 	void plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& color, glm::vec3 p1, glm::vec3 p2);
 	void plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& color, glm::vec3 p1, glm::vec3 p2);
-	void DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color);
+	void DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color, const MeshModel& mesh, const Scene& scene, const Face& face);
 	void allocateZBuffer();
 	void DrawBoundingBox(MeshModel& model , const Scene& scene , glm::fmat4x4 trasformation , const glm::vec3& color);
 	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation  , const glm::vec3& color);
@@ -38,6 +38,10 @@ private:
 	glm::vec3 getDirectionVector(glm::vec3 v1, glm::vec3 v2);
 	float ZpointComputation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 insidePoint);
 	float area(int x1, int y1, int x2, int y2, int x3, int y3);
+
+	void ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh ,  const Scene& scene , const Face& face);
+	void ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
+	void ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
 
 	float* color_buffer_;
 	int viewport_width_;
