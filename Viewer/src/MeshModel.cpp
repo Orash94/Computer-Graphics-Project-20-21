@@ -13,10 +13,10 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 	ObjectTransformation = Utils::getIdMat();
 	WorldTransformation = Utils::getIdMat();
 
-	color = glm::vec3(1, 0, 0);
-	ambientColor = glm::vec3(0, 0, 0);;
-	diffuseColor = glm::vec3(1, 1, 1);;
-	specularColor = glm::vec3(1, 1, 0);
+	color = glm::vec3(1, 1, 1);
+	ambientColor = glm::vec3(0, 0, 0);
+	diffuseColor = glm::vec3(0, 0, 0);
+	specularColor = glm::vec3(0, 0, 0);
 
 
 	setModelInMiddle();
@@ -118,7 +118,7 @@ std::vector<glm::vec3> MeshModel::getVerticesNormals()
 	return verticesNormals_;
 }
 
-std::vector<glm::vec3> MeshModel::getVerticesNormalsPerFace()
+std::vector<glm::vec3> MeshModel::getVerticesNormalsPerFace() const
 {
 	return normals_;
 }
@@ -166,6 +166,11 @@ glm::vec3 MeshModel::getWorldTranslate()
 glm::fmat4x4 MeshModel::getWorldTransformation() const
 {
 	return WorldTransformation;
+}
+
+glm::fmat4x4 MeshModel::getTransformation() const
+{
+	return glm::inverse(getWorldTransformation()) * getObjectTransformation();
 }
 
 
@@ -343,7 +348,7 @@ void MeshModel::updateFrame( glm::fmat4x4 transform)
 
 const glm::vec3& MeshModel::getCenter() const
 {
-	glm::fmat4x4 transformationMatrix = glm::inverse(getWorldTransformation()) * getObjectTransformation();
+	glm::fmat4x4 transformationMatrix = getTransformation();
 	return Utils::applyTransformationToVector(center , transformationMatrix);
 }
 

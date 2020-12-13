@@ -1,8 +1,9 @@
 #include "Light.h"
 
-Light::Light(MeshModel& mesh):MeshModel(mesh)
+Light::Light(MeshModel& mesh, lightType typeLights):MeshModel(mesh)
 {
-	type = MeshModel::modelType::Light;
+	modelType = MeshModel::modelType::Light;
+	typeOfLight = typeLights;
 }
 
 Light::~Light()
@@ -36,24 +37,32 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 	glm::fvec3 lightDirection = lightcenter - MeshPoint;
 	glm::fvec3 CameraDirection = cameraCenter - MeshPoint;
 
-	glm::fvec3 B = glm::dot(lightDirection, Normal) * glm::normalize(Normal) - lightDirection;
-	glm::fvec3 r = lightDirection + 2.0f * B;
+	glm::fvec3 B = glm::dot(lightDirection, Normal) * glm::normalize(Normal) - lightcenter;
+	glm::fvec3 reflection = lightDirection + 2.0f * B;
 
-	float degree = pow((Utils::getDegreeBetweenTwoVectors(r, CameraDirection)) , Alpha);
-	Is = Is * degree;
+	float degree = Utils::getDegreeBetweenTwoVectors(reflection, CameraDirection);
+	degree = glm::cos(degree);
+	float power = pow(degree, Alpha);
+	Is = Is * power;
 
 	return Is;
 }
 
 glm::fvec3 Light::calculateColor(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
 {
-	
-	glm::fvec3 Ia = calculateAmbient(mesh.ambientColor, ambientColor);
-	glm::fvec3 Id = calculateDiffuse(mesh.diffuseColor, diffuseColor, Normal, lightcenter, modelcenter);
-	glm::fvec3 Is = calculateSpecular(mesh.specularColor, specularColor, Normal, MeshPoint, lightcenter, cameraCenter , Alpha );
-	glm::fvec3 I = Ia + Id + Is;
+	if (typeOfLight == Light::lightType::Parallel) {
+		glm::fvec3 Id = calculateDiffuse(mesh.diffuseColor, diffuseColor, Normal, lightcenter, modelcenter);
+		return Id;
+	}
+	else if (typeOfLight == Light::lightType::Point) {
+		glm::fvec3 Ia = calculateAmbient(mesh.ambientColor, ambientColor);
+		glm::fvec3 Is = calculateSpecular(mesh.specularColor, specularColor, Normal, MeshPoint, lightcenter, cameraCenter, Alpha);
 
-	return I;
+		glm::fvec3 I = Ia + Is;
+
+		return I;
+	}
+	
 }
 
 

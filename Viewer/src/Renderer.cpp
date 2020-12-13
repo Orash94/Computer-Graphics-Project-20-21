@@ -155,7 +155,7 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 
 	//here we need to distinguise between the three types of shading
 
-	if (mesh.type == MeshModel::modelType::Light) {
+	if (mesh.modelType == MeshModel::modelType::Light) {
 		ScanConversionTriangle(v1, v2, v3, color);
 	}
 	else {
@@ -316,50 +316,10 @@ glm::vec3 Renderer::getDirectionVector(glm::vec3 v1, glm::vec3 v2)
 
 float Renderer::ZpointComputation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 insidePoint)
 {
-	/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
-	float insideX = insidePoint[0];
-	if (insideX == 0)
-	{
-		insideX += 0.00001;
-	}
-	float alpha = p1[0] / insideX;
-	glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-	float z4 = p4[2];
+	
+	glm::fvec3 weights = Utils::triangleInterpolation(p1, p2, p3, insidePoint);
 
-	glm::vec3 v1v3DirectionVector = getDirectionVector(p1, p3);
-
-	alpha = p1[0] / insideX;
-	glm::vec3 p5 = p1 + glm::vec3(v1v3DirectionVector[0] * alpha, v1v3DirectionVector[1] * alpha, v1v3DirectionVector[2] * alpha);
-	float z5 = p5[2];
-
-	glm::vec3 v4v5DirectionVector = getDirectionVector(p4, p5);
-	alpha = p4[0] / insideX;
-	glm::vec3 p = p4 + glm::vec3(alpha * v4v5DirectionVector[0], alpha * v4v5DirectionVector[1], alpha * v4v5DirectionVector[2]);
-	float z = p[2];
-
-
-	return z;*/
-
-
-	float top1 = (p2.y - p3.y) * (insidePoint.x - p3.x) + (p3.x - p2.x) * (insidePoint.y - p3.y);
-	float bottom1 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
-	if (bottom1 == 0)
-	{
-		bottom1 += 0.00000000000000001;
-	}
-	float w1 = top1 / bottom1;
-
-	float top2 = (p3.y - p1.y) * (insidePoint.x - p3.x) + (p1.x - p3.x) * (insidePoint.y - p3.y);
-	float bottom2 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
-	if (bottom2 == 0)
-	{
-		bottom2 += 0.00000000000000001;
-	}
-
-	float w2 = top2 / bottom2;
-	float w3 = 1 - w1 - w2;
-
-	float z = p1.z * w1 + p2.z * w2 + p3.z * w3;
+	float z = p1.z * weights[0] + p2.z * weights[1] + p3.z * weights[2];
 	return z;
 }
 
@@ -372,24 +332,28 @@ float Renderer::area(int x1, int y1, int x2, int y2, int x3, int y3)
 
 void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
+	
+	
+
+	glm::fvec3 triangleCenter = (v1 + v2 + v3) / 3.0f;
+	glm::fvec3 color = glm::fvec3(0, 0, 0);
+	for (int k = 0; k < scene.GetLightCount(); k++) {
+		Light light = scene.GetLight(k);
+		if (scene.GetCamOrWorldView()) {
+
+			//camera view
+			color += light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+		}
+		else {
+			//world view
+			color += light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), glm::fvec3(0,0,-1000.0f), light.alpha);
+		}
+	}
+
 	float minX = getMin(v1.x, v2.x, v3.x);
 	float maxX = getMax(v1.x, v2.x, v3.x);
 	float minY = getMin(v1.y, v2.y, v3.y);
 	float maxY = getMax(v1.y, v2.y, v3.y);
-
-	glm::fvec3 triangleCenter = (v1 + v2 + v3) / 3.0f;
-	glm::fvec3 color = glm::fvec3(1, 1, 1);
-	for (int k = 0; k < scene.GetLightCount(); k++) {
-		Light light = scene.GetLight(k);
-		if (scene.GetCamOrWorldView()) {
-			//camera view
-			color = light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
-		}
-		else {
-			//world view
-			color = light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), glm::fvec3(0,0,-1000.0f), light.alpha);
-		}
-	}
 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
@@ -403,10 +367,110 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 
 void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
+
+	std::vector<glm::vec3>  normals  = mesh.getVerticesNormalsPerFace();
+	glm::fmat4x4 transformation = mesh.getTransformation();
+
+
+
+	glm::fvec3 normalTransformation[3];
+	glm::fvec3 vertices[3] = {v1, v2, v3};
+	glm::fvec3 verticesColor[3];
+
+	for (int k = 0; k < 3; k++) {
+		int normalIndex = face.GetNormalIndex(k) - 1;
+		glm::vec3 normal = normals[normalIndex];
+		normal = Utils::applyTransformationToNormal(normal, transformation);
+		normalTransformation[k] = normal;
+	}
+
+	for (int k = 0; k < 3; k++) {
+		glm::fvec3 color = glm::fvec3(0, 0, 0);
+		for (int k = 0; k < scene.GetLightCount(); k++) {
+			Light light = scene.GetLight(k);
+			if (scene.GetCamOrWorldView()) {
+
+				//camera view
+				color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+			}
+			else {
+				//world view
+				color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), glm::fvec3(0, 0, -1000.0f), light.alpha);
+			}
+			verticesColor[k] = color;
+		}
+	}
+	
+
+
+	float minX = getMin(v1.x, v2.x, v3.x);
+	float maxX = getMax(v1.x, v2.x, v3.x);
+	float minY = getMin(v1.y, v2.y, v3.y);
+	float maxY = getMax(v1.y, v2.y, v3.y);
+
+	for (int i = minX; i < maxX; i++) {
+		for (int j = minY; j < maxY; j++) {
+			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+
+				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i,j));
+				glm::fvec3 color = weights[0]* verticesColor[0] + weights[1] * verticesColor[1] + weights[2] * verticesColor[2];
+				
+				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
+			}
+		}
+
+	}
 }
 
 void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
+	std::vector<glm::vec3>  normals = mesh.getVerticesNormalsPerFace();
+	glm::fmat4x4 transformation = mesh.getTransformation();
+
+
+
+	glm::fvec3 normalTransformation[3];
+	glm::fvec3 vertices[3] = { v1, v2, v3 };
+
+	for (int k = 0; k < 3; k++) {
+		int normalIndex = face.GetNormalIndex(k) - 1;
+		glm::vec3 normal = normals[normalIndex];
+		normal = Utils::applyTransformationToNormal(normal, transformation);
+		normalTransformation[k] = normal;
+	}
+
+	float minX = getMin(v1.x, v2.x, v3.x);
+	float maxX = getMax(v1.x, v2.x, v3.x);
+	float minY = getMin(v1.y, v2.y, v3.y);
+	float maxY = getMax(v1.y, v2.y, v3.y);
+
+	for (int i = minX; i < maxX; i++) {
+		for (int j = minY; j < maxY; j++) {
+			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+
+				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i, j));
+				glm::fvec3 pointNormal  = weights[0] * normalTransformation[0] + weights[1] * normalTransformation[1] + weights[2] * normalTransformation[2];
+				float pointZAxis = weights[0] * v1[2] + weights[1] * v2[2] + weights[2] * v3[2];
+
+				glm::fvec3 color = glm::fvec3(0, 0, 0);
+				for (int k = 0; k < scene.GetLightCount(); k++) {
+					Light light = scene.GetLight(k);
+					if (scene.GetCamOrWorldView()) {
+
+						//camera view
+						color += light.calculateColor(mesh, pointNormal, glm::fvec3(i,j,pointZAxis ), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+					}
+					else {
+						//world view
+						color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, pointZAxis), mesh.getCenter(), light.getCenter(), glm::fvec3(0, 0, -1000.0f), light.alpha);
+					}
+				}
+
+				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
+			}
+		}
+
+	}
 }
 
 glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 trasformation, const glm::vec3& color)
@@ -629,7 +693,7 @@ void Renderer::Render(const Scene& scene)
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
-			glm::fmat4x4 transformationMatrix = glm::inverse(mesh.getWorldTransformation()) * mesh.getObjectTransformation();
+			glm::fmat4x4 transformationMatrix = mesh.getTransformation();
 
 
 			glm::fmat4x4 finalTransformation =   transformationMatrix * scale   ;
@@ -706,7 +770,7 @@ void Renderer::Render(const Scene& scene)
 
 			//check if we are using LookAt or Transformation
 			if (tempCam.GetLookAtOrTransformation() == true) {
-				 transformationMatrix = glm::inverse(tempCam.getWorldTransformation()) * tempCam.getObjectTransformation();
+				 transformationMatrix = tempCam.getTransformation();
 			}
 			else {
 				transformationMatrix =  glm::inverse(glm::lookAt(tempCam.getEye(), tempCam.getAt(), tempCam.getUp()));
@@ -754,7 +818,7 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
 
-			glm::fmat4x4 transformationMatrix = glm::inverse(tempLight.getWorldTransformation())* tempLight.getObjectTransformation();
+			glm::fmat4x4 transformationMatrix = tempLight.getTransformation();
 
 			glm::fmat4x4 finalTransformation = transformationMatrix * scale;
 

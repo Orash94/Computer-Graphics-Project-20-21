@@ -2,7 +2,7 @@
 
 Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_):MeshModel(mesh)
 {
-	type = MeshModel::modelType::Camera;
+	modelType = MeshModel::modelType::Camera;
 	eye = eye_;
 	at = at_;
 	up = up_;
@@ -98,7 +98,7 @@ bool Camera::GetProjection() const
 void Camera::updateLookAt()
 {
 	if (lookAtOrTransformation == true) {
-		glm::fmat4x4 transformation = glm::inverse(getWorldTransformation()) * getObjectTransformation();
+		glm::fmat4x4 transformation = getTransformation();
 		//up is treated as normal
 		up = Utils::applyTransformationToNormal(glm::vec3(0, 1, 0), transformation);
 		at = Utils::applyTransformationToVector(glm::vec3(0, 0, -1), transformation);

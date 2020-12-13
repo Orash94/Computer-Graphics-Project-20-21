@@ -36,7 +36,8 @@ void Cleanup(GLFWwindow* window);
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
 void ChangeFrameSize(int width, int height, Renderer& renderer);
 std::shared_ptr<Camera> MakeCamera();
-std::shared_ptr<Light> MakeLight();
+std::shared_ptr<Light> MakePointLight();
+std::shared_ptr<Light> MakeParallelLight();
 /**
  * Function implementation
  */
@@ -196,10 +197,16 @@ std::shared_ptr<Camera> MakeCamera() {
 	return std::make_shared<Camera>(mesh, nEye, nAt, nUp);
 }
 
-std::shared_ptr<Light> MakeLight()
+std::shared_ptr<Light> MakePointLight()
 {
 	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/demo.obj")));
-	return std::make_shared<Light>(mesh);
+	return std::make_shared<Light>(mesh , Light::lightType::Point);
+}
+
+std::shared_ptr<Light> MakeParallelLight()
+{
+	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/cube.obj")));
+	return std::make_shared<Light>(mesh , Light::lightType::Parallel);
 }
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
@@ -263,10 +270,19 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				scene.AddCamera(MakeCamera());
 
 			}
-			if (ImGui::MenuItem("Add Light", "CTRL+L"))
+			if (ImGui::BeginMenu("Add Light"))
 			{
-				scene.AddLight(MakeLight());
+				if (ImGui::MenuItem("point light source", "CTRL+P"))
+				{
+					scene.AddLight(MakePointLight());
+				}
+				if (ImGui::MenuItem("parallel light source", "CTRL+L"))
+				{
+					scene.AddLight(MakeParallelLight());
+				}
+				ImGui::EndMenu();
 			}
+			
 			
 			ImGui::EndMenu();
 		}
@@ -811,7 +827,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 				if (light_selected != -1 && scene.GetLightCount() != 0) {
 					MeshModel& model1 = scene.GetActiveLight();
-					if (ImGui::TreeNode("light Transformation"))
+					if (ImGui::TreeNode("model Transformation"))
 					{
 
 						glm::vec3 Rotate = model1.getRotate();
@@ -863,18 +879,14 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						ImGui::TreePop();
 					}
 					if (ImGui::TreeNode("model color selection:")) {
-						glm::vec3 currMeshColor = model1.GetColor();
-						float Color[3] = { currMeshColor[0], currMeshColor[1],currMeshColor[2] };
-						ImGui::ColorEdit3("choose color", (float*)&Color);
 
-						for (int i = 0; i < 3; i++) {
-							currMeshColor[i] = Color[i];
+						if (scene.GetActiveLight().typeOfLight == Light::lightType::Parallel) {
+							ImGui::ColorEdit3("diffuse color", (float*)&model1.diffuseColor);
 						}
-						model1.SetColor(currMeshColor);
-
-						ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
-						ImGui::ColorEdit3("diffuse color", (float*)&model1.diffuseColor);
-						ImGui::ColorEdit3("specular color", (float*)&model1.specularColor);
+						if (scene.GetActiveLight().typeOfLight == Light::lightType::Point) {
+							ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
+							ImGui::ColorEdit3("specular color", (float*)&model1.specularColor);
+						}
 						ImGui::TreePop();
 					}
 

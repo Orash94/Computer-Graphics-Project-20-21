@@ -35,4 +35,6 @@ public:
 	static float getDegreeBetweenTwoVectors(const glm::fvec3 vec1, const glm::fvec3 vec2);
 	static glm::fvec3 twoVectorsComponentMulti(const glm::fvec3 vec1, const glm::fvec3 vec2);
 	static void resetMatrix(glm::fmat4x4& mat);
+
+	static glm::fvec3 triangleInterpolation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 insidePoint);
 };

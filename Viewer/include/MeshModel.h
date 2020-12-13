@@ -25,7 +25,7 @@ public:
 	std::vector<glm::vec3> getFacesNormals();
 	std::vector<glm::vec3> getFacesCenters();
 	std::vector<glm::vec3> getVerticesNormals();
-	std::vector<glm::vec3> getVerticesNormalsPerFace();
+	std::vector<glm::vec3> getVerticesNormalsPerFace() const;
 
 	glm::vec3 getScale();
 	glm::vec3 getRotate();
@@ -37,6 +37,7 @@ public:
 	glm::vec3 getWorldTranslate();
 	glm::fmat4x4 getWorldTransformation() const;
 
+	glm::fmat4x4 getTransformation() const;
 
 	float getMaxDitancePoints();
 
@@ -55,6 +56,9 @@ public:
 	glm::vec3 GetColor()const;
 	const glm::vec3& getCenter() const;
 	const glm::fmat3x3& getCoordinateSystem();
+
+
+
 
 	bool displayBoundingBox = false;
 
@@ -81,7 +85,7 @@ public:
 	glm::vec3 specularColor;
 
 	shadingType shadingType = None;
-	modelType   type = Object;
+	modelType   modelType = Object;
 protected:
 	
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);

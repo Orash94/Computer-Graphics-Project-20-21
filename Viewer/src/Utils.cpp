@@ -262,8 +262,8 @@ glm::fvec3 Utils::twoVectorsComponentMulti(const glm::fvec3 vec1, const glm::fve
 	glm::fvec3 v = glm::fvec3(0, 0, 0);
 
 	v.x = vec1.x * vec2.x;
-	v.x = vec1.y * vec2.y;
-	v.x = vec1.z * vec2.z;
+	v.y = vec1.y * vec2.y;
+	v.z = vec1.z * vec2.z;
 	return v;
 }
 
@@ -295,4 +295,27 @@ void Utils::resetMatrix(glm::fmat4x4& mat)
 
 	mat = glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
 
+}
+
+glm::fvec3 Utils::triangleInterpolation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 insidePoint)
+{
+	float top1 = (p2.y - p3.y) * (insidePoint.x - p3.x) + (p3.x - p2.x) * (insidePoint.y - p3.y);
+	float bottom1 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+	if (bottom1 == 0)
+	{
+		bottom1 += 0.00000000000000001;
+	}
+	float w1 = top1 / bottom1;
+
+	float top2 = (p3.y - p1.y) * (insidePoint.x - p3.x) + (p1.x - p3.x) * (insidePoint.y - p3.y);
+	float bottom2 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+	if (bottom2 == 0)
+	{
+		bottom2 += 0.00000000000000001;
+	}
+
+	float w2 = top2 / bottom2;
+	float w3 = 1 - w1 - w2;
+
+	return glm::fvec3(w1,w2,w3);
 }
