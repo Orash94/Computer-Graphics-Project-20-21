@@ -333,20 +333,18 @@ float Renderer::area(int x1, int y1, int x2, int y2, int x3, int y3)
 void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
 	
-	
-
-	glm::fvec3 triangleCenter = (v1 + v2 + v3) / 3.0f;
+	glm::fvec3 tringlrCenter = (v1 + v2 + v3) / 3.0f;
 	glm::fvec3 color = glm::fvec3(0, 0, 0);
 	for (int k = 0; k < scene.GetLightCount(); k++) {
 		Light light = scene.GetLight(k);
-		if (scene.GetCamOrWorldView()) {
-
-			//camera view
-			color += light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+		color += light.calculateAmbient(mesh.ambientColor, light.ambientColor);
+		
+		if (light.typeOfLight == Light::lightType::Point && scene.GetCamOrWorldView()) {
+			color += light.calculateSpecular(mesh.specularColor, light.specularColor, face.getFaceNormal(), tringlrCenter, light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 		}
-		else {
-			//world view
-			color += light.calculateColor(mesh, face.getFaceNormal(), triangleCenter, mesh.getCenter(), light.getCenter(), glm::fvec3(0,0,-1000.0f), light.alpha);
+		if (light.typeOfLight == Light::lightType::Parallel) {
+			glm::fvec3 lightDirection = Utils::applyTransformationToNormal(light.direction, light.finalTransformation);
+			color += light.calculateDiffuse(mesh.diffuseColor, light.diffuseColor, face.getFaceNormal(), lightDirection);
 		}
 	}
 
@@ -482,16 +480,25 @@ glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 tra
 			vectorArray[k] = mesh.GetVertexAtIndex(index);
 		}
 
-		glm::fvec3 v0 = Utils::applyTransformationToVector(vectorArray[0], trasformation);
-		glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
-		glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
+		//glm::fvec3 v0 = Utils::applyTransformationToVector(vectorArray[0], trasformation);
+		//glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
+		//glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
 		
+		glm::fvec3 v0 = vectorArray[0];
+		glm::fvec3 v1 = vectorArray[1];
+		glm::fvec3 v2 = vectorArray[2];
+
 		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f; //center of face
+		ActualCenter = Utils::applyTransformationToVector(ActualCenter, trasformation);
+
 		glm::vec3 Actualnormal = glm::normalize(glm::cross((v1 - v0), (v2 - v0)));
 
-		glm::vec3 normalizedNormal = Actualnormal;
+		Actualnormal = Utils::applyTransformationToNormal(Actualnormal, trasformation);
 
+		glm::vec3 normalizedNormal = Actualnormal;
+		
 		Actualnormal = Actualnormal * mesh.FaceNormalsLength;
+
 		//face normals check
 		if (mesh.displayFaceNormals) {
 			DrawLine(ActualCenter, ActualCenter + Actualnormal, glm::fvec3(1, 1, 1));
@@ -711,13 +718,22 @@ void Renderer::Render(const Scene& scene)
 
 			//transfer objects to center screen with transalte transformation
 			finalTransformation = translate * finalTransformation;
+			mesh.finalTransformation = finalTransformation;
 			//bounding box check
+
 			if (mesh.displayBoundingBox) {
 				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));
 			}
 
 			std::vector<Face> faces = mesh.getFaces();
 
+			std::vector<glm::vec3> verticesTransformation;
+			for (int j = 0; j < mesh.GetVerticesCount(); j++)
+			{
+				verticesTransformation.push_back(Utils::applyTransformationToVector(mesh.GetVertexAtIndex(j), finalTransformation));
+			}
+
+			
 			//draw faces
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
@@ -728,8 +744,7 @@ void Renderer::Render(const Scene& scene)
 				//extract verices of face
 				for (int k = 0; k < 3; k++) {
 					int index = face.GetVertexIndex(k) - 1;
-					glm::vec3 v =mesh.GetVertexAtIndex(index);
-					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
+					vectorArray[k] = verticesTransformation[index];
 				}
 
 				
@@ -789,6 +804,7 @@ void Renderer::Render(const Scene& scene)
 				finalTransformation = CameraTransformation * finalTransformation;
 			}
 
+			tempCam.finalTransformation = finalTransformation;
 			std::vector<Face> faces = tempCam.getFaces();
 
 			for (int j = 0; j < tempCam.GetFacesCount(); j++)
@@ -813,7 +829,7 @@ void Renderer::Render(const Scene& scene)
 	if (scene.GetLightCount() > 0 ) {
 		for (int i = 0; i < scene.GetLightCount(); i++) {
 			Light& tempLight = scene.GetLight(i);
-			float proportion = 50.0f / tempLight.getMaxDitancePoints();
+			float proportion = 100.0f / tempLight.getMaxDitancePoints();
 
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
@@ -835,6 +851,7 @@ void Renderer::Render(const Scene& scene)
 
 			finalTransformation = translate * finalTransformation;
 
+			tempLight.finalTransformation = finalTransformation;
 			std::vector<Face> faces = tempLight.getFaces();
 
 			for (int j = 0; j < tempLight.GetFacesCount(); j++)

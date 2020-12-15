@@ -17,14 +17,17 @@ glm::fvec3 Light::calculateAmbient(glm::fvec3 MeshModelAmbientColor, glm::fvec3 
 	return Ia;
 }
 
-glm::fvec3 Light::calculateDiffuse(glm::fvec3 MeshModelDiffuseColor, glm::fvec3 LightDiffuseColor, glm::fvec3 Normal, glm::fvec3 lightcenter, glm::fvec3 modelcenter)
+glm::fvec3 Light::calculateDiffuse(glm::fvec3 MeshModelDiffuseColor, glm::fvec3 LightDiffuseColor, glm::fvec3 Normal , glm::fvec3 lightDirection)
 {
+	Normal = glm::normalize(Normal);
+	lightDirection = glm::normalize(lightDirection);
 
 	glm::fvec3 Id = Utils::twoVectorsComponentMulti(MeshModelDiffuseColor, LightDiffuseColor);
 
-	glm::fvec3 lightDirection = lightcenter - modelcenter;
-	float degree = Utils::getDegreeBetweenTwoVectors(lightDirection, Normal);
 
+	glm::fvec3 reflevtive = lightDirection - 2.0f * (glm::dot(lightDirection, Normal) * Normal);
+
+	float degree = Utils::getDegreeBetweenTwoVectors(Normal, glm::normalize(reflevtive));
 	Id  = Id * glm::cos(degree);
 
 	return Id;
@@ -34,11 +37,11 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 {
 	glm::fvec3 Is = Utils::twoVectorsComponentMulti(MeshModelSpecularColor, LightSpecularColor);
 
-	glm::fvec3 lightDirection = lightcenter - MeshPoint;
-	glm::fvec3 CameraDirection = cameraCenter - MeshPoint;
-
-	glm::fvec3 B = glm::dot(lightDirection, Normal) * glm::normalize(Normal) - lightcenter;
-	glm::fvec3 reflection = lightDirection + 2.0f * B;
+	glm::fvec3 lightDirection = glm::normalize(lightcenter - MeshPoint);
+	glm::fvec3 CameraDirection = glm::normalize(cameraCenter - MeshPoint);
+	glm::fvec3 faceNoraml = glm::normalize(Normal);
+	glm::fvec3 B = (glm::dot(lightDirection, faceNoraml) * faceNoraml) - lightDirection;
+	glm::fvec3 reflection = glm::normalize(lightDirection + 2.0f * B);
 
 	float degree = Utils::getDegreeBetweenTwoVectors(reflection, CameraDirection);
 	degree = glm::cos(degree);
@@ -50,19 +53,7 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 
 glm::fvec3 Light::calculateColor(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
 {
-	if (typeOfLight == Light::lightType::Parallel) {
-		glm::fvec3 Id = calculateDiffuse(mesh.diffuseColor, diffuseColor, Normal, lightcenter, modelcenter);
-		return Id;
-	}
-	else if (typeOfLight == Light::lightType::Point) {
-		glm::fvec3 Ia = calculateAmbient(mesh.ambientColor, ambientColor);
-		glm::fvec3 Is = calculateSpecular(mesh.specularColor, specularColor, Normal, MeshPoint, lightcenter, cameraCenter, Alpha);
-
-		glm::fvec3 I = Ia + Is;
-
-		return I;
-	}
-	
+	return glm::fvec3();
 }
 
 

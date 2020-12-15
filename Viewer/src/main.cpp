@@ -205,7 +205,7 @@ std::shared_ptr<Light> MakePointLight()
 
 std::shared_ptr<Light> MakeParallelLight()
 {
-	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/cube.obj")));
+	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/arrow.obj")));
 	return std::make_shared<Light>(mesh , Light::lightType::Parallel);
 }
 
@@ -294,9 +294,16 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	//// Controls
 	//ImGui::ColorEdit3("Clear ", (float*)&clear_color);
 	//// TODO: Add more controls as needed
-	if (scene.GetModelCount() != 0 && scene.GetCameraCount() != 0) {
+	static int camera_selected = -1;
+	static int model_selected = -1;
+	static int light_selected = -1;
+
+	if (scene.GetModelCount() != 0 ||  scene.GetCameraCount() != 0 || scene.GetLightCount() != 0) {
 		if (ImGui::Button("Clear Screen and selection")) {
 			scene.cleanupScene();
+			camera_selected = -1;
+			model_selected = -1;
+			light_selected = -1;
 		}
 	}
 	ImGui::Checkbox("Display Axis", &scene.showAxis);
@@ -329,7 +336,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			//---------------------------------Camera --------------------------
 			if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 			{
-				static int camera_selected = -1;
+				
 				if (scene.GetCameraCount() != 0) {
 					if (ImGui::Button("Clear Cameras")) {
 						camera_selected = -1;
@@ -571,7 +578,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		{
 			if (ImGui::CollapsingHeader("Models Actions", ImGuiTreeNodeFlags_None))
 			{
-				static int model_selected = -1;
+				
 				if (scene.GetModelCount() != 0) {
 					if (ImGui::Button("Clear Models")) {
 						model_selected = -1;
@@ -778,7 +785,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 		{
 			if (ImGui::CollapsingHeader("Light Actions", ImGuiTreeNodeFlags_None))
 			{
-				static int light_selected = -1;
+				
 				if (scene.GetLightCount() != 0) {
 					if (ImGui::Button("Clear Lights")) {
 						light_selected = -1;
@@ -843,6 +850,17 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 								Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 							}
 						}
+
+						if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
+						{
+							ImGui::SliderFloat("Rotate X", &Rotate[0], -180.0f, 180.0f);
+							ImGui::SliderFloat("Rotate Y", &Rotate[1], -180.0f, 180.0f);
+							ImGui::SliderFloat("Rotate Z", &Rotate[2], -180.0f, 180.0f);
+							if (ImGui::Button("Reset Rotating")) {
+								Rotate = glm::vec3(0.0f, 0.0f, 0.0f);
+							}
+						}
+
 						
 						model1.setObjectTransformationUpdates(scale, Rotate, Translate);
 						ImGui::TreePop();
@@ -881,6 +899,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					if (ImGui::TreeNode("model color selection:")) {
 
 						if (scene.GetActiveLight().typeOfLight == Light::lightType::Parallel) {
+							ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
 							ImGui::ColorEdit3("diffuse color", (float*)&model1.diffuseColor);
 						}
 						if (scene.GetActiveLight().typeOfLight == Light::lightType::Point) {
@@ -891,7 +910,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					}
 
 				}
-				if (light_selected != -1 && scene.GetLightCount() != 0) {
+				if (light_selected != -1 && scene.GetLightCount() != 0 && scene.GetActiveLight().typeOfLight == Light::lightType::Point) {
 					Light& Light = scene.GetActiveLight();
 					ImGui::SliderFloat("alpha", &Light.alpha, 0.1, 5.0f);
 				}

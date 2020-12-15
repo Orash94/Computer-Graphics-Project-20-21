@@ -261,9 +261,9 @@ glm::fvec3 Utils::twoVectorsComponentMulti(const glm::fvec3 vec1, const glm::fve
 {
 	glm::fvec3 v = glm::fvec3(0, 0, 0);
 
-	v.x = vec1.x * vec2.x;
-	v.y = vec1.y * vec2.y;
-	v.z = vec1.z * vec2.z;
+	v[0] = vec1[0] * vec2[0];
+	v[1] = vec1[1] * vec2[1];
+	v[2] = vec1[2] * vec2[2];
 	return v;
 }
 

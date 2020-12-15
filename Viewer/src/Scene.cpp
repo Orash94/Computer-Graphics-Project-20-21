@@ -117,6 +117,7 @@ void Scene::cleanupScene()
 {
 	mesh_models_.clear();
 	cameras_.clear();
+	Lights_.clear();
 }
 
 bool Scene::getShowAxis() const

@@ -86,6 +86,8 @@ public:
 
 	shadingType shadingType = None;
 	modelType   modelType = Object;
+	glm::fmat4x4 finalTransformation;
+
 protected:
 	
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
