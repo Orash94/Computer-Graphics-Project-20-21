@@ -172,9 +172,9 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 			ScanConversionTriangle(v1, v2, v3, color);
 		}
 	}
-	DrawLine(v1, v2, glm::vec3(0, 0, 0));
-	DrawLine(v2, v3, glm::vec3(0, 0, 0));
-	DrawLine(v1, v3, glm::vec3(0, 0, 0));
+	//DrawLine(v1, v2, glm::vec3(0, 0, 0));
+	//DrawLine(v2, v3, glm::vec3(0, 0, 0));
+	//DrawLine(v1, v3, glm::vec3(0, 0, 0));
 	
 }
 
@@ -367,12 +367,10 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 {
 
 	std::vector<glm::vec3>  normals  = mesh.getVerticesNormalsPerFace();
-	glm::fmat4x4 transformation = mesh.getTransformation();
+	glm::fmat4x4 transformation = mesh.finalTransformation;
 
-
-
+	glm::fvec3 vertices[3] = { v1, v2, v3 };
 	glm::fvec3 normalTransformation[3];
-	glm::fvec3 vertices[3] = {v1, v2, v3};
 	glm::fvec3 verticesColor[3];
 
 	for (int k = 0; k < 3; k++) {
@@ -386,17 +384,17 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 		glm::fvec3 color = glm::fvec3(0, 0, 0);
 		for (int k = 0; k < scene.GetLightCount(); k++) {
 			Light light = scene.GetLight(k);
-			if (scene.GetCamOrWorldView()) {
+			color += light.calculateAmbient(mesh.ambientColor, light.ambientColor);
 
-				//camera view
-				color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+			if (light.typeOfLight == Light::lightType::Point && scene.GetCamOrWorldView()) {
+				color += light.calculateSpecular(mesh.specularColor, light.specularColor, normalTransformation[k], vertices[k], light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 			}
-			else {
-				//world view
-				color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), glm::fvec3(0, 0, -1000.0f), light.alpha);
+			if (light.typeOfLight == Light::lightType::Parallel) {
+				glm::fvec3 lightDirection = Utils::applyTransformationToNormal(light.direction, light.finalTransformation);
+				color += light.calculateDiffuse(mesh.diffuseColor, light.diffuseColor, normalTransformation[k], lightDirection);
 			}
-			verticesColor[k] = color;
 		}
+		verticesColor[k] = color;
 	}
 	
 
@@ -448,19 +446,19 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 
 				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i, j));
 				glm::fvec3 pointNormal  = weights[0] * normalTransformation[0] + weights[1] * normalTransformation[1] + weights[2] * normalTransformation[2];
-				float pointZAxis = weights[0] * v1[2] + weights[1] * v2[2] + weights[2] * v3[2];
+				float z = weights[0] * v1[2] + weights[1] * v2[2] + weights[2] * v3[2];
 
 				glm::fvec3 color = glm::fvec3(0, 0, 0);
 				for (int k = 0; k < scene.GetLightCount(); k++) {
 					Light light = scene.GetLight(k);
-					if (scene.GetCamOrWorldView()) {
+					color += light.calculateAmbient(mesh.ambientColor, light.ambientColor);
 
-						//camera view
-						color += light.calculateColor(mesh, pointNormal, glm::fvec3(i,j,pointZAxis ), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+					if (light.typeOfLight == Light::lightType::Point && scene.GetCamOrWorldView()) {
+						color += light.calculateSpecular(mesh.specularColor, light.specularColor, pointNormal, glm::fvec3(i,j,z), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 					}
-					else {
-						//world view
-						color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, pointZAxis), mesh.getCenter(), light.getCenter(), glm::fvec3(0, 0, -1000.0f), light.alpha);
+					if (light.typeOfLight == Light::lightType::Parallel) {
+						glm::fvec3 lightDirection = Utils::applyTransformationToNormal(light.direction, light.finalTransformation);
+						color += light.calculateDiffuse(mesh.diffuseColor, light.diffuseColor, pointNormal, lightDirection);
 					}
 				}
 
