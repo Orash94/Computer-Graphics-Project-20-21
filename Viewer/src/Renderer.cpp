@@ -154,7 +154,6 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 
 
 	//here we need to distinguise between the three types of shading
-
 	if (mesh.modelType == MeshModel::modelType::Light) {
 		ScanConversionTriangle(v1, v2, v3, color);
 	}
