@@ -7,7 +7,7 @@
 class Renderer
 {
 public:
-	Renderer(int viewportWidth, int viewportHeight);
+	Renderer(int viewportWidth, int viewportHeight , Scene& scene_);
 	virtual ~Renderer();
 	void Render(const Scene& scene);
 	void SwapBuffers();
@@ -15,7 +15,9 @@ public:
 	int GetViewportWidth() const;
 	int GetViewportHeight() const;
 	void SetViewport(const int width, const int height);
-	
+
+	Scene& scene;
+
 private:
 	void PutPixel(const int i, const int j, const float z, const glm::vec3& color);
 	void DrawLine(const glm::fvec3& p1, const glm::fvec3& p2, const glm::vec3& color);
@@ -43,6 +45,7 @@ private:
 	void ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
 	void ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
 
+	
 	float* color_buffer_;
 	int viewport_width_;
 	int viewport_height_;

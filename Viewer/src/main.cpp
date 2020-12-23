@@ -36,6 +36,7 @@ void Cleanup(GLFWwindow* window);
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
 void ChangeFrameSize(int width, int height, Renderer& renderer);
 std::shared_ptr<Camera> MakeCamera();
+std::shared_ptr<Camera> MakeDefaultCamera();
 std::shared_ptr<Light> MakePointLight();
 std::shared_ptr<Light> MakeParallelLight();
 /**
@@ -58,8 +59,12 @@ int main(int argc, char **argv)
 	glfwMakeContextCurrent(window);
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 
-	Renderer renderer = Renderer(frameBufferWidth, frameBufferHeight);
 	Scene scene = Scene();
+	Renderer renderer = Renderer(frameBufferWidth, frameBufferHeight ,scene);
+
+	//setting up default camera
+	scene.AddCamera(MakeDefaultCamera());
+	scene.SetActiveCameraIndex(0);
 	
 	ImGuiIO& io = SetupDearImgui(window);
 	glfwSetScrollCallback(window, ScrollCallback);
@@ -157,7 +162,6 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 			// Left mouse button is down
 		}
 	}
-
 	renderer.ClearColorBuffer(scene.backgroundColor);
 	renderer.Render(scene);
 	renderer.SwapBuffers();
@@ -195,6 +199,22 @@ std::shared_ptr<Camera> MakeCamera() {
 	glm::vec3 nAt = glm::vec3(0, 0, -1);
 	glm::vec3 nUp = glm::vec3(0, 1, 0);
 	return std::make_shared<Camera>(mesh, nEye, nAt, nUp);
+}
+
+std::shared_ptr<Camera> MakeDefaultCamera()
+{
+	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/camera.obj")));
+	glm::vec3 nEye = glm::vec3(0, 0, 500);
+	glm::vec3 nAt = glm::vec3(0, 0, -1);
+	glm::vec3 nUp = glm::vec3(0, 1, 0);
+	auto cam = std::make_shared<Camera>(mesh, nEye, nAt, nUp);
+
+	glm::fvec3 scale = glm::fvec3(1,1,1);
+	glm::fvec3 Rotate = glm::fvec3(0, 0, 0);
+	glm::fvec3 Translate = glm::fvec3(0, 0, 500);
+
+	cam->setObjectTransformationUpdates(scale, Rotate, Translate);
+	return cam;
 }
 
 std::shared_ptr<Light> MakePointLight()
@@ -294,14 +314,14 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	//// Controls
 	//ImGui::ColorEdit3("Clear ", (float*)&clear_color);
 	//// TODO: Add more controls as needed
-	static int camera_selected = -1;
+	static int camera_selected = 0;
 	static int model_selected = -1;
 	static int light_selected = -1;
 
 	if (scene.GetModelCount() != 0 ||  scene.GetCameraCount() != 0 || scene.GetLightCount() != 0) {
 		if (ImGui::Button("Clear Screen and selection")) {
 			scene.cleanupScene();
-			camera_selected = -1;
+			camera_selected = 0;
 			model_selected = -1;
 			light_selected = -1;
 		}
@@ -323,6 +343,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 				if (ImGui::CollapsingHeader("Post Proccessing ", ImGuiTreeNodeFlags_None))
 				{
+					ImGui::Checkbox("Gray Scale", &scene.gaussianBlurring);
 					ImGui::Checkbox("Gaussian blurring", &scene.gaussianBlurring);
 					ImGui::Checkbox("Bloom", &scene.bloom);
 					ImGui::Checkbox("Fog effect", &scene.fogEffect);
@@ -337,12 +358,12 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 			{
 				
-				if (scene.GetCameraCount() != 0) {
+				/*if (scene.GetCameraCount() != 0) {
 					if (ImGui::Button("Clear Cameras")) {
-						camera_selected = -1;
+						camera_selected = 0;
 						scene.clearCameras();
 					}
-				}
+				}*/
 				if (ImGui::TreeNode("Active camera selection:"))
 				{
 
@@ -359,7 +380,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							// copying the contents of the
 							if (ImGui::Selectable(name.c_str(), camera_selected == n)) {
 								camera_selected = n;
-								scene.SetActiveCameraIndex(n);
+								//scene.SetActiveCameraIndex(n);
 							}
 					
 						
@@ -369,16 +390,23 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 
 		
-				if (camera_selected != -1 && scene.GetCameraCount() != 0) {
+				if (camera_selected != -1 && scene.GetCameraCount() != 0 && camera_selected != 0) {
 					if (ImGui::Button("delete")) {
-						camera_selected = -1;
+						camera_selected = 0;
 						scene.deleteActiveCamera();
 					}
 				}
 				if (camera_selected != -1 && scene.GetCameraCount() != 0) {
 		
-					Camera& cam = scene.GetActiveCamera();
-					if (!scene.GetCamOrWorldView()) {
+					Camera& cam = scene.GetCamera(camera_selected);
+
+					if (scene.GetActiveCameraIndex() != camera_selected) {
+						if (ImGui::Button("To Camera View")) {
+							scene.SetActiveCameraIndex(camera_selected);
+						}
+							
+					}
+					/*if (!scene.GetCamOrWorldView()) {
 						if (ImGui::Button("To Camera View"))
 							scene.SetCamOrWorldView(true);
 					}
@@ -386,12 +414,13 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					{
 						if (ImGui::Button("To World View"))
 							scene.SetCamOrWorldView(false);
-					}
+					}*/
 
-					static int update = 1;
+					static int update = 0;
 					ImGui::RadioButton("Transformation", &update, 1); ImGui::SameLine();
 					ImGui::RadioButton("Lookat", &update, 0);
-					scene.GetActiveCamera().setLookAtOrTransformation(update);
+
+					cam.setLookAtOrTransformation(update);
 					//scene.GetActiveCamera().SetCameraLookAt();
 					if (ImGui::TreeNode("Active camera params:"))
 					{
@@ -492,25 +521,22 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 
 							ImGui::SliderFloat(" :Near ", &nNear,0.1f, 200.0f);
 							ImGui::SliderFloat(" :Far ", &nFar, 200.1f, 500.0f);
-							ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.01f, 0.5f);
+							ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.001f, 0.5f);
 							ImGui::SliderFloat(" :Width", &nAspectRatio, 0.1f, 100.0f);
-							ImGui::SliderFloat("Zoom: ", &nZoom, 1.0f, 16.0f);
+							ImGui::SliderFloat("Zoom: ", &nZoom, 1.0f, 1000000.0f);
 							cam.SetZoom(nZoom);
 							cam.SetPerspectiveData(nNear, nFar, nFovy, nAspectRatio);
 						}
 
-						scene.GetActiveCamera().setProjection(Projection);
+						cam.setProjection(Projection);
 						ImGui::TreePop();
 					}
-				}
 
-				if (camera_selected != -1 && scene.GetCameraCount() != 0) {
-					Camera& camera = scene.GetActiveCamera();
 					if (ImGui::TreeNode("Camera model Transformation"))
 					{
-						glm::vec3 Rotate = camera.getRotate();
-						glm::vec3 Translate = camera.getTranslate();
-						glm::fvec3 scale = camera.getScale();
+						glm::vec3 Rotate = cam.getRotate();
+						glm::vec3 Translate = cam.getTranslate();
+						glm::fvec3 scale = cam.getScale();
 
 						if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 						{
@@ -531,7 +557,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							}
 						}
 
-						camera.setObjectTransformationUpdates(scale, Rotate, Translate);
+						cam.setObjectTransformationUpdates(scale, Rotate, Translate);
 						ImGui::TreePop();
 					}
 
@@ -539,8 +565,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					{
 
 
-						glm::vec3 worldRotate = camera.getWorldRotate();
-						glm::vec3 worldTranslate = camera.getWorldTranslate();
+						glm::vec3 worldRotate = cam.getWorldRotate();
+						glm::vec3 worldTranslate = cam.getWorldTranslate();
 
 						if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 						{
@@ -561,10 +587,10 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							}
 						}
 						glm::fvec3 worldScale = glm::fvec3(1.0f, 1.0f, 1.0f);
-						camera.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
+						cam.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 						ImGui::TreePop();
 					}
-					camera.updateLookAt();
+					cam.updateLookAt();
 
 
 				}
@@ -751,6 +777,13 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							model1.shadingType = MeshModel::shadingType::None;
 							shadingType = 3;
 						};
+						if (ImGui::Checkbox("Render Frame", &scene.renderFrame)) {
+							scene.renderStatus = 1;
+						}
+						else {
+							scene.renderStatus = 0;
+						}
+
 						ImGui::TreePop();
 					}
 

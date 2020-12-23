@@ -10,9 +10,10 @@
 #define INDEX(width,x,y,c) ((x)+(y)*(width))*3+(c)
 #define Z_INDEX(width,x,y) ((x)+(y)*(width))
 
-Renderer::Renderer(int viewport_width, int viewport_height) :
+Renderer::Renderer(int viewport_width, int viewport_height ,  Scene& scene_) :
 	viewport_width_(viewport_width),
-	viewport_height_(viewport_height)
+	viewport_height_(viewport_height),
+	scene(scene_)
 {
 	InitOpenGLRendering();
 	CreateBuffers(viewport_width, viewport_height);
@@ -29,8 +30,26 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 {
 	if (i < 0) return; if (i >= viewport_width_) return;
 	if (j < 0) return; if (j >= viewport_height_) return;
+
 	
-	if (Zbuffer[i][j] > z) {
+	
+	if (Zbuffer[i][j] > z ) {
+		/*if (scene.CamOrWorldView ) {
+			float CameraFar = scene.GetActiveCamera().GetFar();
+			float CameraNear = scene.GetActiveCamera().GetNear();
+			if (z>= CameraNear && z<=CameraFar) {
+				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+				Zbuffer[i][j] = z;
+			}
+		}
+		else {
+			color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+			color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+			Zbuffer[i][j] = z;
+		}*/
 		color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 		color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 		color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
@@ -171,9 +190,10 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 			ScanConversionTriangle(v1, v2, v3, color);
 		}
 	}
-	//DrawLine(v1, v2, glm::vec3(0, 0, 0));
-	//DrawLine(v2, v3, glm::vec3(0, 0, 0));
-	//DrawLine(v1, v3, glm::vec3(0, 0, 0));
+
+	DrawLine(v1, v2, glm::vec3(0, 0, 0));
+	DrawLine(v2, v3, glm::vec3(0, 0, 0));
+	DrawLine(v1, v3, glm::vec3(0, 0, 0));
 	
 }
 
@@ -675,6 +695,7 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 
 void Renderer::Render(const Scene& scene)
 {
+	
 	int windowsWidth = viewport_width_;
 	int windowsHeight = viewport_height_;
 
@@ -692,7 +713,7 @@ void Renderer::Render(const Scene& scene)
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel& mesh = scene.GetModel(i);
-			float proportion = 400.0f/mesh.getMaxDitancePoints();
+			float proportion = 200.0f/mesh.getMaxDitancePoints();
 
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
@@ -702,16 +723,15 @@ void Renderer::Render(const Scene& scene)
 
 			glm::fmat4x4 finalTransformation =   transformationMatrix * scale   ;
 
-			if (scene.GetCamOrWorldView())  // rendering the active camera view
-			{
-				Camera& currentCam = scene.GetActiveCamera();
-				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
-				glm::fmat4x4 viewVolumeTransformation;
+			//rendering active camera view
+			Camera& currentCam = scene.GetActiveCamera();
+			glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+			glm::fmat4x4 viewVolumeTransformation;
 
-				viewVolumeTransformation = currentCam.GetViewTransformation();
-				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
-				finalTransformation = CameraTransformation * finalTransformation;
-			}
+			viewVolumeTransformation = currentCam.GetViewTransformation();
+			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+			finalTransformation = CameraTransformation * finalTransformation;
+
 
 			//transfer objects to center screen with transalte transformation
 			finalTransformation = translate * finalTransformation;
@@ -770,10 +790,15 @@ void Renderer::Render(const Scene& scene)
 	}
 
 	//rendering the  camers to the screen
-	if (scene.GetCameraCount() > 0 && !scene.GetCamOrWorldView()) {
+	if (scene.GetCameraCount() > 0 ) {
 		for (int i = 0; i < scene.GetCameraCount(); i++) {
+
+			if (scene.GetActiveCameraIndex() == i) {
+				continue;
+			}
+
 			Camera& tempCam = scene.GetCamera(i);
-			float proportion = 100.0f / tempCam.getMaxDitancePoints();
+			float proportion = 50.0f / tempCam.getMaxDitancePoints();
 
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
@@ -782,26 +807,26 @@ void Renderer::Render(const Scene& scene)
 
 			//check if we are using LookAt or Transformation
 			if (tempCam.GetLookAtOrTransformation() == true) {
-				 transformationMatrix = tempCam.getTransformation();
+				transformationMatrix = tempCam.getTransformation();
 			}
 			else {
-				transformationMatrix =  glm::inverse(glm::lookAt(tempCam.getEye(), tempCam.getAt(), tempCam.getUp()));
+				transformationMatrix = glm::inverse(glm::lookAt(tempCam.getEye(), tempCam.getAt(), tempCam.getUp()));
 			}
 
-			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
+			glm::fmat4x4 finalTransformation =  transformationMatrix * scale;
 
-			if (scene.GetCamOrWorldView())  // rendering the active camera view
-			{
-				Camera& currentCam = scene.GetActiveCamera();
-				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
-				glm::fmat4x4 viewVolumeTransformation;
+			
+			//rendering active camera view
+			Camera& currentCam = scene.GetActiveCamera();
+			glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+			glm::fmat4x4 viewVolumeTransformation;
+			viewVolumeTransformation = currentCam.GetViewTransformation();
+			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+			finalTransformation = translate *  CameraTransformation * finalTransformation;
+			
 
-				viewVolumeTransformation = currentCam.GetViewTransformation();
-				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
-				finalTransformation = CameraTransformation * finalTransformation;
-			}
+			tempCam.finalTransformation =  finalTransformation;
 
-			tempCam.finalTransformation = finalTransformation;
 			std::vector<Face> faces = tempCam.getFaces();
 
 			for (int j = 0; j < tempCam.GetFacesCount(); j++)
@@ -816,7 +841,7 @@ void Renderer::Render(const Scene& scene)
 					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
 				}
 
-				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(0.5f, 0.5f, 0.5f) , tempCam, scene , face);
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(0.5f, 0.5f, 0.5f), tempCam, scene, face);
 
 			}
 		}

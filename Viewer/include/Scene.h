@@ -56,10 +56,13 @@ public:
 	void ClearLights();
 
 	glm::fvec3 backgroundColor = glm::fvec3(0.8f, 0.8f, 0.8f);
+	bool grayScales = false;
 	bool gaussianBlurring = false;
 	bool bloom = false;
 	bool fogEffect = false;
-private:
+	bool renderFrame = false;
+	int renderStatus = 0; // 0 - frame not rendered , 1 - rendering frame, 2-finished rendering 
+
 	std::vector<std::shared_ptr<MeshModel>> mesh_models_;
 	std::vector<std::shared_ptr<Camera>> cameras_;
 	std::vector<std::shared_ptr<Light>> Lights_;
@@ -68,5 +71,5 @@ private:
 	int active_model_index_;
 	int active_light_index_;
 
-	bool CamOrWorldView; //true for camera view, false for World
+	bool CamOrWorldView ; //true for camera view, false for World
 };

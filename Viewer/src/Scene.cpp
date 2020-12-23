@@ -7,8 +7,9 @@
 Scene::Scene() :
 	active_camera_index_(0),
 	active_model_index_(0),
-	CamOrWorldView(false)
+	CamOrWorldView(true)
 {
+
 	showAxis = true;
 }
 
@@ -93,6 +94,7 @@ int Scene::GetActiveCameraIndex() const
 	return active_camera_index_;
 }
 
+
 void Scene::SetActiveModelIndex(int index)
 {
 	active_model_index_ = index;
@@ -116,7 +118,6 @@ int Scene::GetActiveLightIndex() const
 void Scene::cleanupScene()
 {
 	mesh_models_.clear();
-	cameras_.clear();
 	Lights_.clear();
 }
 
