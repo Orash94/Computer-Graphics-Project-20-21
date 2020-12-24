@@ -169,7 +169,6 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	}
 	renderer.ClearColorBuffer(scene.backgroundColor);
 	renderer.Render(scene);
-	//normalizeColors(renderer);
 	renderer.SwapBuffers();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -235,26 +234,6 @@ std::shared_ptr<Light> MakeParallelLight()
 	return std::make_shared<Light>(mesh , Light::lightType::Parallel);
 }
 
-void normalizeColors(Renderer render )
-{
-	float max = 0;
-
-	float* colorBuffer = render.getColorBuffer();
-	int colorBufferSize = 3 * windowHeight * windowWidth;
-	for (int i = 0; i < colorBufferSize; i++) {
-		if (colorBuffer[i] > max) {
-			max = colorBuffer[i];
-		}
-	}
-
-	if (max > 1.0f) {
-		for (int i = 0; i < colorBufferSize; i++) {
-			colorBuffer[i] = colorBuffer[i]/max;
-
-		}
-	}
-	
-}
 
 void testing()
 {

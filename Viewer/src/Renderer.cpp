@@ -936,7 +936,3 @@ void Renderer::SetViewport(int width, int height)
 	CreateBuffers(width, height);
 }
 
-float* Renderer::getColorBuffer()
-{
-	return color_buffer_;
-}
