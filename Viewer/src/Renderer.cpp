@@ -32,11 +32,12 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 	if (j < 0) return; if (j >= viewport_height_) return;
 
 	
-	
+	float CameraFar = scene.GetActiveCamera().GetFar();
+	float CameraNear = scene.GetActiveCamera().GetNear();
+
 	if (Zbuffer[i][j] > z ) {
 		/*if (scene.CamOrWorldView ) {
-			float CameraFar = scene.GetActiveCamera().GetFar();
-			float CameraNear = scene.GetActiveCamera().GetNear();
+			
 			if (z>= CameraNear && z<=CameraFar) {
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
@@ -50,10 +51,27 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 			Zbuffer[i][j] = z;
 		}*/
-		color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
-		color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
-		color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
-		Zbuffer[i][j] = z;
+		/*if (z > 1 && z<765) {
+				std::cout<< z<<std::endl;
+		}*/
+		if (scene.GetActiveCamera().GetOrthographicOrPerspective()) {
+			//Orthographic
+			if (z >= -1 && z <= 0) {
+
+				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+				Zbuffer[i][j] = z;
+			}
+		}
+		else {
+			//Perspective
+			color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+			color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+			Zbuffer[i][j] = z;
+		}
+		
 	}
 }
 
@@ -191,9 +209,9 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 		}
 	}
 
-	DrawLine(v1, v2, glm::vec3(0, 0, 0));
-	DrawLine(v2, v3, glm::vec3(0, 0, 0));
-	DrawLine(v1, v3, glm::vec3(0, 0, 0));
+	//DrawLine(v1, v2, glm::vec3(0, 0, 0));
+	//DrawLine(v2, v3, glm::vec3(0, 0, 0));
+	//DrawLine(v1, v3, glm::vec3(0, 0, 0));
 	
 }
 
@@ -688,7 +706,7 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 		for (int j = 0; j < viewport_height_; j++)
 		{
 			Zbuffer[i][j] = FLT_MAX;
-			PutPixel(i, j, 4000, color);
+			PutPixel(i, j, 0 , color);
 		}
 	}
 }
@@ -726,9 +744,8 @@ void Renderer::Render(const Scene& scene)
 			//rendering active camera view
 			Camera& currentCam = scene.GetActiveCamera();
 			glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
-			glm::fmat4x4 viewVolumeTransformation;
+			glm::fmat4x4 viewVolumeTransformation= currentCam.GetViewTransformation();
 
-			viewVolumeTransformation = currentCam.GetViewTransformation();
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 			finalTransformation = CameraTransformation * finalTransformation;
 
@@ -747,7 +764,9 @@ void Renderer::Render(const Scene& scene)
 			std::vector<glm::vec3> verticesTransformation;
 			for (int j = 0; j < mesh.GetVerticesCount(); j++)
 			{
-				verticesTransformation.push_back(Utils::applyTransformationToVector(mesh.GetVertexAtIndex(j), finalTransformation));
+				glm::fvec3  vertex = mesh.GetVertexAtIndex(j);
+				glm::fvec3 transformedVertex = Utils::applyTransformationToVector(vertex, finalTransformation); 
+				verticesTransformation.push_back(transformedVertex);
 			}
 
 			

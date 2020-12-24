@@ -39,6 +39,7 @@ std::shared_ptr<Camera> MakeCamera();
 std::shared_ptr<Camera> MakeDefaultCamera();
 std::shared_ptr<Light> MakePointLight();
 std::shared_ptr<Light> MakeParallelLight();
+void testing();
 /**
  * Function implementation
  */
@@ -60,11 +61,14 @@ int main(int argc, char **argv)
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 
 	Scene scene = Scene();
-	Renderer renderer = Renderer(frameBufferWidth, frameBufferHeight ,scene);
 
 	//setting up default camera
 	scene.AddCamera(MakeDefaultCamera());
 	scene.SetActiveCameraIndex(0);
+
+	Renderer renderer = Renderer(frameBufferWidth, frameBufferHeight ,scene);
+
+	
 	
 	ImGuiIO& io = SetupDearImgui(window);
 	glfwSetScrollCallback(window, ScrollCallback);
@@ -229,6 +233,18 @@ std::shared_ptr<Light> MakeParallelLight()
 	return std::make_shared<Light>(mesh , Light::lightType::Parallel);
 }
 
+void testing()
+{
+	glm::fvec3 p1 = glm::fvec3(0, 0, 0);
+	glm::fvec3 p2 = glm::fvec3(4, 0, 0);
+	glm::fvec3 p3 = glm::fvec3(2, 2, 0);
+
+	glm::fvec2 insidePoint = glm::fvec2(2, 1);
+
+	glm::fvec3 w = Utils::triangleInterpolation(p1, p2, p3, insidePoint);
+	std::cout <<  w[0]<< " -- " << w[0] << " -- " << w[0] <<std::endl;
+}
+
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
 	float  windowsWidth = (float)(io.DisplaySize.x) / 2;
@@ -317,6 +333,11 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	static int camera_selected = 0;
 	static int model_selected = -1;
 	static int light_selected = -1;
+
+	if (ImGui::Button("Test")) {
+		testing();
+	}
+
 
 	if (scene.GetModelCount() != 0 ||  scene.GetCameraCount() != 0 || scene.GetLightCount() != 0) {
 		if (ImGui::Button("Clear Screen and selection")) {
@@ -505,7 +526,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							ImGui::SliderFloat(" :Top ", &nTop, 0.0f, 1.0f);
 							ImGui::SliderFloat(" :Bottom", &nBottom, -1, 0.0f);
 							ImGui::SliderFloat(" :Near: ", &nNear , 1.0f, 20.f);
-							ImGui::SliderFloat(" :Far: ", &nFar, 5.0f, 50.f);
+							ImGui::SliderFloat(" :Far: ", &nFar, 5.0f, 2000.0f);
 
 							cam.SetViewVolumeCoordinates(nRight, nLeft, nTop, nBottom, nNear, nFar);
 					

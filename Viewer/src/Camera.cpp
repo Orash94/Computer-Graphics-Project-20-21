@@ -13,7 +13,7 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	bottom = -0.5f;
 	top = 0.5f;
 	_near = 1.0f;
-	_far = 765.0f;
+	_far = 1200.0f;
 
 	zoom = 1.0f;
 	fovy = 0.01f;
@@ -171,6 +171,11 @@ float Camera::GetAspectRatio() const
 float Camera::GetZoom() const
 {
 	return zoom;
+}
+
+bool Camera::GetOrthographicOrPerspective() const
+{
+	return OrthographicOrPerspective;
 }
 
 
