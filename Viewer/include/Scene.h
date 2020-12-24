@@ -72,4 +72,5 @@ public:
 	int active_light_index_;
 
 	bool CamOrWorldView ; //true for camera view, false for World
+	bool wireFrame = false; //true for showing wirefram false otherwise
 };

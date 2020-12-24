@@ -84,7 +84,7 @@ public:
 	glm::vec3 diffuseColor;
 	glm::vec3 specularColor;
 
-	shadingType shadingType = None;
+	shadingType shadingType = Flat;
 	modelType   modelType = Object;
 	glm::fmat4x4 finalTransformation;
 

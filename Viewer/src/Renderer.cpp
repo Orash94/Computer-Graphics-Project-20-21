@@ -209,9 +209,12 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 		}
 	}
 
-	//DrawLine(v1, v2, glm::vec3(0, 0, 0));
-	//DrawLine(v2, v3, glm::vec3(0, 0, 0));
-	//DrawLine(v1, v3, glm::vec3(0, 0, 0));
+	if (scene.wireFrame) {
+		DrawLine(v1, v2, glm::vec3(0, 0, 0));
+		DrawLine(v2, v3, glm::vec3(0, 0, 0));
+		DrawLine(v1, v3, glm::vec3(0, 0, 0));
+	}
+	
 	
 }
 
@@ -374,14 +377,14 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 	glm::fvec3 color = glm::fvec3(0, 0, 0);
 	for (int k = 0; k < scene.GetLightCount(); k++) {
 		Light light = scene.GetLight(k);
-		color += light.calculateAmbient(mesh.ambientColor, light.ambientColor);
-		
-		if (light.typeOfLight == Light::lightType::Point && scene.GetCamOrWorldView()) {
-			color += light.calculateSpecular(mesh.specularColor, light.specularColor, face.getFaceNormal(), tringlrCenter, light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
-		}
-		if (light.typeOfLight == Light::lightType::Parallel) {
-			glm::fvec3 lightDirection = Utils::applyTransformationToNormal(light.direction, light.finalTransformation);
-			color += light.calculateDiffuse(mesh.diffuseColor, light.diffuseColor, face.getFaceNormal(), lightDirection);
+		//(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
+
+		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+
+		for (int i = 0; i < 3; i++) {
+			if (color[i] > 1.0f) {
+				color[i] = 1.0f;
+			}
 		}
 	}
 
@@ -421,15 +424,15 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 		glm::fvec3 color = glm::fvec3(0, 0, 0);
 		for (int k = 0; k < scene.GetLightCount(); k++) {
 			Light light = scene.GetLight(k);
-			color += light.calculateAmbient(mesh.ambientColor, light.ambientColor);
 
-			if (light.typeOfLight == Light::lightType::Point && scene.GetCamOrWorldView()) {
-				color += light.calculateSpecular(mesh.specularColor, light.specularColor, normalTransformation[k], vertices[k], light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+			color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+
+			for (int i = 0; i < 3; i++) {
+				if (color[i] > 1.0f) {
+					color[i] = 1.0f;
+				}
 			}
-			if (light.typeOfLight == Light::lightType::Parallel) {
-				glm::fvec3 lightDirection = Utils::applyTransformationToNormal(light.direction, light.finalTransformation);
-				color += light.calculateDiffuse(mesh.diffuseColor, light.diffuseColor, normalTransformation[k], lightDirection);
-			}
+
 		}
 		verticesColor[k] = color;
 	}
@@ -488,15 +491,15 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 				glm::fvec3 color = glm::fvec3(0, 0, 0);
 				for (int k = 0; k < scene.GetLightCount(); k++) {
 					Light light = scene.GetLight(k);
-					color += light.calculateAmbient(mesh.ambientColor, light.ambientColor);
 
-					if (light.typeOfLight == Light::lightType::Point && scene.GetCamOrWorldView()) {
-						color += light.calculateSpecular(mesh.specularColor, light.specularColor, pointNormal, glm::fvec3(i,j,z), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+					color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, z), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+
+					for (int i = 0; i < 3; i++) {
+						if (color[i] > 1.0f) {
+							color[i] = 1.0f;
+						}
 					}
-					if (light.typeOfLight == Light::lightType::Parallel) {
-						glm::fvec3 lightDirection = Utils::applyTransformationToNormal(light.direction, light.finalTransformation);
-						color += light.calculateDiffuse(mesh.diffuseColor, light.diffuseColor, pointNormal, lightDirection);
-					}
+
 				}
 
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
@@ -870,7 +873,7 @@ void Renderer::Render(const Scene& scene)
 	if (scene.GetLightCount() > 0 ) {
 		for (int i = 0; i < scene.GetLightCount(); i++) {
 			Light& tempLight = scene.GetLight(i);
-			float proportion = 100.0f / tempLight.getMaxDitancePoints();
+			float proportion = 50.0f / tempLight.getMaxDitancePoints();
 
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
@@ -931,4 +934,9 @@ void Renderer::SetViewport(int width, int height)
 	viewport_height_ = height;
 	viewport_width_ = width;
 	CreateBuffers(width, height);
+}
+
+float* Renderer::getColorBuffer()
+{
+	return color_buffer_;
 }

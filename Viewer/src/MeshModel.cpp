@@ -348,8 +348,8 @@ void MeshModel::updateFrame( glm::fmat4x4 transform)
 
 const glm::vec3& MeshModel::getCenter() const
 {
-	glm::fmat4x4 transformationMatrix = getTransformation();
-	return Utils::applyTransformationToVector(center , transformationMatrix);
+	glm::fmat4x4 final = finalTransformation;
+	return Utils::applyTransformationToVector(center , final);
 }
 
 const glm::fmat3x3& MeshModel::getCoordinateSystem()

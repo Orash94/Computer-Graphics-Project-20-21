@@ -39,6 +39,7 @@ std::shared_ptr<Camera> MakeCamera();
 std::shared_ptr<Camera> MakeDefaultCamera();
 std::shared_ptr<Light> MakePointLight();
 std::shared_ptr<Light> MakeParallelLight();
+void normalizeColors(Renderer render);
 void testing();
 /**
  * Function implementation
@@ -168,6 +169,7 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	}
 	renderer.ClearColorBuffer(scene.backgroundColor);
 	renderer.Render(scene);
+	//normalizeColors(renderer);
 	renderer.SwapBuffers();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -223,7 +225,7 @@ std::shared_ptr<Camera> MakeDefaultCamera()
 
 std::shared_ptr<Light> MakePointLight()
 {
-	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/demo.obj")));
+	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/Sphere.obj")));
 	return std::make_shared<Light>(mesh , Light::lightType::Point);
 }
 
@@ -231,6 +233,27 @@ std::shared_ptr<Light> MakeParallelLight()
 {
 	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/arrow.obj")));
 	return std::make_shared<Light>(mesh , Light::lightType::Parallel);
+}
+
+void normalizeColors(Renderer render )
+{
+	float max = 0;
+
+	float* colorBuffer = render.getColorBuffer();
+	int colorBufferSize = 3 * windowHeight * windowWidth;
+	for (int i = 0; i < colorBufferSize; i++) {
+		if (colorBuffer[i] > max) {
+			max = colorBuffer[i];
+		}
+	}
+
+	if (max > 1.0f) {
+		for (int i = 0; i < colorBufferSize; i++) {
+			colorBuffer[i] = colorBuffer[i]/max;
+
+		}
+	}
+	
 }
 
 void testing()
@@ -358,6 +381,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			//---------------------------------Scene --------------------------
 			if (ImGui::CollapsingHeader("Scene Actions", ImGuiTreeNodeFlags_None))
 			{
+				ImGui::Checkbox("WireFram", &scene.wireFrame);
 				ImGui::ColorEdit3("background color", (float*)&scene.backgroundColor);
 				if (ImGui::Button("Reset color")) {
 					scene.backgroundColor = glm::fvec3(0.8f, 0.8f, 0.8f);
@@ -952,19 +976,15 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					}
 					if (ImGui::TreeNode("model color selection:")) {
 
-						if (scene.GetActiveLight().typeOfLight == Light::lightType::Parallel) {
-							ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
-							ImGui::ColorEdit3("diffuse color", (float*)&model1.diffuseColor);
-						}
-						if (scene.GetActiveLight().typeOfLight == Light::lightType::Point) {
-							ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
-							ImGui::ColorEdit3("specular color", (float*)&model1.specularColor);
-						}
+						ImGui::ColorEdit3("ambient color", (float*)&model1.ambientColor);
+						ImGui::ColorEdit3("diffuse color", (float*)&model1.diffuseColor);
+						ImGui::ColorEdit3("specular color", (float*)&model1.specularColor);
+						
 						ImGui::TreePop();
 					}
 
 				}
-				if (light_selected != -1 && scene.GetLightCount() != 0 && scene.GetActiveLight().typeOfLight == Light::lightType::Point) {
+				if (light_selected != -1 && scene.GetLightCount() != 0 ) {
 					Light& Light = scene.GetActiveLight();
 					ImGui::SliderFloat("alpha", &Light.alpha, 0.1, 5.0f);
 				}

@@ -18,6 +18,7 @@ public:
 
 	Scene& scene;
 
+
 private:
 	void PutPixel(const int i, const int j, const float z, const glm::vec3& color);
 	void DrawLine(const glm::fvec3& p1, const glm::fvec3& p2, const glm::vec3& color);
