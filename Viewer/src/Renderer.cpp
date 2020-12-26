@@ -24,6 +24,10 @@ Renderer::Renderer(int viewport_width, int viewport_height ,  Scene& scene_) :
 Renderer::~Renderer()
 {
 	delete[] color_buffer_;
+	for (int i = 0; i < viewport_width_; i++) {
+		delete[] Zbuffer[i];
+		delete[] localColorBuffer[i];
+	}
 	delete[] Zbuffer;
 	delete[] localColorBuffer;
 }
@@ -312,6 +316,10 @@ void Renderer::PostProcessing()
 	if (scene.gaussianBlurring) {
 		float** GaussianMask = GetGaussianMask(scene.maskRadius, scene.gaussianSTD);
 		applyConvolution(localColorBuffer,GaussianMask, scene.maskRadius);
+		for (int i = 0; i < 2* scene.maskRadius +1; i++)
+		{
+			delete[] GaussianMask[i];
+		}
 		delete[] GaussianMask;
 
 	}
@@ -365,12 +373,21 @@ void Renderer::PostProcessing()
 		{
 			for (int j = 0; j < viewport_height_; j++)
 			{
-				localColorBuffer[i][j] += tempImage[i][j];
+				if(tempImage[i][j] != glm::vec3(0,0,0))
+					localColorBuffer[i][j] = tempImage[i][j];
 			}
 
 		}
-
+		for (int i = 0; i < 2 * scene.maskRadius + 1; i++)
+		{
+			delete[] GaussianMask[i];
+		}
 		delete[] GaussianMask;
+
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			delete[] tempImage[i];
+		}
 		delete[] tempImage;
 		
 	}
@@ -448,8 +465,6 @@ void Renderer::applyConvolution(glm::vec3** im, float** mask, int radius)
 					{
 						sum += mask[k][t] * im[i - radius + k][j - radius + t];
 					}
-					
-					
 				}
 			}
 			im[i][j] = sum;
