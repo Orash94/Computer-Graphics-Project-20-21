@@ -58,6 +58,8 @@ public:
 	glm::fvec3 backgroundColor = glm::fvec3(0.8f, 0.8f, 0.8f);
 	bool grayScales = false;
 	bool gaussianBlurring = false;
+	float gaussianSTD = 1;
+	int maskRadius = 1;
 	bool bloom = false;
 	bool fogEffect = false;
 	bool renderFrame = false;

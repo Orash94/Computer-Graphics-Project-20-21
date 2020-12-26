@@ -245,6 +245,8 @@ void testing()
 
 	glm::fvec3 w = Utils::triangleInterpolation(p1, p2, p3, insidePoint);
 	std::cout <<  w[0]<< " -- " << w[0] << " -- " << w[0] <<std::endl;
+
+
 }
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
@@ -367,8 +369,20 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 				if (ImGui::CollapsingHeader("Post Proccessing ", ImGuiTreeNodeFlags_None))
 				{
-					ImGui::Checkbox("Gray Scale", &scene.gaussianBlurring);
-					ImGui::Checkbox("Gaussian blurring", &scene.gaussianBlurring);
+					ImGui::Checkbox("Gray Scale", &scene.grayScales);
+					static bool  gaussuanBlurOptions = false;
+
+					ImGui::Checkbox("Gaussian blurring", &gaussuanBlurOptions);
+					if(gaussuanBlurOptions){
+						scene.gaussianBlurring = true;
+						ImGui::SliderInt("Mask Radius", &scene.maskRadius, 1, 20);
+						ImGui::SliderFloat("Mask STD", &scene.gaussianSTD, 0.1f, 5.0f);
+					}
+					else
+					{
+						scene.gaussianBlurring = false;
+					}
+
 					ImGui::Checkbox("Bloom", &scene.bloom);
 					ImGui::Checkbox("Fog effect", &scene.fogEffect);
 				}

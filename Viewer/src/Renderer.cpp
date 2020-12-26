@@ -18,12 +18,14 @@ Renderer::Renderer(int viewport_width, int viewport_height ,  Scene& scene_) :
 	InitOpenGLRendering();
 	CreateBuffers(viewport_width, viewport_height);
 	allocateZBuffer();
+	allocateColorBuffer();
 }
 
 Renderer::~Renderer()
 {
 	delete[] color_buffer_;
 	delete[] Zbuffer;
+	delete[] localColorBuffer;
 }
 
 void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
@@ -35,7 +37,7 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 	float CameraFar = scene.GetActiveCamera().GetFar();
 	float CameraNear = scene.GetActiveCamera().GetNear();
 
-	if (Zbuffer[i][j] > z ) {
+	if (Zbuffer[i][j] >= z ) {
 		/*if (scene.CamOrWorldView ) {
 			
 			if (z>= CameraNear && z<=CameraFar) {
@@ -62,6 +64,7 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 				Zbuffer[i][j] = z;
+				localColorBuffer[i][j] = color;
 			}
 		}
 		else {
@@ -70,8 +73,24 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 			color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 			Zbuffer[i][j] = z;
+			localColorBuffer[i][j] = color;
 		}
 		
+	}
+
+
+}
+
+void Renderer::UpdatePutPixel()
+{
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			PutPixel(i, j, Zbuffer[i][j], localColorBuffer[i][j]);
+
+		}
+
 	}
 }
 
@@ -275,6 +294,112 @@ void Renderer::allocateZBuffer()
 	for (int i = 0; i < viewport_width_; i++)
 		for (int j = 0; j < viewport_height_; j++)
 			Zbuffer[i][j] = FLT_MAX;
+}
+
+void Renderer::allocateColorBuffer()
+{
+	localColorBuffer = new glm::vec3* [viewport_width_];
+	for (int i = 0; i < viewport_width_; i++)
+		localColorBuffer[i] = new glm::vec3[viewport_height_];
+
+	for (int i = 0; i < viewport_width_; i++)
+		for (int j = 0; j < viewport_height_; j++)
+			localColorBuffer[i][j] = glm::vec3(0,0,0);
+}
+
+void Renderer::PostProcessing()
+{
+	if (scene.gaussianBlurring) {
+		float** GaussianMask = GetGaussianMask(scene.maskRadius, scene.gaussianSTD);
+		applyConvolution(GaussianMask, scene.maskRadius);
+		delete[] GaussianMask;
+
+	}
+	else if (scene.bloom) {
+
+	}
+	else if (scene.fogEffect) {
+
+	}
+
+	UpdatePutPixel();
+}
+
+
+float** Renderer::GetGaussianMask(int radius, float STD) {
+	int maskSize = 2 * radius + 1;
+	float sum = 0;
+
+	/*
+	* allocate new mask
+	*/
+	float** mask = new float* [maskSize];
+	for (int i = 0; i < maskSize; i++) {
+		mask[i] = new float[maskSize];
+	}
+
+	/*
+	* initializing the mask
+	*/
+	for (int i = 0; i < maskSize; i++)
+	{
+		for (int j = 0; j < maskSize; j++) {
+			mask[i][j] = 0;
+		}
+	}
+
+	/*
+	* compute the mask values by gaussian formula
+	*/
+	for (int i = -1*radius; i <= radius; i++)
+	{
+		for (int j = -1 * radius; j <= radius; j++) {
+			//mask(i+maskRadiusX+1, j+maskRadiusY+1) = exp(-1*((i^2 + j^2)/2*(maskSTD^2))); %compute the gaussed value of each coordinate in the mask by formula
+
+			mask[i+radius][j+radius] = std::exp( -1 * (std::pow(i , 2) + std::pow(j , 2)) / (2 * (std::pow(STD,2))));
+			sum += mask[i + radius ][j + radius ];
+		}
+	}
+
+	/*
+	* normalizing the mask factors
+	*/
+	for (int i = 0; i < maskSize; i++)
+	{
+		for (int j = 0; j < maskSize; j++) {
+			mask[i][j] /= sum;
+		}
+	}
+
+	return mask;
+	
+}
+
+void Renderer::applyConvolution(float** mask, int radius)
+{
+	int size = 2 * radius + 1;
+	glm::vec3 sum;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			sum = glm::vec3(0, 0, 0);
+			for (int k = 0; k < size; k++)
+			{
+				for (int t = 0; t < size; t++)
+				{
+					if ((i-radius+k)>=0 && (j-radius+t)>=0 && (i-radius+k)<viewport_width_ && (j-radius+t)<viewport_height_)
+					{
+						sum += mask[k][t] * localColorBuffer[i - radius + k][j - radius + t];
+					}
+					
+					
+				}
+			}
+			localColorBuffer[i][j] = sum;
+		}
+
+	}
 }
 
 void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
@@ -586,6 +711,7 @@ void Renderer::CreateBuffers(int w, int h)
 	CreateOpenGLBuffer(); //Do not remove this line.
 	color_buffer_ = new float[3 * w * h];
 	allocateZBuffer();
+	allocateColorBuffer();
 	ClearColorBuffer(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
@@ -915,8 +1041,8 @@ void Renderer::Render(const Scene& scene)
 			}
 		}
 	}
+	PostProcessing();
 	
-
 }
 
 int Renderer::GetViewportWidth() const

@@ -15,17 +15,22 @@ public:
 	int GetViewportWidth() const;
 	int GetViewportHeight() const;
 	void SetViewport(const int width, const int height);
-
+	float** GetGaussianMask(int radius, float STD);
+	void applyConvolution(float** mask, int radius);
+	
 	Scene& scene;
 
 
 private:
 	void PutPixel(const int i, const int j, const float z, const glm::vec3& color);
+	void UpdatePutPixel();
 	void DrawLine(const glm::fvec3& p1, const glm::fvec3& p2, const glm::vec3& color);
 	void plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& color, glm::vec3 p1, glm::vec3 p2);
 	void plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& color, glm::vec3 p1, glm::vec3 p2);
 	void DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color, const MeshModel& mesh, const Scene& scene, const Face& face);
 	void allocateZBuffer();
+	void allocateColorBuffer();
+	void PostProcessing();
 	void DrawBoundingBox(MeshModel& model , const Scene& scene , glm::fmat4x4 trasformation , const glm::vec3& color);
 	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation  , const glm::vec3& color);
 	void DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength);
@@ -51,6 +56,7 @@ private:
 	int viewport_width_;
 	int viewport_height_;
 	float** Zbuffer;
+	glm::vec3** localColorBuffer;
 	GLuint gl_screen_tex_;
 	GLuint gl_screen_vtc_;
 };
