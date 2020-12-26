@@ -371,11 +371,12 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::Checkbox("Gray Scale", &scene.grayScales);
 					static bool  gaussuanBlurOptions = false;
+					static bool  BloomOptions = false;
 
 					ImGui::Checkbox("Gaussian blurring", &gaussuanBlurOptions);
 					if(gaussuanBlurOptions){
 						scene.gaussianBlurring = true;
-						ImGui::SliderInt("Mask Radius", &scene.maskRadius, 1, 20);
+						ImGui::SliderInt("Mask Radius", &scene.maskRadius, 1, 5);
 						ImGui::SliderFloat("Mask STD", &scene.gaussianSTD, 0.1f, 5.0f);
 					}
 					else
@@ -383,7 +384,11 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						scene.gaussianBlurring = false;
 					}
 
-					ImGui::Checkbox("Bloom", &scene.bloom);
+					ImGui::Checkbox("Bloom", &BloomOptions);
+					if (BloomOptions) {
+						scene.bloom = true;
+						ImGui::SliderFloat("Threshold: ", &scene.threshold, 0.3f, 1.0f);
+					}
 					ImGui::Checkbox("Fog effect", &scene.fogEffect);
 				}
 

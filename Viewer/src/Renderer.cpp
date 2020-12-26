@@ -311,12 +311,68 @@ void Renderer::PostProcessing()
 {
 	if (scene.gaussianBlurring) {
 		float** GaussianMask = GetGaussianMask(scene.maskRadius, scene.gaussianSTD);
-		applyConvolution(GaussianMask, scene.maskRadius);
+		applyConvolution(localColorBuffer,GaussianMask, scene.maskRadius);
 		delete[] GaussianMask;
 
 	}
-	else if (scene.bloom) {
 
+
+	else if (scene.bloom) {
+		int radius = 1;
+		float STD = 3;
+		glm::vec3 brightnessVec = glm::vec3(0.2126, 0.7152, 0.0722);
+		float PixelBrightness=0;
+		float** GaussianMask = GetGaussianMask(radius, STD);
+
+		/*
+		* allocating the temporary color buffer
+		*/
+		glm::vec3** tempImage = new glm::vec3 * [viewport_width_];
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			tempImage[i] = new glm::vec3[viewport_height_];
+		}
+
+		/*
+		* initializing the temporary color buffer
+		*/
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++)
+			{
+				tempImage[i][j] = glm::vec3(0, 0, 0);
+			}
+		}
+
+		/*
+		* assings RGB values from local color buffer when the brightness is above the threshold
+		*/
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++)
+			{
+				PixelBrightness = 0.5;//glm::dot(localColorBuffer[i][j], brightnessVec);
+				if (scene.threshold < PixelBrightness) {
+					tempImage[i][j] = localColorBuffer[i][j];
+				}
+			}
+		}
+
+		applyConvolution(tempImage, GaussianMask, radius);
+
+
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++)
+			{
+				localColorBuffer[i][j] += tempImage[i][j];
+			}
+
+		}
+
+		delete[] GaussianMask;
+		delete[] tempImage;
+		
 	}
 	else if (scene.fogEffect) {
 
@@ -375,7 +431,7 @@ float** Renderer::GetGaussianMask(int radius, float STD) {
 	
 }
 
-void Renderer::applyConvolution(float** mask, int radius)
+void Renderer::applyConvolution(glm::vec3** im, float** mask, int radius)
 {
 	int size = 2 * radius + 1;
 	glm::vec3 sum;
@@ -390,17 +446,19 @@ void Renderer::applyConvolution(float** mask, int radius)
 				{
 					if ((i-radius+k)>=0 && (j-radius+t)>=0 && (i-radius+k)<viewport_width_ && (j-radius+t)<viewport_height_)
 					{
-						sum += mask[k][t] * localColorBuffer[i - radius + k][j - radius + t];
+						sum += mask[k][t] * im[i - radius + k][j - radius + t];
 					}
 					
 					
 				}
 			}
-			localColorBuffer[i][j] = sum;
+			im[i][j] = sum;
 		}
 
 	}
 }
+
+
 
 void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
 {
