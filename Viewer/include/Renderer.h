@@ -16,8 +16,7 @@ public:
 	int GetViewportHeight() const;
 	void SetViewport(const int width, const int height);
 	float** GetGaussianMask(int radius, float STD);
-	void applyConvolution(float** mask, int radius);
-	
+	void applyConvolution(glm::vec3** im, float** mask, int radius);
 	Scene& scene;
 
 
