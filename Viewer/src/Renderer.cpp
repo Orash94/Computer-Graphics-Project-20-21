@@ -367,14 +367,17 @@ void Renderer::PostProcessing()
 		{
 			for (int j = 0; j < viewport_height_; j++)
 			{
-				PixelBrightness = 0.5;//glm::dot(localColorBuffer[i][j], brightnessVec);
+				PixelBrightness = glm::dot(localColorBuffer[i][j], brightnessVec);
 				if (scene.threshold < PixelBrightness) {
 					tempImage[i][j] = localColorBuffer[i][j];
 				}
 			}
 		}
-
-		applyConvolution(tempImage, GaussianMask, radius);
+		for (int i = 0; i < 10; i++)
+		{
+			applyConvolution(tempImage, GaussianMask, radius);
+		}
+		
 
 
 		for (int i = 0; i < viewport_width_; i++)
@@ -382,7 +385,7 @@ void Renderer::PostProcessing()
 			for (int j = 0; j < viewport_height_; j++)
 			{
 				if(tempImage[i][j] != glm::vec3(0,0,0))
-					localColorBuffer[i][j] = tempImage[i][j];
+					localColorBuffer[i][j] = glm::clamp(localColorBuffer[i][j] + tempImage[i][j], 0.0f, 1.0f);
 			}
 
 		}
