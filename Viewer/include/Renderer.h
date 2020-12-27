@@ -17,6 +17,9 @@ public:
 	void SetViewport(const int width, const int height);
 	float** GetGaussianMask(int radius, float STD);
 	void applyConvolution(glm::vec3** im, float** mask, int radius);
+	void applyLinearFogging();
+	void applyExponentialFogging();
+	void applyExponentialSquaredFogging();
 	Scene& scene;
 
 

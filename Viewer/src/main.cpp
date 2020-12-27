@@ -372,6 +372,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					ImGui::Checkbox("Gray Scale", &scene.grayScales);
 					static bool  gaussuanBlurOptions = false;
 					static bool  BloomOptions = false;
+					static bool  FogOptions = false;
 
 					ImGui::Checkbox("Gaussian blurring", &gaussuanBlurOptions);
 					if(gaussuanBlurOptions){
@@ -389,7 +390,49 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						scene.bloom = true;
 						ImGui::SliderFloat("Threshold: ", &scene.threshold, 0.3f, 1.0f);
 					}
-					ImGui::Checkbox("Fog effect", &scene.fogEffect);
+					else
+					{
+						scene.bloom = false;
+					}
+					ImGui::Checkbox("Fog effect", &FogOptions);
+					if (FogOptions)
+					{
+						scene.fogEffect = true;
+						float color[3] = { scene.fogColor[0], scene.fogColor[1], scene.fogColor[2] };
+						ImGui::ColorEdit3("Choose the fog color: ", (float*)&color);
+						scene.fogColor[0] = color[0];
+						scene.fogColor[1] = color[1];
+						scene.fogColor[2] = color[2];
+						ImGui::RadioButton("None", &scene.fogType, 0);
+						ImGui::SameLine();
+						ImGui::RadioButton("Linear", &scene.fogType, 1);
+						ImGui::SameLine();
+						ImGui::RadioButton("Exponential", &scene.fogType, 2);
+						ImGui::SameLine();
+						ImGui::RadioButton("Exponential Squred", &scene.fogType, 3);
+						switch (scene.fogType)
+						{
+						case (1):
+							ImGui::SliderFloat("Start Fog: ", &scene.fogStart, scene.GetActiveCamera().GetNear(), scene.GetActiveCamera().GetFar());
+							ImGui::SliderFloat("End Fog: ", &scene.fogEnd, scene.fogStart, scene.GetActiveCamera().GetFar());
+							break;
+
+						case(2):
+							//ImGui::SliderFloat("Distance Fog: ", &scene.fogDistance, 0.0f, 3.0f);
+							ImGui::SliderFloat("Density Fog: ", &scene.fogDensity, 0.0f, 3.0f);
+							break;
+
+						case(3):
+							ImGui::SliderFloat("Density Fog: ", &scene.fogDensity, 0.0f, 3.0f);
+							break;
+						default:
+							break;
+						}
+					}
+					//else
+					//{
+					//	scene.fogEffect = false;
+					//}
 				}
 
 			}
