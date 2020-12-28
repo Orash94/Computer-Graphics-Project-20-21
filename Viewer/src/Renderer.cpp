@@ -334,8 +334,8 @@ void Renderer::PostProcessing()
 	* creating bloom effect
 	*/
 	else if (scene.bloom) {
-		int radius = 1;
-		float STD = 3;
+		int radius = 2;
+		float STD = 3.0f;
 		glm::vec3 brightnessVec = glm::vec3(0.2126, 0.7152, 0.0722);
 		float PixelBrightness=0;
 		float** GaussianMask = GetGaussianMask(radius, STD);
@@ -373,10 +373,12 @@ void Renderer::PostProcessing()
 				}
 			}
 		}
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			applyConvolution(tempImage, GaussianMask, radius);
 		}
+		//applyConvolution(tempImage, GaussianMask, radius);
+
 		
 
 
@@ -420,6 +422,19 @@ void Renderer::PostProcessing()
 			break;
 		default:
 			break;
+		}
+	}
+
+	else if(scene.grayScales)
+	{
+		float grayScaleColor;
+		glm::vec3 brightnessVec = glm::vec3(0.2126, 0.7152, 0.0722);
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++) {
+				grayScaleColor = glm::dot(localColorBuffer[i][j], brightnessVec);
+				localColorBuffer[i][j] = glm::vec3(grayScaleColor, grayScaleColor, grayScaleColor);
+			}
 		}
 	}
 
@@ -509,7 +524,8 @@ void Renderer::applyLinearFogging()
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			//dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			dist = glm::distance(scene.GetActiveCamera().getEye().z,  Zbuffer[i][j]);
 			f = (scene.fogEnd - dist) / (scene.fogEnd - scene.fogStart);
 			glm::clamp(f, 0.0f, 1.0f);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
@@ -528,6 +544,7 @@ void Renderer::applyExponentialFogging()
 		for (int j = 0; j < viewport_height_; j++)
 		{
 			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			//dist = glm::distance(scene.GetActiveCamera().getEye().z, Zbuffer[i][j]);
 			f = std::exp(-1 * dist * (scene.fogDensity * 0.001));
 			glm::clamp(f, 0.0f, 1.0f);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);

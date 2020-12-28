@@ -369,10 +369,18 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				}
 				if (ImGui::CollapsingHeader("Post Proccessing ", ImGuiTreeNodeFlags_None))
 				{
-					ImGui::Checkbox("Gray Scale", &scene.grayScales);
 					static bool  gaussuanBlurOptions = false;
 					static bool  BloomOptions = false;
 					static bool  FogOptions = false;
+					static bool  GrayOptions = false;
+					ImGui::Checkbox("Gray Scale", &GrayOptions);
+					if (GrayOptions)
+						scene.grayScales = true;
+					else
+					{
+						scene.grayScales = false;
+					}
+					
 
 					ImGui::Checkbox("Gaussian blurring", &gaussuanBlurOptions);
 					if(gaussuanBlurOptions){
@@ -423,7 +431,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							break;
 
 						case(3):
-							ImGui::SliderFloat("Density Fog: ", &scene.fogDensity, 0.0f, 3.0f);
+							ImGui::SliderFloat("Density Fog: ", &scene.fogDensity, 0.0f, 2.5f);
 							break;
 						default:
 							break;
