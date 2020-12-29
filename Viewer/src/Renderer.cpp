@@ -73,11 +73,13 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}
 		else {
 			//Perspective
-			color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
-			color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
-			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
-			Zbuffer[i][j] = z;
-			localColorBuffer[i][j] = color;
+			if (z >= -1.0f && z <= 0.2) {
+				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+				Zbuffer[i][j] = z;
+				localColorBuffer[i][j] = color;
+			}
 		}
 		
 	}
@@ -577,7 +579,7 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 		Light light = scene.GetLight(k);
 		//(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
 
-		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), glm::fvec3(0,0,0), light.alpha);
 
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {

@@ -24,11 +24,7 @@ glm::fvec3 Light::calculateDiffuse(glm::fvec3 MeshModelDiffuseColor, glm::fvec3 
 
 	glm::fvec3 Id = Utils::twoVectorsComponentMulti(MeshModelDiffuseColor, LightDiffuseColor);
 
-
-	glm::fvec3 reflevtive = lightDirection - 2.0f * (glm::dot(lightDirection, Normal) * Normal);
-
-	float degree = Utils::getDegreeBetweenTwoVectors(Normal, glm::normalize(reflevtive));
-	Id  = Id * glm::cos(degree);
+	Id = Id * glm::dot(lightDirection, Normal);
 
 	return Id;
 }
@@ -45,11 +41,10 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 
 	//R = 2*n*dot_product(n,L) - L   // When L goes from the vertex to the light source
 
-	glm::fvec3 reflection = 2.0f *Normal* glm::dot(Normal, lightDirection) - lightDirection;
+	glm::fvec3 reflection = glm::normalize(-2.0f *Normal* glm::dot(Normal, lightDirection) + lightDirection);
 
 
-	float degree = Utils::getDegreeBetweenTwoVectors(reflection, CameraDirection);
-	degree = glm::cos(degree);
+	float degree = glm::dot(reflection, CameraDirection);
 	float power = pow(degree, Alpha);
 	Is = Is * power;
 
@@ -64,7 +59,7 @@ glm::fvec3 Light::calculateColor(const MeshModel& mesh, const glm::fvec3 Normal,
 
 	if (typeOfLight == lightType::Parallel) {
 
-		glm::fvec3 lightDirection = Utils::applyTransformationToNormal(direction, finalTransformation);
+		glm::fvec3 lightDirection = -1.0f* Utils::applyTransformationToNormal(direction, finalTransformation);
 
 		DiffuseLight = calculateDiffuse(mesh.diffuseColor, diffuseColor, Normal, lightDirection);
 
@@ -72,7 +67,7 @@ glm::fvec3 Light::calculateColor(const MeshModel& mesh, const glm::fvec3 Normal,
 	}
 	else if((typeOfLight == lightType::Point)) {
 
-		glm::fvec3 lightDirection = glm::normalize(MeshPoint - lightcenter);
+		glm::fvec3 lightDirection = glm::normalize( lightcenter -  MeshPoint);
 
 		DiffuseLight = calculateDiffuse(mesh.diffuseColor, diffuseColor, Normal, lightDirection);
 
