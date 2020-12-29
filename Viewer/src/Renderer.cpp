@@ -315,6 +315,9 @@ void Renderer::allocateColorBuffer()
 
 void Renderer::PostProcessing()
 {
+	/*
+	* for gaussian blurring
+	*/
 	if (scene.gaussianBlurring) {
 		float** GaussianMask = GetGaussianMask(scene.maskRadius, scene.gaussianSTD);
 		applyConvolution(localColorBuffer,GaussianMask, scene.maskRadius);
@@ -327,9 +330,14 @@ void Renderer::PostProcessing()
 	}
 
 
+
+
+	/*
+	* creating bloom effect
+	*/
 	else if (scene.bloom) {
-		int radius = 1;
-		float STD = 3;
+		int radius = 2;
+		float STD = 3.0f;
 		glm::vec3 brightnessVec = glm::vec3(0.2126, 0.7152, 0.0722);
 		float PixelBrightness=0;
 		float** GaussianMask = GetGaussianMask(radius, STD);
@@ -361,14 +369,19 @@ void Renderer::PostProcessing()
 		{
 			for (int j = 0; j < viewport_height_; j++)
 			{
-				PixelBrightness = 0.5;//glm::dot(localColorBuffer[i][j], brightnessVec);
+				PixelBrightness = glm::dot(localColorBuffer[i][j], brightnessVec);
 				if (scene.threshold < PixelBrightness) {
 					tempImage[i][j] = localColorBuffer[i][j];
 				}
 			}
 		}
+		for (int i = 0; i < 3; i++)
+		{
+			applyConvolution(tempImage, GaussianMask, radius);
+		}
+		//applyConvolution(tempImage, GaussianMask, radius);
 
-		applyConvolution(tempImage, GaussianMask, radius);
+		
 
 
 		for (int i = 0; i < viewport_width_; i++)
@@ -376,7 +389,7 @@ void Renderer::PostProcessing()
 			for (int j = 0; j < viewport_height_; j++)
 			{
 				if(tempImage[i][j] != glm::vec3(0,0,0))
-					localColorBuffer[i][j] = tempImage[i][j];
+					localColorBuffer[i][j] = glm::clamp(localColorBuffer[i][j] + tempImage[i][j], 0.0f, 1.0f);
 			}
 
 		}
@@ -393,8 +406,38 @@ void Renderer::PostProcessing()
 		delete[] tempImage;
 		
 	}
-	else if (scene.fogEffect) {
 
+
+
+
+	else if (scene.fogEffect) {
+		switch (scene.fogType)
+		{
+		case(1):
+			applyLinearFogging();
+			break;
+		case(2):
+			applyExponentialFogging();
+			break;
+		case(3):
+			applyExponentialSquaredFogging();
+			break;
+		default:
+			break;
+		}
+	}
+
+	else if(scene.grayScales)
+	{
+		float grayScaleColor;
+		glm::vec3 brightnessVec = glm::vec3(0.2126, 0.7152, 0.0722);
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++) {
+				grayScaleColor = glm::dot(localColorBuffer[i][j], brightnessVec);
+				localColorBuffer[i][j] = glm::vec3(grayScaleColor, grayScaleColor, grayScaleColor);
+			}
+		}
 	}
 
 	UpdatePutPixel();
@@ -470,6 +513,60 @@ void Renderer::applyConvolution(glm::vec3** im, float** mask, int radius)
 				}
 			}
 			im[i][j] = sum;
+		}
+
+	}
+}
+
+void Renderer::applyLinearFogging()
+{
+	float f;
+	float dist;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			//dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			dist = glm::distance(scene.GetActiveCamera().getEye().z,  Zbuffer[i][j]);
+			f = (scene.fogEnd - dist) / (scene.fogEnd - scene.fogStart);
+			glm::clamp(f, 0.0f, 1.0f);
+			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
+		}
+
+	}
+	
+}
+
+void Renderer::applyExponentialFogging()
+{
+	float f;
+	float dist;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			//dist = glm::distance(scene.GetActiveCamera().getEye().z, Zbuffer[i][j]);
+			f = std::exp(-1 * dist * (scene.fogDensity * 0.001));
+			glm::clamp(f, 0.0f, 1.0f);
+			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
+		}
+
+	}
+}
+
+void Renderer::applyExponentialSquaredFogging()
+{
+	float f;
+	float dist;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			f = std::exp(-1* std::pow(dist * (scene.fogDensity * 0.001),2));
+			glm::clamp(f, 0.0f, 1.0f);
+			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
 		}
 
 	}
