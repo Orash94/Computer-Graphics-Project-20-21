@@ -39,6 +39,8 @@ public:
 	void SetCamOrWorldView(const bool view);
 	bool GetCamOrWorldView() const;
 	
+	bool isTexture = false;
+	int textureFactor = 8;
 
 	void cleanupScene();
 

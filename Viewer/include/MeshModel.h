@@ -62,6 +62,8 @@ public:
 
 	bool displayBoundingBox = false;
 
+	
+
 	bool displayFaceNormals = false;
 	float FaceNormalsLength = 100.0f;
 
@@ -84,6 +86,7 @@ public:
 	glm::vec3 diffuseColor;
 	glm::vec3 specularColor;
 
+	
 	shadingType shadingType = Flat;
 	modelType   modelType = Object;
 	glm::fmat4x4 finalTransformation;
@@ -97,6 +100,7 @@ protected:
 	glm::vec3 WorldScale = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 WorldRotate = glm::vec3(0, 0, 0);
 	glm::vec3 WorldTranslate = glm::vec3(0, 0, 0);
+
 
 	glm::fmat4x4 ObjectTransformation;
 	glm::fmat4x4 WorldTransformation;

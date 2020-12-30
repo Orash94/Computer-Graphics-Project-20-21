@@ -437,10 +437,16 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							break;
 						}
 					}
+					
 					//else
 					//{
 					//	scene.fogEffect = false;
 					//}
+				}
+				ImGui::Checkbox("Create Texture", &scene.isTexture);
+				if (scene.isTexture)
+				{
+					ImGui::SliderInt("Choose your texture factor", &scene.textureFactor, 1, 100);
 				}
 
 			}
@@ -884,7 +890,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					float MaxNormalLenthg = glm::min(windowsHeight, windowsWidth)/2;
 
 					ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
-
+					
 					if (ImGui::CollapsingHeader("Face Normals", ImGuiTreeNodeFlags_None))
 					{
 						ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
