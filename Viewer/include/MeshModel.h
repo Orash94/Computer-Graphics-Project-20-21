@@ -54,7 +54,7 @@ public:
 	void updateFrame( glm::fmat4x4 transform);
 	void SetColor(const glm::vec3 _color);
 	glm::vec3 GetColor()const;
-	const glm::vec3& getCenter() const;
+	const glm::fvec3& getCenter() const;
 	const glm::fmat3x3& getCoordinateSystem();
 
 

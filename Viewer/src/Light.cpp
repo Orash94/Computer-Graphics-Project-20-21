@@ -33,7 +33,7 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 {
 	glm::fvec3 Is = Utils::twoVectorsComponentMulti(MeshModelSpecularColor, LightSpecularColor);
 
-	glm::fvec3 lightDirection = glm::normalize(MeshPoint - lightcenter);
+	glm::fvec3 lightDirection = glm::normalize( lightcenter - MeshPoint);
 	glm::fvec3 CameraDirection = glm::normalize(cameraCenter - MeshPoint);
 	glm::fvec3 faceNoraml = glm::normalize(Normal);
 	//glm::fvec3 B = (glm::dot(lightDirection, faceNoraml) * faceNoraml) - lightDirection;

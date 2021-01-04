@@ -62,14 +62,14 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}*/
 		if (scene.GetActiveCamera().GetOrthographicOrPerspective()) {
 			//Orthographic
-			if (z >= -1 && z <= 0) {
+			//if (z >= -1 && z <= 0) {
 
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 				Zbuffer[i][j] = z;
 				localColorBuffer[i][j] = color;
-			}
+			//}
 		}
 		else {
 			//Perspective
@@ -675,9 +675,15 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 	for (int k = 0; k < scene.GetLightCount(); k++) {
 		Light light = scene.GetLight(k);
 		//(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
+		glm::fvec3 LC = light.getCenter();
+		glm::fvec3 MC = mesh.getCenter();
+		glm::fvec3 CC = scene.GetActiveCamera().getCenter();
+		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 
-		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), glm::fvec3(0,0,0), light.alpha);
-
+		
+		DrawLine(LC, MC, glm::fvec3(0.5, 0.8, 0.8));
+		DrawLine(CC, MC, glm::fvec3(1,1,1));
+		DrawLine(glm::fvec3(0, 0, 0), glm::fvec3(500.0f, 500.0f, 0), glm::fvec3(0, 0, 0));
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {
 				color[i] = 1.0f;
@@ -719,10 +725,10 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 
 	for (int k = 0; k < 3; k++) {
 		glm::fvec3 color = glm::fvec3(0, 0, 0);
-		for (int k = 0; k < scene.GetLightCount(); k++) {
-			Light light = scene.GetLight(k);
+		for (int l = 0; l < scene.GetLightCount(); l++) {
+			Light light = scene.GetLight(l);
 
-			color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+			color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 
 			for (int i = 0; i < 3; i++) {
 				if (color[i] > 1.0f) {
@@ -789,7 +795,7 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 				for (int k = 0; k < scene.GetLightCount(); k++) {
 					Light light = scene.GetLight(k);
 
-					color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, z), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+					color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, z), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 
 					for (int i = 0; i < 3; i++) {
 						if (color[i] > 1.0f) {
@@ -1021,6 +1027,18 @@ void Renderer::Render(const Scene& scene)
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
 
+	Camera& cam = scene.GetActiveCamera();
+	cam.right = (float)centerX;
+	cam.left = -(float)centerX;
+	cam.top = (float)centerY;
+	cam.bottom = -(float)centerY;
+	cam.SetViewVolumeCoordinates(cam.right, cam.left, cam.top, cam.bottom, cam.GetNear(), cam.GetFar());
+
+
+	glm::fmat4x4 translateAfterProjection = Utils::TransformationTransition(glm::fvec3(1, 1, 0));
+	glm::fmat4x4 scaleAfterProjection = Utils::TransformationScale(glm::fvec3(centerX, centerY, 0));
+
+	glm::fmat4x4 AfterProjection = scaleAfterProjection * translateAfterProjection;
 	
 	if (scene.getShowAxis()) {
 		DrawLine(glm::fvec3(0, centerY, 0), glm::fvec3(windowsWidth, centerY, 0), glm::fvec3(0, 0, 0));
@@ -1037,6 +1055,7 @@ void Renderer::Render(const Scene& scene)
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
+
 			glm::fmat4x4 transformationMatrix = mesh.getTransformation();
 
 
@@ -1052,7 +1071,7 @@ void Renderer::Render(const Scene& scene)
 
 
 			//transfer objects to center screen with transalte transformation
-			finalTransformation = translate * finalTransformation;
+			finalTransformation = AfterProjection * finalTransformation;
 			mesh.finalTransformation = finalTransformation;
 			//bounding box check
 
@@ -1113,10 +1132,7 @@ void Renderer::Render(const Scene& scene)
 	if (scene.GetCameraCount() > 0 ) {
 		for (int i = 0; i < scene.GetCameraCount(); i++) {
 
-			if (scene.GetActiveCameraIndex() == i) {
-				continue;
-			}
-
+			
 			Camera& tempCam = scene.GetCamera(i);
 			float proportion = 50.0f / tempCam.getMaxDitancePoints();
 
@@ -1136,17 +1152,20 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 finalTransformation =  transformationMatrix * scale;
 
 			
+
 			//rendering active camera view
 			Camera& currentCam = scene.GetActiveCamera();
 			glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
 			glm::fmat4x4 viewVolumeTransformation;
 			viewVolumeTransformation = currentCam.GetViewTransformation();
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
-			finalTransformation = translate *  CameraTransformation * finalTransformation;
+			finalTransformation = AfterProjection *  CameraTransformation * finalTransformation;
 			
 
 			tempCam.finalTransformation =  finalTransformation;
-
+			if (scene.GetActiveCameraIndex() == i) {
+				continue;
+			}
 			std::vector<Face> faces = tempCam.getFaces();
 
 			for (int j = 0; j < tempCam.GetFacesCount(); j++)
@@ -1191,7 +1210,7 @@ void Renderer::Render(const Scene& scene)
 				finalTransformation = CameraTransformation * finalTransformation;
 			}
 
-			finalTransformation = translate * finalTransformation;
+			finalTransformation = AfterProjection * finalTransformation;
 
 			tempLight.finalTransformation = finalTransformation;
 			std::vector<Face> faces = tempLight.getFaces();
