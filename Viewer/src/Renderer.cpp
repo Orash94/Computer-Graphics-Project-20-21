@@ -73,13 +73,13 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}
 		else {
 			//Perspective
-			if (z >= -1.0f && z <= 0.2) {
+			//if (z >= -1.0f && z <= 0.2) {
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 				Zbuffer[i][j] = z;
 				localColorBuffer[i][j] = color;
-			}
+			//}
 		}
 		
 	}
@@ -683,7 +683,6 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 		
 		DrawLine(LC, MC, glm::fvec3(0.5, 0.8, 0.8));
 		DrawLine(CC, MC, glm::fvec3(1,1,1));
-		DrawLine(glm::fvec3(0, 0, 0), glm::fvec3(500.0f, 500.0f, 0), glm::fvec3(0, 0, 0));
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {
 				color[i] = 1.0f;
@@ -1027,6 +1026,7 @@ void Renderer::Render(const Scene& scene)
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
 
+	// updating camera params;
 	Camera& cam = scene.GetActiveCamera();
 	cam.right = (float)centerX;
 	cam.left = -(float)centerX;
@@ -1036,7 +1036,7 @@ void Renderer::Render(const Scene& scene)
 
 
 	glm::fmat4x4 translateAfterProjection = Utils::TransformationTransition(glm::fvec3(1, 1, 0));
-	glm::fmat4x4 scaleAfterProjection = Utils::TransformationScale(glm::fvec3(centerX, centerY, 0));
+	glm::fmat4x4 scaleAfterProjection = Utils::TransformationScale(glm::fvec3(centerX, centerY, 1));
 
 	glm::fmat4x4 AfterProjection = scaleAfterProjection * translateAfterProjection;
 	
@@ -1050,7 +1050,7 @@ void Renderer::Render(const Scene& scene)
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel& mesh = scene.GetModel(i);
-			float proportion = 200.0f/mesh.getMaxDitancePoints();
+			float proportion = 300.f/mesh.getMaxDitancePoints();
 
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));

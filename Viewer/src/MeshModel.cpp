@@ -16,7 +16,7 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 	color = glm::vec3(1, 1, 1);
 	ambientColor = glm::vec3(0, 0, 0);
 	diffuseColor = glm::vec3(0, 0, 0);
-	specularColor = glm::vec3(0, 0, 0);
+	specularColor = glm::vec3(1, 1, 1);
 
 
 	setModelInMiddle();

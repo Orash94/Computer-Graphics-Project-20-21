@@ -33,16 +33,13 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 {
 	glm::fvec3 Is = Utils::twoVectorsComponentMulti(MeshModelSpecularColor, LightSpecularColor);
 
-	glm::fvec3 lightDirection = glm::normalize( lightcenter - MeshPoint);
+	glm::fvec3 lightDirection = glm::normalize(MeshPoint -lightcenter );
 	glm::fvec3 CameraDirection = glm::normalize(cameraCenter - MeshPoint);
 	glm::fvec3 faceNoraml = glm::normalize(Normal);
-	//glm::fvec3 B = (glm::dot(lightDirection, faceNoraml) * faceNoraml) - lightDirection;
-	//glm::fvec3 reflection = glm::normalize(lightDirection + 2.0f * B);
 
 	//R = 2*n*dot_product(n,L) - L   // When L goes from the vertex to the light source
 
-	glm::fvec3 reflection = glm::normalize(-2.0f *Normal* glm::dot(Normal, lightDirection) + lightDirection);
-
+	glm::fvec3 reflection = glm::normalize(-2.0f * glm::dot(lightDirection, Normal)*Normal  + lightDirection);
 
 	float degree = glm::dot(reflection, CameraDirection);
 	float power = pow(degree, Alpha);
@@ -63,17 +60,15 @@ glm::fvec3 Light::calculateColor(const MeshModel& mesh, const glm::fvec3 Normal,
 
 		DiffuseLight = calculateDiffuse(mesh.diffuseColor, diffuseColor, Normal, lightDirection);
 
-		SpecularLight = calculateSpecular(mesh.specularColor, specularColor, Normal, MeshPoint, lightcenter, cameraCenter, Alpha);
 	}
 	else if((typeOfLight == lightType::Point)) {
 
 		glm::fvec3 lightDirection = glm::normalize( lightcenter -  MeshPoint);
 
 		DiffuseLight = calculateDiffuse(mesh.diffuseColor, diffuseColor, Normal, lightDirection);
-
-		SpecularLight = calculateSpecular(mesh.specularColor, specularColor, Normal, MeshPoint, lightcenter, cameraCenter, Alpha);
 	}
-	
+
+	SpecularLight = calculateSpecular(mesh.specularColor, specularColor, Normal, MeshPoint, lightcenter, cameraCenter, Alpha);
 
 	glm::fvec3 light = AmbientLight + DiffuseLight + SpecularLight;
 
