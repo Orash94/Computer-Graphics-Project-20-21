@@ -217,6 +217,7 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 
 	//here we need to distinguise between the three types of shading
 	if (mesh.modelType == MeshModel::modelType::Light) {
+
 		ScanConversionTriangle(v1, v2, v3, color);
 	}
 	else {
@@ -583,10 +584,16 @@ void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, 
 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
-			if (isInsideTheTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, i, j))
-				
+			if (isInsideTheTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, i, j)) {
+				if (scene.isTexture) {
+					//float noise1 = (std::rand() % 255) * std::exp(-1 * (scene.GetActiveModel().textureFactor + 7));
+					float x = pow(rand(), 2) + std::pow(rand(), 2);
+					float factor = scene.textureFactor * 0.0001f;
+					float noise1 = glm::clamp(x, 0.0f, factor);
+					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+				}
 				PutPixel(i, j, ZpointComputation(p1, p2, p3, glm::vec2(i, j)), color);
-			
+			}
 		}
 
 	}
@@ -698,6 +705,12 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
 			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+				if (scene.isTexture) {
+					float x = pow(rand(), 2) + std::pow(rand(), 2);
+					float factor = scene.textureFactor * 0.0001f;
+					float noise1 = glm::clamp(x, 0.0f, factor);
+					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+				}
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
 		}
@@ -752,7 +765,13 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 
 				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i,j));
 				glm::fvec3 color = weights[0]* verticesColor[0] + weights[1] * verticesColor[1] + weights[2] * verticesColor[2];
-				
+
+				if (scene.isTexture) {
+					float x = pow(rand(), 2) + std::pow(rand(), 2);
+					float factor = scene.textureFactor * 0.0001f;
+					float noise1 = glm::clamp(x, 0.0f, factor);
+					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+				}
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
 		}
@@ -803,7 +822,12 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 					}
 
 				}
-
+				if (scene.isTexture) {
+					float x = pow(rand(), 2) + std::pow(rand(), 2);
+					float factor = scene.textureFactor * 0.0001f;
+					float noise1 = glm::clamp(x, 0.0f, factor);
+					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+				}
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
 		}
