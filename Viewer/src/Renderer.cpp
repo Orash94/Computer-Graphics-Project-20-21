@@ -677,7 +677,17 @@ float Renderer::area(int x1, int y1, int x2, int y2, int x3, int y3)
 void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
 	
-	glm::fvec3 tringlrCenter = (v1 + v2 + v3) / 3.0f;
+	
+
+	glm::vec3 vectorArray[3];
+
+	for (int k = 0; k < 3; k++) {
+		int index = face.GetVertexIndex(k) - 1;
+		glm::vec3 v = mesh.GetVertexAtIndex(index);
+		vectorArray[k] = Utils::applyTransformationToVector(v, mesh.getNormalTransformation());
+	}
+	glm::fvec3 tringlrCenter = (vectorArray[0] + vectorArray[1] + vectorArray[2]) / 3.0f;
+
 	glm::fvec3 color = glm::fvec3(0, 0, 0);
 	for (int k = 0; k < scene.GetLightCount(); k++) {
 		Light light = scene.GetLight(k);
@@ -722,9 +732,15 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 {
 
 	std::vector<glm::vec3>  normals  = mesh.getVerticesNormalsPerFace();
-	glm::fmat4x4 transformation = mesh.finalTransformation;
+	glm::fmat4x4 transformation = mesh.normalTransformation;
 
-	glm::fvec3 vertices[3] = { v1, v2, v3 };
+	glm::vec3 vertices[3];
+
+	for (int k = 0; k < 3; k++) {
+		int index = face.GetVertexIndex(k) - 1;
+		glm::vec3 v = mesh.GetVertexAtIndex(index);
+		vertices[k] = Utils::applyTransformationToVector(v, mesh.getNormalTransformation());
+	}
 	glm::fvec3 normalTransformation[3];
 	glm::fvec3 verticesColor[3];
 
@@ -782,12 +798,11 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
 	std::vector<glm::vec3>  normals = mesh.getVerticesNormalsPerFace();
-	glm::fmat4x4 transformation = mesh.getTransformation();
+	glm::fmat4x4 transformation = mesh.normalTransformation;
 
 
 
 	glm::fvec3 normalTransformation[3];
-	glm::fvec3 vertices[3] = { v1, v2, v3 };
 
 	for (int k = 0; k < 3; k++) {
 		int normalIndex = face.GetNormalIndex(k) - 1;
@@ -1093,10 +1108,12 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 			finalTransformation = CameraTransformation * finalTransformation;
 			glm::mat4x4 normalMatrix = finalTransformation;
-			mesh.finalTransformation = finalTransformation;
+			
+
+			mesh.normalTransformation = finalTransformation;
 			//transfer objects to center screen with transalte transformation
 			finalTransformation = AfterProjection * finalTransformation;
-			
+			mesh.finalTransformation = finalTransformation;
 			//bounding box check
 
 			if (mesh.displayBoundingBox) {
@@ -1183,9 +1200,11 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 viewVolumeTransformation;
 			viewVolumeTransformation = currentCam.GetViewTransformation();
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
-			tempCam.finalTransformation = CameraTransformation*finalTransformation;
-			finalTransformation = AfterProjection *  CameraTransformation * finalTransformation;
-			
+			finalTransformation =   CameraTransformation * finalTransformation;
+
+			tempCam.normalTransformation = finalTransformation;
+			finalTransformation = AfterProjection * finalTransformation;
+			tempCam.finalTransformation = finalTransformation;
 
 			
 			if (scene.GetActiveCameraIndex() == i) {
@@ -1234,9 +1253,9 @@ void Renderer::Render(const Scene& scene)
 				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 				finalTransformation = CameraTransformation * finalTransformation;
 			}
-			tempLight.finalTransformation = finalTransformation;
+			tempLight.normalTransformation = finalTransformation;
 			finalTransformation = AfterProjection * finalTransformation;
-
+			tempLight.finalTransformation = finalTransformation;
 			
 			std::vector<Face> faces = tempLight.getFaces();
 

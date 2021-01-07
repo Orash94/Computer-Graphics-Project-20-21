@@ -56,7 +56,7 @@ public:
 	glm::vec3 GetColor()const;
 	const glm::fvec3& getCenter() const;
 	const glm::fmat3x3& getCoordinateSystem();
-
+	glm::fmat4x4 getNormalTransformation() const;
 
 
 
@@ -89,7 +89,7 @@ public:
 	shadingType shadingType = Flat;
 	modelType   modelType = Object;
 	glm::fmat4x4 finalTransformation;
-
+	glm::fmat4x4 normalTransformation;
 protected:
 	
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);

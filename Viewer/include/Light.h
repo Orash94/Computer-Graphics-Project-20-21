@@ -14,6 +14,7 @@ public:
 	glm::fvec3 calculateDiffuse(glm::fvec3 MeshModelDiffuseColor, glm::fvec3 LightDiffuseColor, glm::fvec3 Normal, glm::fvec3 lightDirection);
 	glm::fvec3 calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec3 LightSpecularColor, glm::fvec3 Normal, glm::fvec3 MeshPoint ,glm::fvec3 lightcenter, glm::fvec3 cameraCenter , float Alpha);
 	glm::fvec3 calculateColor(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha);
+	glm::fvec3 calculateSpecularParallel(glm::fvec3 MeshModelSpecularColor, glm::fvec3 LightSpecularColor, glm::fvec3 Normal, glm::fvec3 MeshPoint, glm::fvec3 lightDirection, glm::fvec3 cameraCenter, float Alpha);
 
 	lightType typeOfLight;
 	float alpha = 1;
