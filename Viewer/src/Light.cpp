@@ -40,7 +40,7 @@ glm::fvec3 Light::calculateSpecular(glm::fvec3 MeshModelSpecularColor, glm::fvec
 	//R = 2*n*dot_product(n,L) - L   // When L goes from the vertex to the light source
 
 	glm::fvec3 reflection = glm::normalize(-2.0f * glm::dot(lightDirection, Normal)*Normal  + lightDirection);
-
+	
 	float degree = glm::dot(reflection, CameraDirection);
 	float power = pow(degree, Alpha);
 	Is = Is * power;

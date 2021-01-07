@@ -688,8 +688,8 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 
 		
-		//DrawLine(LC, MC, glm::fvec3(0.5, 0.8, 0.8));
-		//DrawLine(CC, MC, glm::fvec3(1,1,1));
+		DrawLine(LC, MC, glm::fvec3(0.5, 0.8, 0.8));
+		DrawLine(CC, MC, glm::fvec3(1,1,1));
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {
 				color[i] = 1.0f;

@@ -64,16 +64,28 @@ later
 
  <img src="./pictures/Zoom_8YYjAjRlhk.png" width="400">  <img src="./pictures/Zoom_aL5T606hhl.png" width="400">  
 
-We allow the user to choose the threshold. Lower threshold means more ✨shinny✨ objects.
+We allow the user to choose the threshold. Lower threshold means more ✨shinny✨ objects. source image on the left bloom effect on the right.
 
 ### Fog Effect
 
+<img src="./pictures/__no fog.png" width="400">
+
+Here we can see the original picture.
+
 #### Linear
 
+<img src="./pictures/__Linear Fog.png" width="400">
 
+Users can choose the start and end of fog effect.
 
 #### Exponential 
 
+<img src="./pictures/__expo fog.png" width="400">
 
+Users can choose density of the fog.
 
 #### Exponential Squared 
+
+<img src="./pictures/__expo squared fog.png" width="400">
+
+Users can choose density of the fog.
