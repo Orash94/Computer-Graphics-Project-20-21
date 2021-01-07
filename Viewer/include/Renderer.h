@@ -34,7 +34,7 @@ private:
 	void allocateColorBuffer();
 	void PostProcessing();
 	void DrawBoundingBox(MeshModel& model , const Scene& scene , glm::fmat4x4 trasformation , const glm::vec3& color);
-	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation  , const glm::vec3& color);
+	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation, glm::fmat4x4 FinalTrasformation, const glm::vec3& color);
 	void DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength);
 	void DrawVerticesNormalPerFace(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength);
 	void CreateBuffers(int w, int h);

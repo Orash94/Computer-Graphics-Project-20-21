@@ -692,7 +692,7 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 		//DrawLine(CC, MC, glm::fvec3(1,1,1));
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {
-				color[i] = 1.0f;
+				color[i] = glm::clamp(color[i],0.0f, 1.0f);
 			}
 		}
 	}
@@ -835,7 +835,7 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 	}
 }
 
-glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 trasformation, const glm::vec3& color)
+glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 trasformation, glm::fmat4x4 FinalTrasformation, const glm::vec3& color)
 {
 		glm::vec3 vectorArray[3];
 
@@ -853,7 +853,7 @@ glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 tra
 		glm::fvec3 v2 = vectorArray[2];
 
 		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f; //center of face
-		ActualCenter = Utils::applyTransformationToVector(ActualCenter, trasformation);
+		ActualCenter = Utils::applyTransformationToVector(ActualCenter, FinalTrasformation);
 
 		glm::vec3 Actualnormal = glm::normalize(glm::cross((v1 - v0), (v2 - v0)));
 
@@ -1092,11 +1092,11 @@ void Renderer::Render(const Scene& scene)
 
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 			finalTransformation = CameraTransformation * finalTransformation;
-
-
+			glm::mat4x4 normalMatrix = finalTransformation;
+			mesh.finalTransformation = finalTransformation;
 			//transfer objects to center screen with transalte transformation
 			finalTransformation = AfterProjection * finalTransformation;
-			mesh.finalTransformation = finalTransformation;
+			
 			//bounding box check
 
 			if (mesh.displayBoundingBox) {
@@ -1128,7 +1128,7 @@ void Renderer::Render(const Scene& scene)
 				}
 
 				
-				glm::fvec3  faceNormal = DrawFaceNormal(mesh ,face, finalTransformation, glm::vec3(1, 0, 1));
+				glm::fvec3  faceNormal = DrawFaceNormal(mesh ,face, normalMatrix, finalTransformation, glm::vec3(1, 0, 1));
 				mesh.setFaceNormal(j ,faceNormal);
 				
 				
@@ -1183,10 +1183,11 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 viewVolumeTransformation;
 			viewVolumeTransformation = currentCam.GetViewTransformation();
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+			tempCam.finalTransformation = CameraTransformation*finalTransformation;
 			finalTransformation = AfterProjection *  CameraTransformation * finalTransformation;
 			
 
-			tempCam.finalTransformation =  finalTransformation;
+			
 			if (scene.GetActiveCameraIndex() == i) {
 				continue;
 			}
@@ -1233,10 +1234,10 @@ void Renderer::Render(const Scene& scene)
 				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 				finalTransformation = CameraTransformation * finalTransformation;
 			}
-
+			tempLight.finalTransformation = finalTransformation;
 			finalTransformation = AfterProjection * finalTransformation;
 
-			tempLight.finalTransformation = finalTransformation;
+			
 			std::vector<Face> faces = tempLight.getFaces();
 
 			for (int j = 0; j < tempLight.GetFacesCount(); j++)
