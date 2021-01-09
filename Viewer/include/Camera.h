@@ -47,6 +47,14 @@ public:
 	float left;
 	float top;
 	float bottom;
+
+
+
+	float _near;
+	float _far;
+	float fovy;
+	float aspectRatio;
+
 private:
 	glm::mat4x4 view_transformation_;
 	glm::mat4x4 view_transformation_inverse;
@@ -57,10 +65,6 @@ private:
 
 
 	
-	float _near;
-	float _far;
-	float fovy;
-	float aspectRatio;
 
 	float zoom;
 

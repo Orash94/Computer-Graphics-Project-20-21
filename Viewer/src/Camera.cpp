@@ -76,9 +76,9 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	float width = aspectRatio * height;
 
 	//(T fov, T width, T height, T zNear, T zFar)
-	view_transformation_ = glm::perspectiveFov(fovy, width, height , _near, _far);
+	//view_transformation_ = glm::perspectiveFov(fovy, width, height , _near, _far);
 	
-	//view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(-width, width, height, -height, near_, far_);
+	view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(left, right, top, bottom, near_, far_);
 }
 
 void Camera::setProjection(const int Projection)

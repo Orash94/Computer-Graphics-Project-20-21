@@ -1,5 +1,3 @@
-
-
 ## Light Types
 
 ### Ambient
@@ -74,9 +72,25 @@ We interpolate nomrals of the three vertices constructing the face,and then we c
 
 ## Demonstration
 
+### Art
+
+<img src="./pictures/Zoom_cCk0QaQs1j.png" width="400"> <img src="./pictures/b44668f04dc693785f64bbefd08d_Gallery.jpg" width="400">
+
+Phantom of the opera ? more like bugs bunny of the opera , we have diffuse light with ambient light with the combination of the white light to  give you this masterpiece. 
+
+<img src="./pictures/‏‏furious beethoven.png" width="400"> <img src="./pictures/1584452342_Dragon-Ball-Z-Kakarot-will-receive-Goku-and-Vegeta-Super-1024x576.jpg" width="400">
 
 
 
+Super Saiyan  God Beethoven evolves into Pikachu . we used specular with diffuse and a little spice of ambient for Beethoven  and for the bananas we used only diffuse and ambient light because banana is not specular although its spectacular .
+
+#### Multiple lights sources
+
+<img src="./pictures/Zoom_pEusxGkyKP.png" width="400"> <img src="./pictures/Zoom_6jdd8XYdTDzY.png" width="400">
+
+
+
+we show multiple light using point and parallel light.
 
 ## Post Processing Effects
 
@@ -114,3 +128,4 @@ Users can choose density of the fog.
 
 <img src="./pictures/proceduralTexture .png" width="400">
 
+We give the user the option to choose the intensity factor for the procedural textures.
