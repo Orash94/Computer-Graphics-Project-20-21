@@ -86,11 +86,11 @@ Super Saiyan  God Beethoven evolves into Pikachu . we used specular with diffuse
 
 #### Multiple lights sources
 
-<img src="./pictures/Zoom_pEusxGkyKP.png" width="400"> <img src="./pictures/Zoom_6jdd8XYdTDzY.png" width="400">
+<img src="./pictures/Zoom_pEusxGkyKP.png" width="400"> 
 
 
 
-we show multiple light using point and parallel light.
+we show multiple light using parallel light.
 
 ## Post Processing Effects
 
