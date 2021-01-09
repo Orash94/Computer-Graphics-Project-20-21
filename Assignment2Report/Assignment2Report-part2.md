@@ -110,7 +110,7 @@ Users can choose density of the fog.
 
 Users can choose density of the fog.
 
-### Procedural textures
+### Procedural textures 
 
 <img src="./pictures/proceduralTexture.png" width="400">
 
