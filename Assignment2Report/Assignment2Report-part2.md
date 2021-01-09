@@ -88,29 +88,29 @@ We allow the user to choose the threshold. Lower threshold means more âœ¨shinnyâ
 
 ### Fog Effect
 
-<img src="./pictures/Nofog.png" width="400">
+<img src="./pictures/Nofog .png" width="400">
 
 Here we can see the original picture.
 
 #### Linear
 
-<img src="./pictures/LinearFog.png" width="400">
+<img src="./pictures/LinearFog .png" width="400">
 
 Users can choose the start and end of fog effect.
 
 #### Exponential 
 
-<img src="./pictures/expoFog.png" width="400">
+<img src="./pictures/expoFog .png" width="400">
 
 Users can choose density of the fog.
 
 #### Exponential Squared 
 
-<img src="./pictures/expoSquaredFog.png" width="400">
+<img src="./pictures/expoSquaredFog .png" width="400">
 
 Users can choose density of the fog.
 
 ### Procedural textures 
 
-<img src="./pictures/proceduralTexture.png" width="400">
+<img src="./pictures/proceduralTexture .png" width="400">
 
