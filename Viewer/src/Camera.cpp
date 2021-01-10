@@ -14,11 +14,11 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	bottom = -500.f;
 	top = 500.f;
 	
-	_near = 1.0f;
+	_near = 200.0f;
 	_far = 1200.0f;
 
 	zoom = 1.0f;
-	fovy = 45.f;
+	fovy = glm::radians(45.0f);
 	aspectRatio = 1.0f;
 
 
@@ -72,13 +72,13 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	fovy = _fovy;
 	aspectRatio = _aspectRatio;
 
-	float height = glm::abs(glm::tan(glm::radians(fovy)/zoom)) * _near;
+	float height = glm::abs(glm::tan(fovy/zoom)) * _near;
 	float width = aspectRatio * height;
 
 	//(T fov, T width, T height, T zNear, T zFar)
-	//view_transformation_ = glm::perspectiveFov(fovy, width, height , _near, _far);
-	
-	view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(left, right, top, bottom, near_, far_);
+	//view_transformation_ = glm::perspective(fovy, aspectRatio , _near, _far);
+	view_transformation_ = glm::frustum(left, right, bottom, top, _near, _far);
+	//view_trview_transformation_ =ansformation_ = Utils::SetViewVolumePerspectiveTransformation(left, right, top, bottom, near_, far_);
 }
 
 void Camera::setProjection(const int Projection)

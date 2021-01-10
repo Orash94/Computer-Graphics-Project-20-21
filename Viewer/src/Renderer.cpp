@@ -62,24 +62,24 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}*/
 		if (scene.GetActiveCamera().GetOrthographicOrPerspective()) {
 			//Orthographic
-			//if (z >= -1 && z <= 0) {
+			if (z >= -1 && z <= 0) {
 
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 				Zbuffer[i][j] = z;
 				localColorBuffer[i][j] = color;
-			//}
+			}
 		}
 		else {
 			//Perspective
-			//if (z >= -1.0f && z <= 0.2) {
+			if (z >= -1.0f && z <= 0.2) {
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
 				Zbuffer[i][j] = z;
 				localColorBuffer[i][j] = color;
-			//}
+			}
 		}
 		
 	}
@@ -1071,7 +1071,7 @@ void Renderer::Render(const Scene& scene)
 	cam.left = -(float)centerX;
 	cam.top = (float)centerY;
 	cam.bottom = -(float)centerY;
-	cam.aspectRatio = (cam.right - cam.left) / (cam.top - cam.bottom);
+	cam.aspectRatio = windowsWidth / windowsHeight;
 	if(cam.GetOrthographicOrPerspective()){
 		cam.SetViewVolumeCoordinates(cam.right, cam.left, cam.top, cam.bottom, cam.GetNear(), cam.GetFar());
 	}
