@@ -702,7 +702,7 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 		DrawLine(CC, MC, glm::fvec3(1,1,1));
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {
-				color[i] = glm::clamp(color[i],0.0f, 1.0f);
+				color[i] = 1;
 			}
 		}
 	}
@@ -757,7 +757,12 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 			Light light = scene.GetLight(l);
 
 			color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
-
+			if (scene.isTexture) {
+				float x = pow(rand(), 2) + std::pow(rand(), 2);
+				float factor = scene.textureFactor * 0.0001f;
+				float noise1 = glm::clamp(x, 0.0f, factor);
+				color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+			}
 			for (int i = 0; i < 3; i++) {
 				if (color[i] > 1.0f) {
 					color[i] = 1.0f;
@@ -782,12 +787,7 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i,j));
 				glm::fvec3 color = weights[0]* verticesColor[0] + weights[1] * verticesColor[1] + weights[2] * verticesColor[2];
 
-				if (scene.isTexture) {
-					float x = pow(rand(), 2) + std::pow(rand(), 2);
-					float factor = scene.textureFactor * 0.0001f;
-					float noise1 = glm::clamp(x, 0.0f, factor);
-					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
-				}
+				
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
 		}
@@ -829,20 +829,20 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 					Light light = scene.GetLight(k);
 
 					color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, z), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
-
+					if (scene.isTexture) {
+						float x = pow(rand(), 2) + std::pow(rand(), 2);
+						float factor = scene.textureFactor * 0.0001f;
+						float noise1 = glm::clamp(x, 0.0f, factor);
+						color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+					}
 					for (int i = 0; i < 3; i++) {
 						if (color[i] > 1.0f) {
-							color[i] = 1.0f;
+							color[i] = 1;
 						}
 					}
 
 				}
-				if (scene.isTexture) {
-					float x = pow(rand(), 2) + std::pow(rand(), 2);
-					float factor = scene.textureFactor * 0.0001f;
-					float noise1 = glm::clamp(x, 0.0f, factor);
-					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
-				}
+				
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
 		}
