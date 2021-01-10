@@ -616,7 +616,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							nNear = cam.GetNear();
 							nFar = cam.GetFar();
 							nFovy = cam.GetFovy();
-							nAspectRatio = cam.GetAspectRatio();
+							nAspectRatio = (cam.right - cam.left) / (cam.top - cam.bottom);
 							nZoom = cam.GetZoom();
 
 							ImGui::SliderFloat(" :Near ", &nNear,0.1f, 200.0f);

@@ -1071,7 +1071,14 @@ void Renderer::Render(const Scene& scene)
 	cam.left = -(float)centerX;
 	cam.top = (float)centerY;
 	cam.bottom = -(float)centerY;
-	cam.SetViewVolumeCoordinates(cam.right, cam.left, cam.top, cam.bottom, cam.GetNear(), cam.GetFar());
+	cam.aspectRatio = (cam.right - cam.left) / (cam.top - cam.bottom);
+	if(cam.GetOrthographicOrPerspective()){
+		cam.SetViewVolumeCoordinates(cam.right, cam.left, cam.top, cam.bottom, cam.GetNear(), cam.GetFar());
+	}
+	else {
+		cam.SetPerspectiveData(cam.GetNear(), cam.GetFar(), cam.GetFovy(), cam.GetAspectRatio());
+	}
+	
 
 
 	glm::fmat4x4 translateAfterProjection = Utils::TransformationTransition(glm::fvec3(1, 1, 0));

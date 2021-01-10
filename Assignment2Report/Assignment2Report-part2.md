@@ -1,5 +1,3 @@
-
-
 ## Light Types
 
 ### Ambient
@@ -16,7 +14,9 @@ Here we demonstrate the ambient light,  it works by multiplying the  ambient col
 
 #### Parallel light
 
-<img src="./pictures/3ywCJzI339.png" width="400"> <img src="./pictures/Zoom_72rAwpKJSY.png" width="400">
+ <img src="./pictures/MeshViewer_sZsHQfe460.png" width="400"> <img src="./pictures/MeshViewer_e2mNkoyxGg.png" width="400">
+
+
 
 
 
@@ -24,39 +24,73 @@ Diffuse color with Parallel light. We can see that the light is in the shape of 
 
 #### Point light
 
- <img src="./pictures/RZQGpf2DGI.png" width="400"> <img src="./pictures/OcGDJ8jcGU.png" width="400">  
+ <img src="./pictures/MeshViewer_Pn90Td6QYD.png" width="400"> <img src="./pictures/MeshViewer_nQ2sLcmsLB.png" width="400">  
 
 Diffuse color with point light. We can that the light is in the shape of a sphere because the light emits lights in every direction. We can see that whenever we translate the point lights source the sphere color changes,  but whenever we rotate the point light source the colors remain the same.
 
 ### Specular
 
-???
+#### Parallel light
 
-## Materials??
+<img src="./pictures/Zoom_4nBKdPWjrw.png" width="400">
 
-Later
+Here we have the specular light with a parallel light .
+
+#### Point light
+
+<img src="./pictures/Zoom_P3ivz8da89.png" width="400">
+
+Here we have the point light with a parallel light .
+
+## Materials
+
+<img src="./pictures/MeshViewer_K8DUKfJsFG.png" width="400">
+
+We gave the user the options to choose material colors for the model.
 
 ## Shading types
 
-later
-
 ### Flat
+
+<img src="./pictures/chrome_XnE0uymuoY.png" width="400"> <img src="./pictures/MeshViewer_UXbjyaTIQ4.png" width="400">
+
+We use the triangle center to color the the faces and use tringle centers to calculate colors,
 
 
 
 ### Gouraud
 
+<img src="./pictures/chrome_exOlLbCEvz.png" width="400"> <img src="./pictures/MeshViewer_NT55zZkXbr.png" width="400">
 
+We interpolate on the face using  three colors calculated using  three varices constructing the face and using normals per vertex per face.
 
 ### Phong
 
+<img src="./pictures/chrome_TPTkFEEOrB.png" width="400"> <img src="./pictures/MeshViewer_896vIyibtE.png" width="400">
 
+We interpolate nomrals of the three vertices constructing the face,and then we calculate the normal for each point on tringle and calculate color using new normal.
 
 ## Demonstration
 
+### Art
+
+<img src="./pictures/Zoom_cCk0QaQs1j.png" width="400"> <img src="./pictures/b44668f04dc693785f64bbefd08d_Gallery.jpg" width="400">
+
+Phantom of the opera ? more like bugs bunny of the opera , we have diffuse light with ambient light with the combination of the white light to  give you this masterpiece. 
+
+<img src="./pictures/‏‏furious beethoven.png" width="400"> <img src="./pictures/1584452342_Dragon-Ball-Z-Kakarot-will-receive-Goku-and-Vegeta-Super-1024x576.jpg" width="400">
 
 
 
+Super Saiyan  God Beethoven evolves into Pikachu . we used specular with diffuse and a little spice of ambient for Beethoven  and for the bananas we used only diffuse and ambient light because banana is not specular although its spectacular .
+
+#### Multiple lights sources
+
+<img src="./pictures/Zoom_pEusxGkyKP.png" width="400"><img src="./pictures/WhatsApp Image 2021-01-10 at 15.03.57.jpeg" width="400"> 
+
+
+
+we show multiple light using parallel light.
 
 ## Post Processing Effects
 
@@ -68,24 +102,30 @@ We allow the user to choose the threshold. Lower threshold means more ✨shinny�
 
 ### Fog Effect
 
-<img src="./pictures/__no fog.png" width="400">
+<img src="./pictures/Nofog .png" width="400">
 
 Here we can see the original picture.
 
 #### Linear
 
-<img src="./pictures/__Linear Fog.png" width="400">
+<img src="./pictures/LinearFog .png" width="400">
 
 Users can choose the start and end of fog effect.
 
 #### Exponential 
 
-<img src="./pictures/__expo fog.png" width="400">
+<img src="./pictures/expoFog .png" width="400">
 
 Users can choose density of the fog.
 
 #### Exponential Squared 
 
-<img src="./pictures/__expo squared fog.png" width="400">
+<img src="./pictures/expoSquaredFog .png" width="400">
 
 Users can choose density of the fog.
+
+### Procedural textures 
+
+<img src="./pictures/proceduralTexture .png" width="400">
+
+We give the user the option to choose the intensity factor for the procedural textures.
