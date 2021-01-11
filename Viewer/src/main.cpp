@@ -209,14 +209,14 @@ std::shared_ptr<Camera> MakeCamera() {
 std::shared_ptr<Camera> MakeDefaultCamera()
 {
 	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/camera.obj")));
-	glm::vec3 nEye = glm::vec3(0, 0, 300);
+	glm::vec3 nEye = glm::vec3(0, 0, 250);
 	glm::vec3 nAt = glm::vec3(0, 0, -1);
 	glm::vec3 nUp = glm::vec3(0, 1, 0);
 	auto cam = std::make_shared<Camera>(mesh, nEye, nAt, nUp);
 
 	glm::fvec3 scale = glm::fvec3(1,1,1);
 	glm::fvec3 Rotate = glm::fvec3(0, 0, 0);
-	glm::fvec3 Translate = glm::fvec3(0, 0, 300);
+	glm::fvec3 Translate = glm::fvec3(0, 0, 250);
 
 	cam->setObjectTransformationUpdates(scale, Rotate, Translate);
 	return cam;
@@ -619,8 +619,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							nAspectRatio = windowsWidth / windowHeight;
 							nZoom = cam.GetZoom();
 
-							ImGui::SliderFloat(" :Near ", &nNear,0.1f, 200.0f);
-							ImGui::SliderFloat(" :Far ", &nFar, 200.1f, 500.0f);
+							ImGui::SliderFloat(" :Near ", &nNear,0.1f, 400.0f);
+							ImGui::SliderFloat(" :Far ", &nFar, 10.0f, 2500.0f);
 							ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.001f, 3.14f);
 							ImGui::SliderFloat(" :Width", &nAspectRatio, 0.1f, 100.0f);
 							ImGui::SliderFloat("Zoom: ", &nZoom, 1.0f, 1000000.0f);

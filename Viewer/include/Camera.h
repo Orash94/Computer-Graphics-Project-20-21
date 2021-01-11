@@ -54,7 +54,8 @@ public:
 	float _far;
 	float fovy;
 	float aspectRatio;
-
+	float Pnear;
+	float Pfar;
 private:
 	glm::mat4x4 view_transformation_;
 	glm::mat4x4 view_transformation_inverse;

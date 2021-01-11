@@ -62,7 +62,7 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}*/
 		if (scene.GetActiveCamera().GetOrthographicOrPerspective()) {
 			//Orthographic
-			if (z >= -1 && z <= 0) {
+			if (1) {
 
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
@@ -73,7 +73,9 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}
 		else {
 			//Perspective
-			if (z >= -1.0f && z <= 0.2) {
+			
+
+			if (1) {
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
 				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
@@ -546,9 +548,10 @@ void Renderer::applyExponentialFogging()
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
-			//dist = glm::distance(scene.GetActiveCamera().getEye().z, Zbuffer[i][j]);
-			f = std::exp(-1 * dist * (scene.fogDensity * 0.001));
+			//dist = glm::distance(scene.GetActiveCamera().getCenter(), glm::vec3(i, j, Zbuffer[i][j]));
+			glm::vec3 CC = scene.GetActiveCamera().getCenter();
+			dist = glm::distance(CC[2], Zbuffer[i][j]) *100;
+			f = std::exp(-1 * dist * (scene.fogDensity * 0.01));
 			glm::clamp(f, 0.0f, 1.0f);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
 		}
@@ -698,8 +701,8 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 
 		
-		DrawLine(LC, MC, glm::fvec3(0.5, 0.8, 0.8));
-		DrawLine(CC, MC, glm::fvec3(1,1,1));
+		//DrawLine(LC, MC, glm::fvec3(0.5, 0.8, 0.8));
+		//DrawLine(CC, MC, glm::fvec3(1,1,1));
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {
 				color[i] = 1;
@@ -815,6 +818,8 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 	float maxX = getMax(v1.x, v2.x, v3.x);
 	float minY = getMin(v1.y, v2.y, v3.y);
 	float maxY = getMax(v1.y, v2.y, v3.y);
+
+	
 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
@@ -1156,7 +1161,15 @@ void Renderer::Render(const Scene& scene)
 				mesh.setFaceNormal(j ,faceNormal);
 				
 				
-
+				if (scene.GetActiveCamera().GetOrthographicOrPerspective() == false) {
+					glm::vec3 triangleCenter = (vectorArray[0] + vectorArray[1] + vectorArray[2]) / 3.0f;
+					glm::vec3 at = scene.GetActiveCamera().getAt();
+					float zAt = at.z;
+					glm::vec3 camCenter = scene.GetActiveCamera().getCenter();
+					if ((camCenter[2] + zAt * triangleCenter[2]) < (camCenter.z + zAt * scene.GetActiveCamera().GetNear())) {
+						continue;
+					}
+				}
 				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor(), mesh , scene , face);
 			}
 
