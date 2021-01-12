@@ -106,7 +106,13 @@ specular and diffuse light used, when you just want a cup of tea but there is on
 
 <img src="./pictures/WhatsApp Image 2021-01-12 at 19.51.58.jpeg" width="400"> <img src="./pictures/WhatsApp Image 2021-01-12 at 19.57.41.jpeg" width="400">
 
-background color change with diffuse and specular light, sphere and cow is in flat shading, dolphin is in Gouraud shading and bunny is in phong shading, on the left we have fog effect. Time to boogie like its 1969. 
+background color change with diffuse and specular light, sphere and cow is in flat shading, dolphin is in Gouraud shading and bunny is in phong shading, on the right we have fog effect. Time to boogie like its 1969. 
+
+### Beethoven new mix cover art
+
+<img src="./pictures/WhatsApp Image 2021-01-12 at 21.09.26.jpeg" width="400"> <img src="./pictures/WhatsApp Image 2021-01-12 at 21.10.52.jpeg" width="400">
+
+diffuse lighting with background color change, we can see Beethoven behind the scenes getting ready to drop his new sick mixtape, Symphony No. 10, soon available on Spotify and Apple music,  get your copy soon.  
 
 ### Multiple lights sources
 
