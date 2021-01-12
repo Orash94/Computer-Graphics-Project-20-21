@@ -810,8 +810,7 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 	for (int k = 0; k < 3; k++) {
 		int normalIndex = face.GetNormalIndex(k) - 1;
 		glm::vec3 normal = normals[normalIndex];
-		normal = Utils::applyTransformationToNormal(normal, transformation);
-		normalTransformation[k] = normal;
+		normalTransformation[k] = Utils::applyTransformationToNormal(normal, transformation);
 	}
 
 	float minX = getMin(v1.x, v2.x, v3.x);
@@ -819,7 +818,6 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 	float minY = getMin(v1.y, v2.y, v3.y);
 	float maxY = getMax(v1.y, v2.y, v3.y);
 
-	
 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
@@ -832,8 +830,12 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 				glm::fvec3 color = glm::fvec3(0, 0, 0);
 				for (int k = 0; k < scene.GetLightCount(); k++) {
 					Light light = scene.GetLight(k);
+					
+					glm::fvec3 meshPoint = glm::fvec3(i, j, z);
+					glm::fmat4x4 inverseAfterProjection= glm::inverse(afterProjectionMatrix);
+					meshPoint = Utils::applyTransformationToVector(meshPoint, inverseAfterProjection);
 
-					color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, z), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+					color += light.calculateColor(mesh, pointNormal, meshPoint, mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 					if (scene.isTexture) {
 						float x = pow(rand(), 2) + std::pow(rand(), 2);
 						float factor = scene.textureFactor * 0.0001f;
@@ -1090,7 +1092,7 @@ void Renderer::Render(const Scene& scene)
 	glm::fmat4x4 scaleAfterProjection = Utils::TransformationScale(glm::fvec3(centerX, centerY, 1));
 
 	glm::fmat4x4 AfterProjection = scaleAfterProjection * translateAfterProjection;
-	
+	afterProjectionMatrix = AfterProjection;
 	if (scene.getShowAxis()) {
 		DrawLine(glm::fvec3(0, centerY, 0), glm::fvec3(windowsWidth, centerY, 0), glm::fvec3(0, 0, 0));
 		DrawLine(glm::fvec3(centerX, 0, 0), glm::fvec3(centerX, windowsHeight, 0), glm::fvec3(0, 0, 0));

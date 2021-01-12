@@ -22,7 +22,7 @@ public:
 	void applyExponentialSquaredFogging();
 	Scene& scene;
 
-
+	
 private:
 	void PutPixel(const int i, const int j, const float z, const glm::vec3& color);
 	void UpdatePutPixel();
@@ -52,7 +52,7 @@ private:
 	void ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh ,  const Scene& scene , const Face& face);
 	void ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
 	void ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
-
+	glm::fmat4x4 afterProjectionMatrix;
 	
 	float* color_buffer_;
 	int viewport_width_;
