@@ -71,8 +71,8 @@ public:
 	glm::vec3 fogColor = glm::vec3(0.4, 0.4, 0.4);
 	int fogType = 0; // 0 - none, 1 - linear, 2 - Exponential, 3 - Exponential Squared
 	float fogDensity = 1.0f;
-	float fogStart = 0;
-	float fogEnd = 1000; // check what value should be initialized with
+	float fogStart = 0 ;
+	float fogEnd = 10.0f ; // check what value should be initialized with
 	float fogDistance = 0;
 
 	bool renderFrame = false;

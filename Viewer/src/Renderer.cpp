@@ -530,7 +530,9 @@ void Renderer::applyLinearFogging()
 		for (int j = 0; j < viewport_height_; j++)
 		{
 			//dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
-			dist = glm::distance(scene.GetActiveCamera().getCenter().z,  Zbuffer[i][j]) * 100;
+
+			glm::vec3 CC = scene.GetActiveCamera().getCenter();
+			dist = glm::distance(CC[2],  Zbuffer[i][j]);
 			f = (scene.fogEnd - dist) / (scene.fogEnd - scene.fogStart);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
 		}
@@ -566,9 +568,10 @@ void Renderer::applyExponentialSquaredFogging()
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			dist = glm::distance(scene.GetActiveCamera().getCenter(), glm::vec3(i, j, Zbuffer[i][j])) * 100;
-			f = std::exp(-1* std::pow(dist * (scene.fogDensity * 0.001),2));
-			glm::clamp(f, 0.0f, 1.0f);
+			glm::vec3 CC = scene.GetActiveCamera().getCenter();
+			dist = glm::distance(CC[2],  Zbuffer[i][j]);
+			f = std::exp(-1* std::pow(dist * (scene.fogDensity),2));
+			glm::clamp(f, 0.0f, 0.009f);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
 		}
 

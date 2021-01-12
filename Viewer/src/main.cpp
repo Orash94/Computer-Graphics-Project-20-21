@@ -421,8 +421,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						switch (scene.fogType)
 						{
 						case (1):
-							ImGui::SliderFloat("Start Fog: ", &scene.fogStart, scene.GetActiveCamera().GetNear(), scene.fogEnd);
-							ImGui::SliderFloat("End Fog: ", &scene.fogEnd, scene.fogStart, scene.GetActiveCamera().GetFar());
+							ImGui::SliderFloat("Start Fog: ", &scene.fogStart, -10.0f, 10.0f);
+							ImGui::SliderFloat("End Fog: ", &scene.fogEnd, 1.0f, 15.0f);
 							break;
 
 						case(2):
