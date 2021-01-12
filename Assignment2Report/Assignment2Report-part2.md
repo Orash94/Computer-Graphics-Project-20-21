@@ -102,25 +102,25 @@ We allow the user to choose the threshold. Lower threshold means more âœ¨shinnyâ
 
 ### Fog Effect
 
-<img src="./pictures/Nofog .png" width="400">
+ <img src="./pictures/MeshViewer_qa0ou7Zr7g.png" width="400">
 
-Here we can see the original picture.
+Here we can see the original pictures.
 
 #### Linear
 
-<img src="./pictures/LinearFog .png" width="400">
+<img src="./pictures/MeshViewer_dU2hfdfDkd.png" width="400">
 
 Users can choose the start and end of fog effect.
 
 #### Exponential 
 
-<img src="./pictures/expoFog .png" width="400">
+<img src="./pictures/MeshViewer_Z0RK3MSzTu.png" width="400">
 
 Users can choose density of the fog.
 
 #### Exponential Squared 
 
-<img src="./pictures/expoSquaredFog .png" width="400">
+<img src="./pictures/dMtPScq6K3.png" width="400">
 
 Users can choose density of the fog.
 
