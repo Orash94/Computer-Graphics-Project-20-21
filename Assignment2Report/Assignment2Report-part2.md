@@ -94,6 +94,14 @@ Super Saiyan  God Beethoven evolves into Pikachu . we used specular with diffuse
 
 specular and diffuse light used to display this monster of computation complexity.
 
+
+
+### Simple is beautiful
+
+<img src="./pictures/WhatsApp Image 2021-01-12 at 19.35.04.jpeg" width="400"> <img src="./pictures/WhatsApp Image 2021-01-12 at 19.35.20.jpeg" width="400">
+
+specular and diffuse light used, when you just want a cup of tea but there is only tea and no cup.
+
 ### Multiple lights sources
 
 <img src="./pictures/Zoom_pEusxGkyKP.png" width="400"><img src="./pictures/WhatsApp Image 2021-01-10 at 15.03.57.jpeg" width="400"> 
