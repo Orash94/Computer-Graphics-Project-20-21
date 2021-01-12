@@ -102,6 +102,12 @@ specular and diffuse light used to display this monster of computation complexit
 
 specular and diffuse light used, when you just want a cup of tea but there is only tea and no cup.
 
+### Animals at the disco 
+
+<img src="./pictures/WhatsApp Image 2021-01-12 at 19.51.58.jpeg" width="400"> <img src="./pictures/WhatsApp Image 2021-01-12 at 19.57.41.jpeg" width="400">
+
+background color change with diffuse and specular light, sphere and cow is in flat shading, dolphin is in Gouraud shading and bunny is in phong shading, on the left we have fog effect. Time to boogie like its 1969. 
+
 ### Multiple lights sources
 
 <img src="./pictures/Zoom_pEusxGkyKP.png" width="400"><img src="./pictures/WhatsApp Image 2021-01-10 at 15.03.57.jpeg" width="400"> 
