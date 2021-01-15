@@ -197,8 +197,11 @@ std::shared_ptr<Camera> MakeCamera() {
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 {
-	int windowsWidth = (io.DisplaySize.x) / 2;
-	int windowsHeight = (io.DisplaySize.y) / 2;
+	float  windowsWidth = (float)(io.DisplaySize.x) / 2;
+	float  windowsHeight = (float)(io.DisplaySize.y) / 2;
+	float minWindow = glm::min(windowsWidth, windowsHeight);
+	float maxWindow = glm::max(windowsWidth, windowsHeight);
+
 	/**
 	 * MeshViewer menu
 	 */
@@ -246,9 +249,22 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	//// Controls
 	//ImGui::ColorEdit3("Clear ", (float*)&clear_color);
 	//// TODO: Add more controls as needed
+	if (scene.GetModelCount() != 0 && scene.GetCameraCount() != 0) {
+		if (ImGui::Button("Clear Screen and selection")) {
+			scene.cleanupScene();
+		}
+	}
+	ImGui::Checkbox("Display Axis", &scene.showAxis);
+
 	if (ImGui::CollapsingHeader("Camera Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int camera_selected = -1;
+		if (scene.GetCameraCount() != 0) {
+			if (ImGui::Button("Clear Cameras")) {
+				camera_selected = -1;
+				scene.clearCameras();
+			}
+		}
 		if (ImGui::TreeNode("Active camera selection:"))
 		{
 
@@ -267,28 +283,46 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						camera_selected = n;
 						scene.SetActiveCameraIndex(n);
 					}
+					
+						
 				}
 			}
 			ImGui::TreePop();
 		}
 
+		
 		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
-			if (ImGui::TreeNode("Active camera Projection Type:"))
+			if (ImGui::Button("delete")) {
+				camera_selected = -1;
+				scene.deleteActiveCamera();
+			}
+		}
+		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
+		
+			Camera& cam = scene.GetActiveCamera();
+			if (!scene.GetCamOrWorldView()) {
+				if (ImGui::Button("To Camera View"))
+					scene.SetCamOrWorldView(true);
+			}
+			else
 			{
-				static int Projection = 1;
-				ImGui::RadioButton("Orthographic", &Projection, 1); ImGui::SameLine();
-				ImGui::RadioButton("Perspective", &Projection, 0);
-
-				scene.GetActiveCamera().setProjection(Projection);
-				ImGui::TreePop();
+				if (ImGui::Button("To World View"))
+					scene.SetCamOrWorldView(false);
 			}
 
+			static int update = 1;
+			ImGui::RadioButton("Transformation", &update, 1); ImGui::SameLine();
+			ImGui::RadioButton("Lookat", &update, 0);
+			scene.GetActiveCamera().setLookAtOrTransformation(update);
+			//scene.GetActiveCamera().SetCameraLookAt();
 			if (ImGui::TreeNode("Active camera params:"))
 			{
-				Camera cam = scene.GetActiveCamera();
+				
 				glm::vec3 glmEye = cam.getEye();
 				glm::vec3 glmAt = cam.getAt();
 				glm::vec3 glmUp = cam.getUp();
+
+
 				static float vecEye[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecAt[3] = { 0.10f, 0.20f, 0.30f };
 				static float vecUp[3] = { 0.10f, 0.20f, 0.30f };
@@ -300,23 +334,104 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					vecUp[i] = glmUp[i];
 				}
 
-				ImGui::InputFloat3("Eye (x,y,z)", vecEye);
-				ImGui::InputFloat3("At (x,y,z)", vecAt);
-				ImGui::InputFloat3("Up (x,y,z)", vecUp);
+				static bool symmetriceye = false;
+				
+				ImGui::Checkbox("symmetric", &symmetriceye);
+				if (symmetriceye) {
+					ImGui::SliderFloat("Eye", &vecEye[0], -minWindow, minWindow);
+					vecEye[1]=vecEye[0];
+					vecEye[2] = vecEye[0];
+				}
+				else {
+					ImGui::SliderFloat("Eye X", &vecEye[0], -windowsWidth, windowsWidth);
+					ImGui::SliderFloat("Eye Y", &vecEye[1], -windowHeight, windowHeight);
+					ImGui::SliderFloat("Eye Z", &vecEye[2], -maxWindow, maxWindow);
+				}
+			
+				
+				if (ImGui::Button("Reset eye")) {
+					vecEye[0] = 0.f;
+					vecEye[1] = 0.f;
+					vecEye[2] = 0.f;
+				}
+				ImGui::SliderFloat("at X", &vecAt[0], -windowsWidth, windowsWidth);
+				ImGui::SliderFloat("at Y", &vecAt[1], -windowHeight, windowHeight);
+				ImGui::SliderFloat("at Z", &vecAt[2], -maxWindow, maxWindow);
+				if (ImGui::Button("Reset at")) {
+					vecAt[0] = 0.f;
+					vecAt[1] = 0.f;
+					vecAt[2] = -1.f;
+				}
+				ImGui::SliderFloat3("Up (x,y,z)", vecUp , -1.0, 1.0);
+				if (ImGui::Button("Reset up")) {
+					vecUp[0] = 0.f;
+					vecUp[1] = 1.f;
+					vecUp[2] = 0.f;
+				}
+
+				for (int i = 0; i < 3; i++) {
+					glmEye[i] = vecEye[i];
+					glmAt[i] = vecAt[i];
+					glmUp[i] = vecUp[i];
+				}
+				cam.SetCameraLookAt(glmEye, glmAt, glmUp);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Active camera Projection Type:"))
+			{
+				static int Projection = 1;
+				ImGui::RadioButton("Orthographic", &Projection, 1); ImGui::SameLine();
+				ImGui::RadioButton("Perspective", &Projection, 0);
+
+				if (Projection) {
+					float nRight, nLeft, nTop, nBottom, nNear, nFar;
+					nRight = cam.GetRight();
+					nLeft = cam.GetLeft();
+					nTop = cam.GetTop();
+					nBottom = cam.GetBottom();
+					nNear = cam.GetNear();
+					nFar = cam.GetFar();
+
+					ImGui::SliderFloat(":Right ", &nRight , 0.0f, 1.0f);
+					ImGui::SliderFloat(":Left ", &nLeft,  -1 , 0.0f);
+					ImGui::SliderFloat(" :Top ", &nTop, 0.0f, 1.0f);
+					ImGui::SliderFloat(" :Bottom", &nBottom, -1, 0.0f);
+					ImGui::SliderFloat(" :Near: ", &nNear , 1.0f, 20.f);
+					ImGui::SliderFloat(" :Far: ", &nFar, 5.0f, 50.f);
+
+					cam.SetViewVolumeCoordinates(nRight, nLeft, nTop, nBottom, nNear, nFar);
+					
+				}
+				else
+				{
+					float nNear, nFar, nFovy, nAspectRatio, nZoom;
+					nNear = cam.GetNear();
+					nFar = cam.GetFar();
+					nFovy = cam.GetFovy();
+					nAspectRatio = cam.GetAspectRatio();
+					nZoom = cam.GetZoom();
+
+					ImGui::SliderFloat(" :Near ", &nNear,0.1f, 200.0f);
+					ImGui::SliderFloat(" :Far ", &nFar, 200.1f, 500.0f);
+					ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.01f, 0.5f);
+					ImGui::SliderFloat(" :Width", &nAspectRatio, 0.1f, 100.0f);
+					ImGui::SliderFloat("Zoom: ", &nZoom, 1.0f, 16.0f);
+					cam.SetZoom(nZoom);
+					cam.SetPerspectiveData(nNear, nFar, nFovy, nAspectRatio);
+				}
+
+				scene.GetActiveCamera().setProjection(Projection);
 				ImGui::TreePop();
 			}
 		}
 
 		if (camera_selected != -1 && scene.GetCameraCount() != 0) {
 			Camera& camera = scene.GetActiveCamera();
-			if (ImGui::TreeNode("model Transformation"))
+			if (ImGui::TreeNode("Camera model Transformation"))
 			{
-
 				glm::vec3 Rotate = camera.getRotate();
 				glm::vec3 Translate = camera.getTranslate();
-
-
-
 
 				if (ImGui::CollapsingHeader("Rotating", ImGuiTreeNodeFlags_None))
 				{
@@ -331,7 +446,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset trasnalte")) {
 						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -344,7 +459,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("model world Transformation:"))
+			if (ImGui::TreeNode("Camera model world Transformation:"))
 			{
 
 
@@ -364,7 +479,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset Translating")) {
 						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -373,7 +488,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				camera.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 				ImGui::TreePop();
 			}
-			//TODO add function to update eye  at up according to transformations
+			camera.updateLookAt();
+
 
 		}
 
@@ -381,12 +497,15 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 	if (ImGui::CollapsingHeader("Models Actions", ImGuiTreeNodeFlags_None))
 	{
 		static int model_selected = -1;
-
-		if (ImGui::Button("Clear Screen and selection")) {
-			model_selected = -1;
-			scene.cleanupScene();
+		if (scene.GetModelCount() != 0) {
+			if (ImGui::Button("Clear Models")) {
+				model_selected = -1;
+				scene.clearModels();
+			}
 		}
 
+		ImGui::Separator();
+		
 		if (ImGui::TreeNode("Active model selection:"))
 		{
 
@@ -395,7 +514,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			{
 
 				//sprintf(buf, ((scene.GetModels())[n])->GetModelName() + "model", n);
-				const std::string name = scene.GetModels()[n]->GetModelName() + " model";
+				const std::string name = " model #"+ std::to_string(n+1)+ ": " +scene.GetModels()[n]->GetModelName() ;
 				// copying the contents of the
 				if (ImGui::Selectable(name.c_str(), model_selected == n)) {
 					model_selected = n;
@@ -408,8 +527,12 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 			}
 			ImGui::TreePop();
 		}
-
-
+		if (model_selected != -1 && scene.GetModelCount() != 0) {
+			if (ImGui::Button("delete")) {
+				model_selected = -1;
+				scene.deleteActiveModel();
+			}
+		}
 		if (model_selected != -1 && scene.GetModelCount() != 0) {
 			MeshModel& model1 = scene.GetActiveModel();
 			if (ImGui::TreeNode("model Transformation"))
@@ -451,7 +574,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &Translate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &Translate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &Translate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &Translate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset trasnalte")) {
 						Translate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -501,7 +624,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				{
 					ImGui::SliderFloat("Translate X", &worldTranslate[0], -windowsWidth, windowsWidth);
 					ImGui::SliderFloat("Translate Y", &worldTranslate[1], -windowsHeight, windowsHeight);
-					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -windowsHeight, windowsHeight);
+					ImGui::SliderFloat("Translate Z", &worldTranslate[2], -maxWindow, maxWindow);
 					if (ImGui::Button("Reset Translating")) {
 						worldTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
 					}
@@ -511,10 +634,39 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 				model1.setWorldTransformationUpdates(worldScale, worldRotate, worldTranslate);
 				ImGui::TreePop();
 			}
+			if (ImGui::TreeNode("model color selection:")) {
+				glm::vec3 currMeshColor = model1.GetColor();
+				float Color[3] = { currMeshColor[0], currMeshColor[1],currMeshColor[2] };
+				ImGui::ColorEdit3("choose color", (float*)&Color);
+
+				for (int i = 0; i < 3; i++) {
+					currMeshColor[i] = Color[i];
+				}
+				model1.SetColor(currMeshColor);
+				ImGui::TreePop();
+			}
+
+			float MaxNormalLenthg = glm::min(windowsHeight, windowsWidth)/2;
+
 			ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
 
-			ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+			if (ImGui::CollapsingHeader("Face Normals", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);
+				ImGui::SliderFloat("Face Normals Length", &model1.FaceNormalsLength, 0, MaxNormalLenthg);
+			}
 
+			if (ImGui::CollapsingHeader("vertices Normals", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display vertices Normals", &model1.displayVerticesNormals);
+				ImGui::SliderFloat("vertices Normals Length", &model1.VerticesNormalsLength, 0, MaxNormalLenthg);
+			}
+
+			if (ImGui::CollapsingHeader("vertices Normals Per Face", ImGuiTreeNodeFlags_None))
+			{
+				ImGui::Checkbox("Display vertices Normals Per Face", &model1.displayVerticesNormalsPerFace);
+				ImGui::SliderFloat("vertices Normals Per Face Length", &model1.VerticesNormalsPerFaceLength, 0, MaxNormalLenthg);
+			}
 		}
 	}
 	ImGui::End();

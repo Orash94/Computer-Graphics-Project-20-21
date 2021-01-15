@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include "Face.h"
-
+#include <map>
 
 class MeshModel
 {
@@ -16,9 +16,13 @@ public:
 	const glm::vec3& GetVertexAtIndex(int i) const;
 
 	
-
+	void setFaceNormal(int index, const glm::fvec3 normal);
 	std::vector<Face> getFaces() const;
 	void outputFacesAndVertices();
+	std::vector<glm::vec3> getFacesNormals();
+	std::vector<glm::vec3> getFacesCenters();
+	std::vector<glm::vec3> getVerticesNormals();
+	std::vector<glm::vec3> getVerticesNormalsPerFace();
 
 	glm::vec3 getScale();
 	glm::vec3 getRotate();
@@ -32,8 +36,10 @@ public:
 
 
 	float getMaxDitancePoints();
-	void getMiddleOfModel();
+
+	void setModelInMiddle();
 	void setMinMaxVertices();
+	void setVerteciesNormals();
 
 	void setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
 	void setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
@@ -42,12 +48,30 @@ public:
 
 	void setFrame(glm::fvec3 center, glm::fmat3x3 CoordinateSystem);
 	void updateFrame( glm::fmat4x4 transform);
-
+	void SetColor(const glm::vec3 _color);
+	glm::vec3 GetColor()const;
 	const glm::vec3& getCenter();
 	const glm::fmat3x3& getCoordinateSystem();
 
 	bool displayBoundingBox = false;
+
 	bool displayFaceNormals = false;
+	float FaceNormalsLength = 100.0f;
+
+	bool displayVerticesNormals = false;
+	float VerticesNormalsLength = 100.0f;
+
+	bool displayVerticesNormalsPerFace = false;
+	float VerticesNormalsPerFaceLength = 100.0f;
+
+	float minX_ = FLT_MAX;
+	float minY_ = FLT_MAX;
+	float minZ_ = FLT_MAX;
+	float maxX_ = FLT_MIN;
+	float maxY_ = FLT_MIN;
+	float maxZ_ = FLT_MIN;
+
+	std::map<int, std::vector<int>> vertcisAdjacent;
 
 protected:
 	
@@ -67,12 +91,12 @@ protected:
 	std::vector<glm::vec3> normals_;
 	std::string model_name_;
 
-	float minX_ = FLT_MAX;
-	float minY_ = FLT_MAX;
-	float minZ_ = FLT_MAX;
-	float maxX_ = FLT_MIN;
-	float maxY_ = FLT_MIN;
-	float maxZ_ = FLT_MIN;
+
+	std::vector<glm::vec3> verticesNormals_;
+	std::vector<glm::vec3> facesNormals_;
+	std::vector<glm::vec3> facesCenters_;
+	
+	glm::vec3 color;
 	
 
 	glm::vec3 center;
