@@ -274,6 +274,8 @@ glm::fvec3 Utils::Homogeneous2Euclidean(const glm::fvec4 vec)
 	float y = vec[1];
 	float z = vec[2];
 	float w = vec[3];
+	if (w == 0)
+		w += 0.00001;
 	return glm::fvec3(x / w, y / w, z / w);
 }
 

@@ -54,13 +54,15 @@ public:
 	void updateFrame( glm::fmat4x4 transform);
 	void SetColor(const glm::vec3 _color);
 	glm::vec3 GetColor()const;
-	const glm::vec3& getCenter() const;
+	const glm::fvec3& getCenter() const;
 	const glm::fmat3x3& getCoordinateSystem();
-
+	glm::fmat4x4 getNormalTransformation() const;
 
 
 
 	bool displayBoundingBox = false;
+
+	
 
 	bool displayFaceNormals = false;
 	float FaceNormalsLength = 100.0f;
@@ -87,7 +89,9 @@ public:
 	shadingType shadingType = Flat;
 	modelType   modelType = Object;
 	glm::fmat4x4 finalTransformation;
+	glm::fmat4x4 normalTransformation;
 
+	
 protected:
 	
 	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -97,6 +101,7 @@ protected:
 	glm::vec3 WorldScale = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 WorldRotate = glm::vec3(0, 0, 0);
 	glm::vec3 WorldTranslate = glm::vec3(0, 0, 0);
+
 
 	glm::fmat4x4 ObjectTransformation;
 	glm::fmat4x4 WorldTransformation;

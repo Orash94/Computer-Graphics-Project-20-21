@@ -209,14 +209,14 @@ std::shared_ptr<Camera> MakeCamera() {
 std::shared_ptr<Camera> MakeDefaultCamera()
 {
 	MeshModel mesh = MeshModel(*(Utils::LoadMeshModel("../computergraphics2021-or-and-abed/Data/camera.obj")));
-	glm::vec3 nEye = glm::vec3(0, 0, 500);
+	glm::vec3 nEye = glm::vec3(0, 0, 250);
 	glm::vec3 nAt = glm::vec3(0, 0, -1);
 	glm::vec3 nUp = glm::vec3(0, 1, 0);
 	auto cam = std::make_shared<Camera>(mesh, nEye, nAt, nUp);
 
 	glm::fvec3 scale = glm::fvec3(1,1,1);
 	glm::fvec3 Rotate = glm::fvec3(0, 0, 0);
-	glm::fvec3 Translate = glm::fvec3(0, 0, 500);
+	glm::fvec3 Translate = glm::fvec3(0, 0, 250);
 
 	cam->setObjectTransformationUpdates(scale, Rotate, Translate);
 	return cam;
@@ -421,8 +421,8 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 						switch (scene.fogType)
 						{
 						case (1):
-							ImGui::SliderFloat("Start Fog: ", &scene.fogStart, scene.GetActiveCamera().GetNear(), scene.GetActiveCamera().GetFar());
-							ImGui::SliderFloat("End Fog: ", &scene.fogEnd, scene.fogStart, scene.GetActiveCamera().GetFar());
+							ImGui::SliderFloat("Start Fog: ", &scene.fogStart, -10.0f, 10.0f);
+							ImGui::SliderFloat("End Fog: ", &scene.fogEnd, 1.0f, 15.0f);
 							break;
 
 						case(2):
@@ -437,10 +437,16 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							break;
 						}
 					}
+					
 					//else
 					//{
 					//	scene.fogEffect = false;
 					//}
+				}
+				ImGui::Checkbox("Create Texture", &scene.isTexture);
+				if (scene.isTexture)
+				{
+					ImGui::SliderInt("Choose your texture factor", &scene.textureFactor, 1, 100);
 				}
 
 			}
@@ -610,14 +616,15 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 							nNear = cam.GetNear();
 							nFar = cam.GetFar();
 							nFovy = cam.GetFovy();
-							nAspectRatio = cam.GetAspectRatio();
+							nAspectRatio = windowsWidth / windowHeight;
 							nZoom = cam.GetZoom();
 
-							ImGui::SliderFloat(" :Near ", &nNear,0.1f, 200.0f);
-							ImGui::SliderFloat(" :Far ", &nFar, 200.1f, 500.0f);
-							ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.001f, 0.5f);
+							ImGui::SliderFloat(" :Near ", &nNear,0.1f, 400.0f);
+							ImGui::SliderFloat(" :Far ", &nFar, 10.0f, 2500.0f);
+							ImGui::SliderFloat(":Angle of Field of View Y ", &nFovy,0.001f, 3.14f);
 							ImGui::SliderFloat(" :Width", &nAspectRatio, 0.1f, 100.0f);
 							ImGui::SliderFloat("Zoom: ", &nZoom, 1.0f, 1000000.0f);
+							ImGui::SliderFloat("Zmin: ", &cam.ZMinPerspective, 0.00001f, 2.0f);
 							cam.SetZoom(nZoom);
 							cam.SetPerspectiveData(nNear, nFar, nFovy, nAspectRatio);
 						}
@@ -884,7 +891,7 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene)
 					float MaxNormalLenthg = glm::min(windowsHeight, windowsWidth)/2;
 
 					ImGui::Checkbox("Display Bounding Box", &model1.displayBoundingBox);
-
+					
 					if (ImGui::CollapsingHeader("Face Normals", ImGuiTreeNodeFlags_None))
 					{
 						ImGui::Checkbox("Display Face Normals", &model1.displayFaceNormals);

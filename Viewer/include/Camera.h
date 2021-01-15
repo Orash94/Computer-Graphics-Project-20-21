@@ -41,6 +41,21 @@ public:
 	void setCameraDirection();
 	void setLookAtOrTransformation(const bool flag);
 	bool GetLookAtOrTransformation() const;
+
+	float ZMinPerspective = 0.f;
+	float right;
+	float left;
+	float top;
+	float bottom;
+
+
+
+	float _near;
+	float _far;
+	float fovy;
+	float aspectRatio;
+	float Pnear;
+	float Pfar;
 private:
 	glm::mat4x4 view_transformation_;
 	glm::mat4x4 view_transformation_inverse;
@@ -50,14 +65,7 @@ private:
 	glm::vec3 up;
 
 
-	float right;
-	float left;
-	float top;
-	float bottom;
-	float _near;
-	float _far;
-	float fovy;
-	float aspectRatio;
+	
 
 	float zoom;
 

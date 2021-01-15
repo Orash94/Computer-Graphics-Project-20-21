@@ -62,7 +62,7 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}*/
 		if (scene.GetActiveCamera().GetOrthographicOrPerspective()) {
 			//Orthographic
-			if (z >= -1 && z <= 0) {
+			if (1) {
 
 				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
 				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
@@ -73,11 +73,15 @@ void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 		}
 		else {
 			//Perspective
-			color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
-			color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
-			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
-			Zbuffer[i][j] = z;
-			localColorBuffer[i][j] = color;
+			
+
+			if (1) {
+				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+				Zbuffer[i][j] = z;
+				localColorBuffer[i][j] = color;
+			}
 		}
 		
 	}
@@ -215,6 +219,7 @@ void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const gl
 
 	//here we need to distinguise between the three types of shading
 	if (mesh.modelType == MeshModel::modelType::Light) {
+
 		ScanConversionTriangle(v1, v2, v3, color);
 	}
 	else {
@@ -525,9 +530,10 @@ void Renderer::applyLinearFogging()
 		for (int j = 0; j < viewport_height_; j++)
 		{
 			//dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
-			dist = glm::distance(scene.GetActiveCamera().getEye().z,  Zbuffer[i][j]);
+
+			glm::vec3 CC = scene.GetActiveCamera().getCenter();
+			dist = glm::distance(CC[2],  Zbuffer[i][j]);
 			f = (scene.fogEnd - dist) / (scene.fogEnd - scene.fogStart);
-			glm::clamp(f, 0.0f, 1.0f);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
 		}
 
@@ -543,9 +549,10 @@ void Renderer::applyExponentialFogging()
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
-			//dist = glm::distance(scene.GetActiveCamera().getEye().z, Zbuffer[i][j]);
-			f = std::exp(-1 * dist * (scene.fogDensity * 0.001));
+			//dist = glm::distance(scene.GetActiveCamera().getCenter(), glm::vec3(i, j, Zbuffer[i][j]));
+			glm::vec3 CC = scene.GetActiveCamera().getCenter();
+			dist = glm::distance(CC[2], Zbuffer[i][j]) *100;
+			f = std::exp(-1 * dist * (scene.fogDensity * 0.01));
 			glm::clamp(f, 0.0f, 1.0f);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
 		}
@@ -561,9 +568,10 @@ void Renderer::applyExponentialSquaredFogging()
 	{
 		for (int j = 0; j < viewport_height_; j++)
 		{
-			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
-			f = std::exp(-1* std::pow(dist * (scene.fogDensity * 0.001),2));
-			glm::clamp(f, 0.0f, 1.0f);
+			glm::vec3 CC = scene.GetActiveCamera().getCenter();
+			dist = glm::distance(CC[2],  Zbuffer[i][j]);
+			f = std::exp(-1* std::pow(dist * (scene.fogDensity),2));
+			glm::clamp(f, 0.0f, 0.009f);
 			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
 		}
 
@@ -581,10 +589,16 @@ void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, 
 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
-			if (isInsideTheTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, i, j))
-				
+			if (isInsideTheTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, i, j)) {
+				if (scene.isTexture) {
+					//float noise1 = (std::rand() % 255) * std::exp(-1 * (scene.GetActiveModel().textureFactor + 7));
+					float x = pow(rand(), 2) + std::pow(rand(), 2);
+					float factor = scene.textureFactor * 0.0001f;
+					float noise1 = glm::clamp(x, 0.0f, factor);
+					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+				}
 				PutPixel(i, j, ZpointComputation(p1, p2, p3, glm::vec2(i, j)), color);
-			
+			}
 		}
 
 	}
@@ -668,17 +682,32 @@ float Renderer::area(int x1, int y1, int x2, int y2, int x3, int y3)
 void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
 	
-	glm::fvec3 tringlrCenter = (v1 + v2 + v3) / 3.0f;
+	
+
+	glm::vec3 vectorArray[3];
+
+	for (int k = 0; k < 3; k++) {
+		int index = face.GetVertexIndex(k) - 1;
+		glm::vec3 v = mesh.GetVertexAtIndex(index);
+		vectorArray[k] = Utils::applyTransformationToVector(v, mesh.getNormalTransformation());
+	}
+	glm::fvec3 tringlrCenter = (vectorArray[0] + vectorArray[1] + vectorArray[2]) / 3.0f;
+
 	glm::fvec3 color = glm::fvec3(0, 0, 0);
 	for (int k = 0; k < scene.GetLightCount(); k++) {
 		Light light = scene.GetLight(k);
 		//(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
+		glm::fvec3 LC = light.getCenter();
+		glm::fvec3 MC = mesh.getCenter();
+		glm::fvec3 CC = scene.GetActiveCamera().getCenter();
+		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
 
-		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
-
+		
+		//DrawLine(LC, MC, glm::fvec3(0.5, 0.8, 0.8));
+		//DrawLine(CC, MC, glm::fvec3(1,1,1));
 		for (int i = 0; i < 3; i++) {
 			if (color[i] > 1.0f) {
-				color[i] = 1.0f;
+				color[i] = 1;
 			}
 		}
 	}
@@ -691,6 +720,12 @@ void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
 			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+				if (scene.isTexture) {
+					float x = pow(rand(), 2) + std::pow(rand(), 2);
+					float factor = scene.textureFactor * 0.0001f;
+					float noise1 = glm::clamp(x, 0.0f, factor);
+					color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+				}
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
 		}
@@ -702,9 +737,15 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 {
 
 	std::vector<glm::vec3>  normals  = mesh.getVerticesNormalsPerFace();
-	glm::fmat4x4 transformation = mesh.finalTransformation;
+	glm::fmat4x4 transformation = mesh.normalTransformation;
 
-	glm::fvec3 vertices[3] = { v1, v2, v3 };
+	glm::vec3 vertices[3];
+
+	for (int k = 0; k < 3; k++) {
+		int index = face.GetVertexIndex(k) - 1;
+		glm::vec3 v = mesh.GetVertexAtIndex(index);
+		vertices[k] = Utils::applyTransformationToVector(v, mesh.getNormalTransformation());
+	}
 	glm::fvec3 normalTransformation[3];
 	glm::fvec3 verticesColor[3];
 
@@ -717,11 +758,16 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 
 	for (int k = 0; k < 3; k++) {
 		glm::fvec3 color = glm::fvec3(0, 0, 0);
-		for (int k = 0; k < scene.GetLightCount(); k++) {
-			Light light = scene.GetLight(k);
+		for (int l = 0; l < scene.GetLightCount(); l++) {
+			Light light = scene.GetLight(l);
 
-			color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
-
+			color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+			if (scene.isTexture) {
+				float x = pow(rand(), 2) + std::pow(rand(), 2);
+				float factor = scene.textureFactor * 0.0001f;
+				float noise1 = glm::clamp(x, 0.0f, factor);
+				color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+			}
 			for (int i = 0; i < 3; i++) {
 				if (color[i] > 1.0f) {
 					color[i] = 1.0f;
@@ -745,6 +791,7 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 
 				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i,j));
 				glm::fvec3 color = weights[0]* verticesColor[0] + weights[1] * verticesColor[1] + weights[2] * verticesColor[2];
+
 				
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
@@ -756,24 +803,23 @@ void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const 
 void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
 {
 	std::vector<glm::vec3>  normals = mesh.getVerticesNormalsPerFace();
-	glm::fmat4x4 transformation = mesh.getTransformation();
+	glm::fmat4x4 transformation = mesh.normalTransformation;
 
 
 
 	glm::fvec3 normalTransformation[3];
-	glm::fvec3 vertices[3] = { v1, v2, v3 };
 
 	for (int k = 0; k < 3; k++) {
 		int normalIndex = face.GetNormalIndex(k) - 1;
 		glm::vec3 normal = normals[normalIndex];
-		normal = Utils::applyTransformationToNormal(normal, transformation);
-		normalTransformation[k] = normal;
+		normalTransformation[k] = Utils::applyTransformationToNormal(normal, transformation);
 	}
 
 	float minX = getMin(v1.x, v2.x, v3.x);
 	float maxX = getMax(v1.x, v2.x, v3.x);
 	float minY = getMin(v1.y, v2.y, v3.y);
 	float maxY = getMax(v1.y, v2.y, v3.y);
+
 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
@@ -786,17 +832,26 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 				glm::fvec3 color = glm::fvec3(0, 0, 0);
 				for (int k = 0; k < scene.GetLightCount(); k++) {
 					Light light = scene.GetLight(k);
+					
+					glm::fvec3 meshPoint = glm::fvec3(i, j, z);
+					glm::fmat4x4 inverseAfterProjection= glm::inverse(afterProjectionMatrix);
+					meshPoint = Utils::applyTransformationToVector(meshPoint, inverseAfterProjection);
 
-					color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, z), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
-
+					color += light.calculateColor(mesh, pointNormal, meshPoint, mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getCenter(), light.alpha);
+					if (scene.isTexture) {
+						float x = pow(rand(), 2) + std::pow(rand(), 2);
+						float factor = scene.textureFactor * 0.0001f;
+						float noise1 = glm::clamp(x, 0.0f, factor);
+						color = glm::clamp(glm::vec3(color.x + noise1, color.y + noise1, color.z + noise1), 0.0f, 1.0f);
+					}
 					for (int i = 0; i < 3; i++) {
 						if (color[i] > 1.0f) {
-							color[i] = 1.0f;
+							color[i] = 1;
 						}
 					}
 
 				}
-
+				
 				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
 			}
 		}
@@ -804,7 +859,7 @@ void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const gl
 	}
 }
 
-glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 trasformation, const glm::vec3& color)
+glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 trasformation, glm::fmat4x4 FinalTrasformation, const glm::vec3& color)
 {
 		glm::vec3 vectorArray[3];
 
@@ -822,7 +877,7 @@ glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 tra
 		glm::fvec3 v2 = vectorArray[2];
 
 		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f; //center of face
-		ActualCenter = Utils::applyTransformationToVector(ActualCenter, trasformation);
+		ActualCenter = Utils::applyTransformationToVector(ActualCenter, FinalTrasformation);
 
 		glm::vec3 Actualnormal = glm::normalize(glm::cross((v1 - v0), (v2 - v0)));
 
@@ -1019,7 +1074,27 @@ void Renderer::Render(const Scene& scene)
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
 
+	// updating camera params;
+	Camera& cam = scene.GetActiveCamera();
+	cam.right = (float)centerX;
+	cam.left = -(float)centerX;
+	cam.top = (float)centerY;
+	cam.bottom = -(float)centerY;
+	cam.aspectRatio = windowsWidth / windowsHeight;
+	if(cam.GetOrthographicOrPerspective()){
+		cam.SetViewVolumeCoordinates(cam.right, cam.left, cam.top, cam.bottom, cam.GetNear(), cam.GetFar());
+	}
+	else {
+		cam.SetPerspectiveData(cam.GetNear(), cam.GetFar(), cam.GetFovy(), cam.GetAspectRatio());
+	}
 	
+
+
+	glm::fmat4x4 translateAfterProjection = Utils::TransformationTransition(glm::fvec3(1, 1, 0));
+	glm::fmat4x4 scaleAfterProjection = Utils::TransformationScale(glm::fvec3(centerX, centerY, 1));
+
+	glm::fmat4x4 AfterProjection = scaleAfterProjection * translateAfterProjection;
+	afterProjectionMatrix = AfterProjection;
 	if (scene.getShowAxis()) {
 		DrawLine(glm::fvec3(0, centerY, 0), glm::fvec3(windowsWidth, centerY, 0), glm::fvec3(0, 0, 0));
 		DrawLine(glm::fvec3(centerX, 0, 0), glm::fvec3(centerX, windowsHeight, 0), glm::fvec3(0, 0, 0));
@@ -1030,11 +1105,12 @@ void Renderer::Render(const Scene& scene)
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel& mesh = scene.GetModel(i);
-			float proportion = 200.0f/mesh.getMaxDitancePoints();
+			float proportion = 300.f/mesh.getMaxDitancePoints();
 
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
+
 			glm::fmat4x4 transformationMatrix = mesh.getTransformation();
 
 
@@ -1047,10 +1123,12 @@ void Renderer::Render(const Scene& scene)
 
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 			finalTransformation = CameraTransformation * finalTransformation;
+			glm::mat4x4 normalMatrix = finalTransformation;
+			
 
-
+			mesh.normalTransformation = finalTransformation;
 			//transfer objects to center screen with transalte transformation
-			finalTransformation = translate * finalTransformation;
+			finalTransformation = AfterProjection * finalTransformation;
 			mesh.finalTransformation = finalTransformation;
 			//bounding box check
 
@@ -1083,11 +1161,19 @@ void Renderer::Render(const Scene& scene)
 				}
 
 				
-				glm::fvec3  faceNormal = DrawFaceNormal(mesh ,face, finalTransformation, glm::vec3(1, 0, 1));
+				glm::fvec3  faceNormal = DrawFaceNormal(mesh ,face, normalMatrix, finalTransformation, glm::vec3(1, 0, 1));
 				mesh.setFaceNormal(j ,faceNormal);
 				
 				
-
+				if (scene.GetActiveCamera().GetOrthographicOrPerspective() == false) {
+					glm::vec3 triangleCenter = (vectorArray[0] + vectorArray[1] + vectorArray[2]) / 3.0f;
+					glm::vec3 at = scene.GetActiveCamera().getAt();
+					float zAt = at.z;
+					glm::vec3 camCenter = scene.GetActiveCamera().getCenter();
+					if ((camCenter[2] + zAt * triangleCenter[2]) < (camCenter.z + zAt * scene.GetActiveCamera().GetNear())) {
+						continue;
+					}
+				}
 				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor(), mesh , scene , face);
 			}
 
@@ -1111,10 +1197,7 @@ void Renderer::Render(const Scene& scene)
 	if (scene.GetCameraCount() > 0 ) {
 		for (int i = 0; i < scene.GetCameraCount(); i++) {
 
-			if (scene.GetActiveCameraIndex() == i) {
-				continue;
-			}
-
+			
 			Camera& tempCam = scene.GetCamera(i);
 			float proportion = 50.0f / tempCam.getMaxDitancePoints();
 
@@ -1134,17 +1217,23 @@ void Renderer::Render(const Scene& scene)
 			glm::fmat4x4 finalTransformation =  transformationMatrix * scale;
 
 			
+
 			//rendering active camera view
 			Camera& currentCam = scene.GetActiveCamera();
 			glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
 			glm::fmat4x4 viewVolumeTransformation;
 			viewVolumeTransformation = currentCam.GetViewTransformation();
 			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
-			finalTransformation = translate *  CameraTransformation * finalTransformation;
+			finalTransformation =   CameraTransformation * finalTransformation;
+
+			tempCam.normalTransformation = finalTransformation;
+			finalTransformation = AfterProjection * finalTransformation;
+			tempCam.finalTransformation = finalTransformation;
+
 			
-
-			tempCam.finalTransformation =  finalTransformation;
-
+			if (scene.GetActiveCameraIndex() == i) {
+				continue;
+			}
 			std::vector<Face> faces = tempCam.getFaces();
 
 			for (int j = 0; j < tempCam.GetFacesCount(); j++)
@@ -1188,10 +1277,10 @@ void Renderer::Render(const Scene& scene)
 				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
 				finalTransformation = CameraTransformation * finalTransformation;
 			}
-
-			finalTransformation = translate * finalTransformation;
-
+			tempLight.normalTransformation = finalTransformation;
+			finalTransformation = AfterProjection * finalTransformation;
 			tempLight.finalTransformation = finalTransformation;
+			
 			std::vector<Face> faces = tempLight.getFaces();
 
 			for (int j = 0; j < tempLight.GetFacesCount(); j++)

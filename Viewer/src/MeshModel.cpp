@@ -16,7 +16,7 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 	color = glm::vec3(1, 1, 1);
 	ambientColor = glm::vec3(0, 0, 0);
 	diffuseColor = glm::vec3(0, 0, 0);
-	specularColor = glm::vec3(0, 0, 0);
+	specularColor = glm::vec3(1, 1, 1);
 
 
 	setModelInMiddle();
@@ -346,15 +346,20 @@ void MeshModel::updateFrame( glm::fmat4x4 transform)
 	CoordinateSystem = glm::fmat3x3(v0, v1, v2);
 }
 
-const glm::vec3& MeshModel::getCenter() const
+const glm::fvec3& MeshModel::getCenter() const
 {
-	glm::fmat4x4 final = finalTransformation;
+	glm::fmat4x4 final = normalTransformation;
 	return Utils::applyTransformationToVector(center , final);
 }
 
 const glm::fmat3x3& MeshModel::getCoordinateSystem()
 {
 	return CoordinateSystem;
+}
+
+glm::fmat4x4 MeshModel::getNormalTransformation() const
+{
+	return normalTransformation;
 }
 
 

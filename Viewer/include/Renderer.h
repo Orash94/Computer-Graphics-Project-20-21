@@ -22,7 +22,7 @@ public:
 	void applyExponentialSquaredFogging();
 	Scene& scene;
 
-
+	
 private:
 	void PutPixel(const int i, const int j, const float z, const glm::vec3& color);
 	void UpdatePutPixel();
@@ -34,7 +34,7 @@ private:
 	void allocateColorBuffer();
 	void PostProcessing();
 	void DrawBoundingBox(MeshModel& model , const Scene& scene , glm::fmat4x4 trasformation , const glm::vec3& color);
-	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation  , const glm::vec3& color);
+	glm::vec3 DrawFaceNormal(MeshModel& mesh, Face& face , glm::fmat4x4 trasformation, glm::fmat4x4 FinalTrasformation, const glm::vec3& color);
 	void DrawVerticesNormal(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength);
 	void DrawVerticesNormalPerFace(MeshModel& mesh, glm::fmat4x4 trasformation, const glm::vec3& color, float normalLength);
 	void CreateBuffers(int w, int h);
@@ -52,7 +52,7 @@ private:
 	void ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh ,  const Scene& scene , const Face& face);
 	void ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
 	void ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const  MeshModel& mesh, const Scene& scene , const Face& face);
-
+	glm::fmat4x4 afterProjectionMatrix;
 	
 	float* color_buffer_;
 	int viewport_width_;

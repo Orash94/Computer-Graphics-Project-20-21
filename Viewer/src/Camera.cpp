@@ -8,22 +8,26 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	up = up_;
 
 	
-	left = -0.5f;
-	right = 0.5f;
-	bottom = -0.5f;
-	top = 0.5f;
-	_near = 1.0f;
+	left = -500.f;
+	right = 500.f;
+
+	bottom = -500.f;
+	top = 500.f;
+	
+	_near = 0.1f;
+	Pnear = 250.0f;
 	_far = 1200.0f;
+	Pfar = 750.0;
 
 	zoom = 1.0f;
-	fovy = 0.01f;
+	fovy = glm::radians(135.0f);
 	aspectRatio = 1.0f;
 
 
 	lookAtOrTransformation = true;
 	OrthographicOrPerspective = true;
 	setCameraDirection();
-	SetPerspectiveData(_near, _far, fovy, aspectRatio);
+	SetPerspectiveData(Pnear, Pfar, fovy, aspectRatio);
 
 	SetViewVolumeCoordinates(right, left, top, bottom, _near, _far);
 }
@@ -70,13 +74,13 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	fovy = _fovy;
 	aspectRatio = _aspectRatio;
 
-	float height = glm::abs(glm::tan(glm::radians(fovy)/zoom)) * _near;
-	float width = aspectRatio * height;
+	/*float height = glm::abs(glm::tan(fovy/zoom)) * _near;
+	float width = aspectRatio * height;*/
 
 	//(T fov, T width, T height, T zNear, T zFar)
-	view_transformation_ = glm::perspectiveFov(fovy, width, height , _near, _far);
-
-	//view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(-width, width, height, -height, near_, far_);
+	view_transformation_ = glm::perspective(fovy, aspectRatio , _near, _far);
+	//view_transformation_ = glm::frustum(left, right, bottom, top, _near, _far);
+	//view_trview_transformation_ =ansformation_ = Utils::SetViewVolumePerspectiveTransformation(left, right, top, bottom, near_, far_);
 }
 
 void Camera::setProjection(const int Projection)
@@ -150,12 +154,16 @@ float Camera::GetBottom() const
 
 float Camera::GetNear() const
 {
-	return _near;
+	if(OrthographicOrPerspective)
+		return _near;
+	return Pnear;
 }
 
 float Camera::GetFar() const
 {
-	return _far;
+	if (OrthographicOrPerspective)
+		return _far;
+	return Pfar;
 }
 
 float Camera::GetFovy() const
