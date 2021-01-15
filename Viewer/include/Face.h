@@ -12,7 +12,7 @@ public:
 	int GetTextureIndex(int index) const;
 	int GetNumberOfVertexIndexes() const;
 	void setFaceNormal(const glm::fvec3 normal);
-	glm::fvec3 getFaceNormal();
+	const glm::fvec3 getFaceNormal() const;
 
 private:
 	glm::fvec3 normal;

@@ -36,6 +36,8 @@ public:
 
 	float GetZoom() const;
 
+	bool GetOrthographicOrPerspective() const;
+
 	void setCameraDirection();
 	void setLookAtOrTransformation(const bool flag);
 	bool GetLookAtOrTransformation() const;

@@ -7,6 +7,9 @@
 class MeshModel
 {
 public:
+	static enum shadingType { Flat, Gauraud, Phong, None };
+	static enum modelType { Object, Camera, Light};
+
 	MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, const std::string& model_name);
 	virtual ~MeshModel();
 	const Face& GetFace(int index) const;
@@ -22,18 +25,19 @@ public:
 	std::vector<glm::vec3> getFacesNormals();
 	std::vector<glm::vec3> getFacesCenters();
 	std::vector<glm::vec3> getVerticesNormals();
-	std::vector<glm::vec3> getVerticesNormalsPerFace();
+	std::vector<glm::vec3> getVerticesNormalsPerFace() const;
 
 	glm::vec3 getScale();
 	glm::vec3 getRotate();
 	glm::vec3 getTranslate();
-	glm::fmat4x4 getObjectTransformation();
+	glm::fmat4x4 getObjectTransformation() const;
 
 	glm::vec3 getWorldScale();
 	glm::vec3 getWorldRotate();
 	glm::vec3 getWorldTranslate();
-	glm::fmat4x4 getWorldTransformation();
+	glm::fmat4x4 getWorldTransformation() const;
 
+	glm::fmat4x4 getTransformation() const;
 
 	float getMaxDitancePoints();
 
@@ -50,8 +54,11 @@ public:
 	void updateFrame( glm::fmat4x4 transform);
 	void SetColor(const glm::vec3 _color);
 	glm::vec3 GetColor()const;
-	const glm::vec3& getCenter();
+	const glm::vec3& getCenter() const;
 	const glm::fmat3x3& getCoordinateSystem();
+
+
+
 
 	bool displayBoundingBox = false;
 
@@ -72,6 +79,14 @@ public:
 	float maxZ_ = FLT_MIN;
 
 	std::map<int, std::vector<int>> vertcisAdjacent;
+
+	glm::vec3 ambientColor;
+	glm::vec3 diffuseColor;
+	glm::vec3 specularColor;
+
+	shadingType shadingType = Flat;
+	modelType   modelType = Object;
+	glm::fmat4x4 finalTransformation;
 
 protected:
 	

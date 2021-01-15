@@ -13,7 +13,11 @@ MeshModel::MeshModel(std::vector<Face> faces, std::vector<glm::vec3> vertices, s
 	ObjectTransformation = Utils::getIdMat();
 	WorldTransformation = Utils::getIdMat();
 
-	color = glm::vec3(1, 0, 0);
+	color = glm::vec3(1, 1, 1);
+	ambientColor = glm::vec3(0, 0, 0);
+	diffuseColor = glm::vec3(0, 0, 0);
+	specularColor = glm::vec3(0, 0, 0);
+
 
 	setModelInMiddle();
 	setFrame(glm::fvec3(0.0f, 0.0f, 0.0f), Utils::getIdMat());
@@ -114,7 +118,7 @@ std::vector<glm::vec3> MeshModel::getVerticesNormals()
 	return verticesNormals_;
 }
 
-std::vector<glm::vec3> MeshModel::getVerticesNormalsPerFace()
+std::vector<glm::vec3> MeshModel::getVerticesNormalsPerFace() const
 {
 	return normals_;
 }
@@ -139,7 +143,7 @@ glm::vec3 MeshModel::getTranslate()
 	return Translate;
 }
 
-glm::fmat4x4 MeshModel::getObjectTransformation()
+glm::fmat4x4 MeshModel::getObjectTransformation() const
 {
 	return ObjectTransformation;
 }
@@ -159,9 +163,14 @@ glm::vec3 MeshModel::getWorldTranslate()
 	return WorldTranslate;
 }
 
-glm::fmat4x4 MeshModel::getWorldTransformation()
+glm::fmat4x4 MeshModel::getWorldTransformation() const
 {
 	return WorldTransformation;
+}
+
+glm::fmat4x4 MeshModel::getTransformation() const
+{
+	return glm::inverse(getWorldTransformation()) * getObjectTransformation();
 }
 
 
@@ -329,7 +338,6 @@ void MeshModel::setFrame(glm::fvec3 center, glm::fmat3x3 CoordinateSystem)
 
 void MeshModel::updateFrame( glm::fmat4x4 transform)
 {
-	center = Utils::applyTransformationToVector(center, transform);
 
 	glm::fvec3 v0 = Utils::applyTransformationToVector(glm::fvec3(1.0f,0.0f,0.0f) , transform);
 	glm::fvec3 v1 = Utils::applyTransformationToVector(glm::fvec3(0.0f,1.0f, 0.0f), transform);
@@ -338,9 +346,10 @@ void MeshModel::updateFrame( glm::fmat4x4 transform)
 	CoordinateSystem = glm::fmat3x3(v0, v1, v2);
 }
 
-const glm::vec3& MeshModel::getCenter()
+const glm::vec3& MeshModel::getCenter() const
 {
-	return center;
+	glm::fmat4x4 final = finalTransformation;
+	return Utils::applyTransformationToVector(center , final);
 }
 
 const glm::fmat3x3& MeshModel::getCoordinateSystem()

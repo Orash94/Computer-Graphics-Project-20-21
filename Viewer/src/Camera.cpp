@@ -2,7 +2,7 @@
 
 Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_):MeshModel(mesh)
 {
-
+	modelType = MeshModel::modelType::Camera;
 	eye = eye_;
 	at = at_;
 	up = up_;
@@ -12,19 +12,19 @@ Camera::Camera(MeshModel& mesh, glm::vec3& eye_, glm::vec3& at_, glm::vec3& up_)
 	right = 0.5f;
 	bottom = -0.5f;
 	top = 0.5f;
-	_near = 0.5f;
-	_far = 1.0f;
+	_near = 1.0f;
+	_far = 1200.0f;
 
 	zoom = 1.0f;
-	fovy = 0.1f;
+	fovy = 0.01f;
 	aspectRatio = 1.0f;
 
 
 	lookAtOrTransformation = true;
 	OrthographicOrPerspective = true;
-	
 	setCameraDirection();
 	SetPerspectiveData(_near, _far, fovy, aspectRatio);
+
 	SetViewVolumeCoordinates(right, left, top, bottom, _near, _far);
 }
 Camera::~Camera()
@@ -49,8 +49,8 @@ void Camera::SetViewVolumeCoordinates(const float right_, const float left_, con
 	bottom = bottom_;
 	_near = near_;
 	_far = far_;
-	
-	view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(right, left, top, bottom, -_near, -_far);
+	view_transformation_ = glm::ortho(left,right,bottom,top, _near, _far);
+	//view_transformation_ = Utils::SetViewVolumeOrthographicTransformation(-right, -left, top, bottom, _near, _far);
 }
 
 const glm::mat4x4& Camera::GetProjectionTransformation() const
@@ -73,7 +73,10 @@ void Camera::SetPerspectiveData(const float near_, const float far_, const float
 	float height = glm::abs(glm::tan(glm::radians(fovy)/zoom)) * _near;
 	float width = aspectRatio * height;
 
-	view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(width, -width, height, -height, near_, far_);
+	//(T fov, T width, T height, T zNear, T zFar)
+	view_transformation_ = glm::perspectiveFov(fovy, width, height , _near, _far);
+
+	//view_transformation_ = Utils::SetViewVolumePerspectiveTransformation(-width, width, height, -height, near_, far_);
 }
 
 void Camera::setProjection(const int Projection)
@@ -99,8 +102,9 @@ bool Camera::GetProjection() const
 void Camera::updateLookAt()
 {
 	if (lookAtOrTransformation == true) {
-		glm::fmat4x4 transformation = glm::inverse(getWorldTransformation()) * getObjectTransformation();
+		glm::fmat4x4 transformation = getTransformation();
 		//up is treated as normal
+
 		up = Utils::applyTransformationToNormal(glm::vec3(0, 1, 0), transformation);
 		at = Utils::applyTransformationToVector(glm::vec3(0, 0, -1), transformation);
 		eye = Utils::applyTransformationToVector(glm::vec3(0, 0, 0), transformation);
@@ -169,6 +173,11 @@ float Camera::GetZoom() const
 	return zoom;
 }
 
+bool Camera::GetOrthographicOrPerspective() const
+{
+	return OrthographicOrPerspective;
+}
+
 
 // initlise camera to look at negative z direction
 void Camera::setCameraDirection()
@@ -176,9 +185,11 @@ void Camera::setCameraDirection()
 	
 	glm::fmat4x4  transformation = Utils::TransformationRotateY(glm::radians(180.0f));
 
+
 	for (int i = 0; i < GetVerticesCount();i++) {
 		 vertices_[i] = Utils::applyTransformationToVector(GetVertexAtIndex(i), transformation);
 	}
+
 }
 
 void Camera::setLookAtOrTransformation(const bool flag)

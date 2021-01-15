@@ -59,7 +59,7 @@ void Face::setFaceNormal(const glm::fvec3 normal)
 	this->normal = normal;
 }
 
-glm::fvec3 Face::getFaceNormal()
+const glm::fvec3 Face::getFaceNormal() const
 {
 	return normal;
 }

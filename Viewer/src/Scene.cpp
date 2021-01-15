@@ -7,8 +7,9 @@
 Scene::Scene() :
 	active_camera_index_(0),
 	active_model_index_(0),
-	CamOrWorldView(false)
+	CamOrWorldView(true)
 {
+
 	showAxis = true;
 }
 
@@ -63,6 +64,26 @@ Camera& Scene::GetActiveCamera() const
 	return *cameras_[active_camera_index_];
 }
 
+void Scene::AddLight(const std::shared_ptr<Light>& light)
+{
+	Lights_.push_back(light);
+}
+
+int Scene::GetLightCount() const
+{
+	return Lights_.size();
+}
+
+Light& Scene::GetLight(int index) const
+{
+	return *Lights_[index];
+}
+
+Light& Scene::GetActiveLight() const
+{
+	return *Lights_[active_light_index_];
+}
+
 void Scene::SetActiveCameraIndex(int index)
 {
 	active_camera_index_ = index;
@@ -72,6 +93,7 @@ int Scene::GetActiveCameraIndex() const
 {
 	return active_camera_index_;
 }
+
 
 void Scene::SetActiveModelIndex(int index)
 {
@@ -83,10 +105,20 @@ int Scene::GetActiveModelIndex() const
 	return active_model_index_;
 }
 
+void Scene::SetActiveLightIndex(int index)
+{
+	active_light_index_ = index;
+}
+
+int Scene::GetActiveLightIndex() const
+{
+	return active_light_index_;
+}
+
 void Scene::cleanupScene()
 {
 	mesh_models_.clear();
-	cameras_.clear();
+	Lights_.clear();
 }
 
 bool Scene::getShowAxis() const
@@ -109,6 +141,11 @@ void Scene::deleteActiveModel()
 	mesh_models_.erase(mesh_models_.begin() + active_model_index_);
 }
 
+void Scene::deleteActiveLight()
+{
+	Lights_.erase(Lights_.begin() + active_light_index_);
+}
+
 void Scene::clearCameras()
 {
 	cameras_.clear();
@@ -117,6 +154,11 @@ void Scene::clearCameras()
 void Scene::clearModels()
 {
 	mesh_models_.clear();
+}
+
+void Scene::ClearLights()
+{
+	Lights_.clear();
 }
 
 

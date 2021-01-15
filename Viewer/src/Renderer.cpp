@@ -10,31 +10,91 @@
 #define INDEX(width,x,y,c) ((x)+(y)*(width))*3+(c)
 #define Z_INDEX(width,x,y) ((x)+(y)*(width))
 
-Renderer::Renderer(int viewport_width, int viewport_height) :
+Renderer::Renderer(int viewport_width, int viewport_height ,  Scene& scene_) :
 	viewport_width_(viewport_width),
-	viewport_height_(viewport_height)
+	viewport_height_(viewport_height),
+	scene(scene_)
 {
 	InitOpenGLRendering();
 	CreateBuffers(viewport_width, viewport_height);
 	allocateZBuffer();
+	allocateColorBuffer();
 }
 
 Renderer::~Renderer()
 {
 	delete[] color_buffer_;
+	for (int i = 0; i < viewport_width_; i++) {
+		delete[] Zbuffer[i];
+		delete[] localColorBuffer[i];
+	}
 	delete[] Zbuffer;
+	delete[] localColorBuffer;
 }
 
 void Renderer::PutPixel(int i, int j, const float z, const glm::vec3& color)
 {
 	if (i < 0) return; if (i >= viewport_width_) return;
 	if (j < 0) return; if (j >= viewport_height_) return;
+
 	
-	if (Zbuffer[i][j] > z) {
-		color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
-		color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
-		color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
-		Zbuffer[i][j] = z;
+	float CameraFar = scene.GetActiveCamera().GetFar();
+	float CameraNear = scene.GetActiveCamera().GetNear();
+
+	if (Zbuffer[i][j] >= z ) {
+		/*if (scene.CamOrWorldView ) {
+			
+			if (z>= CameraNear && z<=CameraFar) {
+				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+				Zbuffer[i][j] = z;
+			}
+		}
+		else {
+			color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+			color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+			Zbuffer[i][j] = z;
+		}*/
+		/*if (z > 1 && z<765) {
+				std::cout<< z<<std::endl;
+		}*/
+		if (scene.GetActiveCamera().GetOrthographicOrPerspective()) {
+			//Orthographic
+			if (z >= -1 && z <= 0) {
+
+				color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+				color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+				color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+				Zbuffer[i][j] = z;
+				localColorBuffer[i][j] = color;
+			}
+		}
+		else {
+			//Perspective
+			color_buffer_[INDEX(viewport_width_, i, j, 0)] = color.x;
+			color_buffer_[INDEX(viewport_width_, i, j, 1)] = color.y;
+			color_buffer_[INDEX(viewport_width_, i, j, 2)] = color.z;
+			Zbuffer[i][j] = z;
+			localColorBuffer[i][j] = color;
+		}
+		
+	}
+
+
+}
+
+void Renderer::UpdatePutPixel()
+{
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			PutPixel(i, j, Zbuffer[i][j], localColorBuffer[i][j]);
+
+		}
+
 	}
 }
 
@@ -90,18 +150,10 @@ void Renderer::plotLineLow(int x0, int y0, int  x1, int y1, const glm::vec3& col
 	int y = y0;
 
 	for (int x = x0;x <= x1; x++) {
-		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
-		float insideX = x;
-		if (insideX == 0)
-		{
-			insideX += 0.00001;
-		}
-		float alpha = p1[0] / insideX;
-		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-		float z = p4[2];*/
+		
 		glm::vec2 temp = glm::vec2(x, y);
 		float tempDist1= glm::distance(v1, temp);
-		float tempDist2 = glm::distance( temp, v2);
+		float tempDist2 = glm::distance( v2, temp);
 		float normalDist1 = tempDist1 / totaldist;
 		float normalDist2 = tempDist2 / totaldist;
 		float z = normalDist1 * p1.z + normalDist2 * p2.z;
@@ -137,16 +189,7 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	int x = x0;
 
 	for (int y = y0; y <= y1; y++) {
-		/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
-		float insideX = x;
-		if (insideX == 0)
-		{
-			insideX += 0.00001;
-		}
-		float alpha = p1[0] / insideX;
-		glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-		float z = p4[2];*/
-
+		
 		glm::vec2 temp = glm::vec2(x, y);
 		float tempDist1 = glm::distance(v1, temp);
 		float tempDist2 = glm::distance(temp, v2);
@@ -165,12 +208,37 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	}
 }
 
-void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color)
+void Renderer::DrawTriangle(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const glm::vec3& color ,const  MeshModel& mesh, const Scene& scene ,const Face& face)
 {
-	DrawLine(v1, v2, glm::vec3(0, 0, 0));
-	DrawLine(v2, v3, glm::vec3(0, 0, 0));
-	DrawLine(v1, v3, glm::vec3(0, 0, 0));
-	ScanConversionTriangle(v1, v2, v3, color);
+	
+
+
+	//here we need to distinguise between the three types of shading
+	if (mesh.modelType == MeshModel::modelType::Light) {
+		ScanConversionTriangle(v1, v2, v3, color);
+	}
+	else {
+		if (mesh.shadingType == MeshModel::shadingType::Flat) {
+			ScanConversionTriangleFlatShading(v1, v2, v3, mesh , scene , face);
+		}
+		else if (mesh.shadingType == MeshModel::shadingType::Gauraud) {
+			ScanConversionTriangleGouraudShading(v1, v2, v3, mesh, scene , face);
+		}
+		else if (mesh.shadingType == MeshModel::shadingType::Phong) {
+			ScanConversionTrianglePhongShading(v1, v2, v3, mesh, scene , face);
+		}
+		else if (mesh.shadingType == MeshModel::shadingType::None) {
+			ScanConversionTriangle(v1, v2, v3, color);
+		}
+	}
+
+	if (scene.wireFrame) {
+		DrawLine(v1, v2, glm::vec3(0, 0, 0));
+		DrawLine(v2, v3, glm::vec3(0, 0, 0));
+		DrawLine(v1, v3, glm::vec3(0, 0, 0));
+	}
+	
+	
 }
 
 void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x4 trasformation , const glm::vec3& color)
@@ -232,6 +300,278 @@ void Renderer::allocateZBuffer()
 			Zbuffer[i][j] = FLT_MAX;
 }
 
+void Renderer::allocateColorBuffer()
+{
+	localColorBuffer = new glm::vec3* [viewport_width_];
+	for (int i = 0; i < viewport_width_; i++)
+		localColorBuffer[i] = new glm::vec3[viewport_height_];
+
+	for (int i = 0; i < viewport_width_; i++)
+		for (int j = 0; j < viewport_height_; j++)
+			localColorBuffer[i][j] = glm::vec3(0,0,0);
+}
+
+void Renderer::PostProcessing()
+{
+	/*
+	* for gaussian blurring
+	*/
+	if (scene.gaussianBlurring) {
+		float** GaussianMask = GetGaussianMask(scene.maskRadius, scene.gaussianSTD);
+		applyConvolution(localColorBuffer,GaussianMask, scene.maskRadius);
+		for (int i = 0; i < 2* scene.maskRadius +1; i++)
+		{
+			delete[] GaussianMask[i];
+		}
+		delete[] GaussianMask;
+
+	}
+
+
+
+
+	/*
+	* creating bloom effect
+	*/
+	else if (scene.bloom) {
+		int radius = 2;
+		float STD = 3.0f;
+		glm::vec3 brightnessVec = glm::vec3(0.2126, 0.7152, 0.0722);
+		float PixelBrightness=0;
+		float** GaussianMask = GetGaussianMask(radius, STD);
+
+		/*
+		* allocating the temporary color buffer
+		*/
+		glm::vec3** tempImage = new glm::vec3 * [viewport_width_];
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			tempImage[i] = new glm::vec3[viewport_height_];
+		}
+
+		/*
+		* initializing the temporary color buffer
+		*/
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++)
+			{
+				tempImage[i][j] = glm::vec3(0, 0, 0);
+			}
+		}
+
+		/*
+		* assings RGB values from local color buffer when the brightness is above the threshold
+		*/
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++)
+			{
+				PixelBrightness = glm::dot(localColorBuffer[i][j], brightnessVec);
+				if (scene.threshold < PixelBrightness) {
+					tempImage[i][j] = localColorBuffer[i][j];
+				}
+			}
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			applyConvolution(tempImage, GaussianMask, radius);
+		}
+		//applyConvolution(tempImage, GaussianMask, radius);
+
+		
+
+
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++)
+			{
+				if(tempImage[i][j] != glm::vec3(0,0,0))
+					localColorBuffer[i][j] = glm::clamp(localColorBuffer[i][j] + tempImage[i][j], 0.0f, 1.0f);
+			}
+
+		}
+		for (int i = 0; i < 2 * scene.maskRadius + 1; i++)
+		{
+			delete[] GaussianMask[i];
+		}
+		delete[] GaussianMask;
+
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			delete[] tempImage[i];
+		}
+		delete[] tempImage;
+		
+	}
+
+
+
+
+	else if (scene.fogEffect) {
+		switch (scene.fogType)
+		{
+		case(1):
+			applyLinearFogging();
+			break;
+		case(2):
+			applyExponentialFogging();
+			break;
+		case(3):
+			applyExponentialSquaredFogging();
+			break;
+		default:
+			break;
+		}
+	}
+
+	else if(scene.grayScales)
+	{
+		float grayScaleColor;
+		glm::vec3 brightnessVec = glm::vec3(0.2126, 0.7152, 0.0722);
+		for (int i = 0; i < viewport_width_; i++)
+		{
+			for (int j = 0; j < viewport_height_; j++) {
+				grayScaleColor = glm::dot(localColorBuffer[i][j], brightnessVec);
+				localColorBuffer[i][j] = glm::vec3(grayScaleColor, grayScaleColor, grayScaleColor);
+			}
+		}
+	}
+
+	UpdatePutPixel();
+}
+
+
+float** Renderer::GetGaussianMask(int radius, float STD) {
+	int maskSize = 2 * radius + 1;
+	float sum = 0;
+
+	/*
+	* allocate new mask
+	*/
+	float** mask = new float* [maskSize];
+	for (int i = 0; i < maskSize; i++) {
+		mask[i] = new float[maskSize];
+	}
+
+	/*
+	* initializing the mask
+	*/
+	for (int i = 0; i < maskSize; i++)
+	{
+		for (int j = 0; j < maskSize; j++) {
+			mask[i][j] = 0;
+		}
+	}
+
+	/*
+	* compute the mask values by gaussian formula
+	*/
+	for (int i = -1*radius; i <= radius; i++)
+	{
+		for (int j = -1 * radius; j <= radius; j++) {
+			//mask(i+maskRadiusX+1, j+maskRadiusY+1) = exp(-1*((i^2 + j^2)/2*(maskSTD^2))); %compute the gaussed value of each coordinate in the mask by formula
+
+			mask[i+radius][j+radius] = std::exp( -1 * (std::pow(i , 2) + std::pow(j , 2)) / (2 * (std::pow(STD,2))));
+			sum += mask[i + radius ][j + radius ];
+		}
+	}
+
+	/*
+	* normalizing the mask factors
+	*/
+	for (int i = 0; i < maskSize; i++)
+	{
+		for (int j = 0; j < maskSize; j++) {
+			mask[i][j] /= sum;
+		}
+	}
+
+	return mask;
+	
+}
+
+void Renderer::applyConvolution(glm::vec3** im, float** mask, int radius)
+{
+	int size = 2 * radius + 1;
+	glm::vec3 sum;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			sum = glm::vec3(0, 0, 0);
+			for (int k = 0; k < size; k++)
+			{
+				for (int t = 0; t < size; t++)
+				{
+					if ((i-radius+k)>=0 && (j-radius+t)>=0 && (i-radius+k)<viewport_width_ && (j-radius+t)<viewport_height_)
+					{
+						sum += mask[k][t] * im[i - radius + k][j - radius + t];
+					}
+				}
+			}
+			im[i][j] = sum;
+		}
+
+	}
+}
+
+void Renderer::applyLinearFogging()
+{
+	float f;
+	float dist;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			//dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			dist = glm::distance(scene.GetActiveCamera().getEye().z,  Zbuffer[i][j]);
+			f = (scene.fogEnd - dist) / (scene.fogEnd - scene.fogStart);
+			glm::clamp(f, 0.0f, 1.0f);
+			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
+		}
+
+	}
+	
+}
+
+void Renderer::applyExponentialFogging()
+{
+	float f;
+	float dist;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			//dist = glm::distance(scene.GetActiveCamera().getEye().z, Zbuffer[i][j]);
+			f = std::exp(-1 * dist * (scene.fogDensity * 0.001));
+			glm::clamp(f, 0.0f, 1.0f);
+			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
+		}
+
+	}
+}
+
+void Renderer::applyExponentialSquaredFogging()
+{
+	float f;
+	float dist;
+	for (int i = 0; i < viewport_width_; i++)
+	{
+		for (int j = 0; j < viewport_height_; j++)
+		{
+			dist = glm::distance(scene.GetActiveCamera().getEye(), glm::vec3(i, j, Zbuffer[i][j]));
+			f = std::exp(-1* std::pow(dist * (scene.fogDensity * 0.001),2));
+			glm::clamp(f, 0.0f, 1.0f);
+			localColorBuffer[i][j] = glm::clamp(f * localColorBuffer[i][j] + (1 - f) * scene.fogColor, 0.0f, 1.0f);
+		}
+
+	}
+}
+
+
+
 void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
 {
 	float minX = getMin(p1.x, p2.x, p3.x);
@@ -242,10 +582,9 @@ void Renderer::ScanConversionTriangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, 
 	for (int i = minX; i < maxX; i++) {
 		for (int j = minY; j < maxY; j++) {
 			if (isInsideTheTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, i, j))
-				//if (Zbuffer[i][j] >= ZpointComputation(p1, p2, p3, glm::vec2(i, j))) {
+				
 				PutPixel(i, j, ZpointComputation(p1, p2, p3, glm::vec2(i, j)), color);
-			//	Zbuffer[i][j] = ZpointComputation(p1, p2, p3, glm::vec2(i, j));
-			//}
+			
 		}
 
 	}
@@ -312,50 +651,10 @@ glm::vec3 Renderer::getDirectionVector(glm::vec3 v1, glm::vec3 v2)
 
 float Renderer::ZpointComputation(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 insidePoint)
 {
-	/*glm::vec3 v1v2DirectionVector = getDirectionVector(p1, p2);
-	float insideX = insidePoint[0];
-	if (insideX == 0)
-	{
-		insideX += 0.00001;
-	}
-	float alpha = p1[0] / insideX;
-	glm::vec3 p4 = p1 + glm::vec3(alpha * v1v2DirectionVector[0], alpha * v1v2DirectionVector[1], alpha * v1v2DirectionVector[3]);
-	float z4 = p4[2];
+	
+	glm::fvec3 weights = Utils::triangleInterpolation(p1, p2, p3, insidePoint);
 
-	glm::vec3 v1v3DirectionVector = getDirectionVector(p1, p3);
-
-	alpha = p1[0] / insideX;
-	glm::vec3 p5 = p1 + glm::vec3(v1v3DirectionVector[0] * alpha, v1v3DirectionVector[1] * alpha, v1v3DirectionVector[2] * alpha);
-	float z5 = p5[2];
-
-	glm::vec3 v4v5DirectionVector = getDirectionVector(p4, p5);
-	alpha = p4[0] / insideX;
-	glm::vec3 p = p4 + glm::vec3(alpha * v4v5DirectionVector[0], alpha * v4v5DirectionVector[1], alpha * v4v5DirectionVector[2]);
-	float z = p[2];
-
-
-	return z;*/
-
-
-	float top1 = (p2.y - p3.y) * (insidePoint.x - p3.x) + (p3.x - p2.x) * (insidePoint.y - p3.y);
-	float bottom1 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
-	if (bottom1 == 0)
-	{
-		bottom1 += 0.00000000000000001;
-	}
-	float w1 = top1 / bottom1;
-
-	float top2 = (p3.y - p1.y) * (insidePoint.x - p3.x) + (p1.x - p3.x) * (insidePoint.y - p3.y);
-	float bottom2 = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
-	if (bottom2 == 0)
-	{
-		bottom2 += 0.00000000000000001;
-	}
-
-	float w2 = top2 / bottom2;
-	float w3 = 1 - w1 - w2;
-
-	float z = p1.z * w1 + p2.z * w2 + p3.z * w3;
+	float z = p1.z * weights[0] + p2.z * weights[1] + p3.z * weights[2];
 	return z;
 }
 
@@ -364,6 +663,145 @@ float Renderer::area(int x1, int y1, int x2, int y2, int x3, int y3)
 
 	return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
 
+}
+
+void Renderer::ScanConversionTriangleFlatShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
+{
+	
+	glm::fvec3 tringlrCenter = (v1 + v2 + v3) / 3.0f;
+	glm::fvec3 color = glm::fvec3(0, 0, 0);
+	for (int k = 0; k < scene.GetLightCount(); k++) {
+		Light light = scene.GetLight(k);
+		//(const MeshModel& mesh, const glm::fvec3 Normal, const glm::fvec3 MeshPoint, const glm::fvec3 modelcenter, const  glm::fvec3 lightcenter, const glm::fvec3 cameraCenter, const float Alpha )
+
+		color += light.calculateColor(mesh, face.getFaceNormal(), tringlrCenter, mesh.getCenter(),  light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+
+		for (int i = 0; i < 3; i++) {
+			if (color[i] > 1.0f) {
+				color[i] = 1.0f;
+			}
+		}
+	}
+
+	float minX = getMin(v1.x, v2.x, v3.x);
+	float maxX = getMax(v1.x, v2.x, v3.x);
+	float minY = getMin(v1.y, v2.y, v3.y);
+	float maxY = getMax(v1.y, v2.y, v3.y);
+
+	for (int i = minX; i < maxX; i++) {
+		for (int j = minY; j < maxY; j++) {
+			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
+			}
+		}
+
+	}
+}
+
+void Renderer::ScanConversionTriangleGouraudShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
+{
+
+	std::vector<glm::vec3>  normals  = mesh.getVerticesNormalsPerFace();
+	glm::fmat4x4 transformation = mesh.finalTransformation;
+
+	glm::fvec3 vertices[3] = { v1, v2, v3 };
+	glm::fvec3 normalTransformation[3];
+	glm::fvec3 verticesColor[3];
+
+	for (int k = 0; k < 3; k++) {
+		int normalIndex = face.GetNormalIndex(k) - 1;
+		glm::vec3 normal = normals[normalIndex];
+		normal = Utils::applyTransformationToNormal(normal, transformation);
+		normalTransformation[k] = normal;
+	}
+
+	for (int k = 0; k < 3; k++) {
+		glm::fvec3 color = glm::fvec3(0, 0, 0);
+		for (int k = 0; k < scene.GetLightCount(); k++) {
+			Light light = scene.GetLight(k);
+
+			color += light.calculateColor(mesh, normalTransformation[k], vertices[k], mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+
+			for (int i = 0; i < 3; i++) {
+				if (color[i] > 1.0f) {
+					color[i] = 1.0f;
+				}
+			}
+
+		}
+		verticesColor[k] = color;
+	}
+	
+
+
+	float minX = getMin(v1.x, v2.x, v3.x);
+	float maxX = getMax(v1.x, v2.x, v3.x);
+	float minY = getMin(v1.y, v2.y, v3.y);
+	float maxY = getMax(v1.y, v2.y, v3.y);
+
+	for (int i = minX; i < maxX; i++) {
+		for (int j = minY; j < maxY; j++) {
+			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+
+				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i,j));
+				glm::fvec3 color = weights[0]* verticesColor[0] + weights[1] * verticesColor[1] + weights[2] * verticesColor[2];
+				
+				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
+			}
+		}
+
+	}
+}
+
+void Renderer::ScanConversionTrianglePhongShading(const glm::fvec3& v1, const glm::fvec3& v2, const glm::fvec3& v3, const MeshModel& mesh, const Scene& scene , const Face& face)
+{
+	std::vector<glm::vec3>  normals = mesh.getVerticesNormalsPerFace();
+	glm::fmat4x4 transformation = mesh.getTransformation();
+
+
+
+	glm::fvec3 normalTransformation[3];
+	glm::fvec3 vertices[3] = { v1, v2, v3 };
+
+	for (int k = 0; k < 3; k++) {
+		int normalIndex = face.GetNormalIndex(k) - 1;
+		glm::vec3 normal = normals[normalIndex];
+		normal = Utils::applyTransformationToNormal(normal, transformation);
+		normalTransformation[k] = normal;
+	}
+
+	float minX = getMin(v1.x, v2.x, v3.x);
+	float maxX = getMax(v1.x, v2.x, v3.x);
+	float minY = getMin(v1.y, v2.y, v3.y);
+	float maxY = getMax(v1.y, v2.y, v3.y);
+
+	for (int i = minX; i < maxX; i++) {
+		for (int j = minY; j < maxY; j++) {
+			if (isInsideTheTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, i, j)) {
+
+				glm::fvec3 weights = Utils::triangleInterpolation(v1, v2, v3, glm::fvec2(i, j));
+				glm::fvec3 pointNormal  = weights[0] * normalTransformation[0] + weights[1] * normalTransformation[1] + weights[2] * normalTransformation[2];
+				float z = weights[0] * v1[2] + weights[1] * v2[2] + weights[2] * v3[2];
+
+				glm::fvec3 color = glm::fvec3(0, 0, 0);
+				for (int k = 0; k < scene.GetLightCount(); k++) {
+					Light light = scene.GetLight(k);
+
+					color += light.calculateColor(mesh, pointNormal, glm::fvec3(i, j, z), mesh.getCenter(), light.getCenter(), scene.GetActiveCamera().getEye(), light.alpha);
+
+					for (int i = 0; i < 3; i++) {
+						if (color[i] > 1.0f) {
+							color[i] = 1.0f;
+						}
+					}
+
+				}
+
+				PutPixel(i, j, ZpointComputation(v1, v2, v3, glm::vec2(i, j)), color);
+			}
+		}
+
+	}
 }
 
 glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 trasformation, const glm::vec3& color)
@@ -375,16 +813,25 @@ glm::vec3 Renderer::DrawFaceNormal(MeshModel& mesh, Face& face, glm::fmat4x4 tra
 			vectorArray[k] = mesh.GetVertexAtIndex(index);
 		}
 
-		glm::fvec3 v0 = Utils::applyTransformationToVector(vectorArray[0], trasformation);
-		glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
-		glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
+		//glm::fvec3 v0 = Utils::applyTransformationToVector(vectorArray[0], trasformation);
+		//glm::fvec3 v1 = Utils::applyTransformationToVector(vectorArray[1], trasformation);
+		//glm::fvec3 v2 = Utils::applyTransformationToVector(vectorArray[2], trasformation);
 		
+		glm::fvec3 v0 = vectorArray[0];
+		glm::fvec3 v1 = vectorArray[1];
+		glm::fvec3 v2 = vectorArray[2];
+
 		glm::fvec3 ActualCenter = (v0 + v1 + v2) / 3.0f; //center of face
+		ActualCenter = Utils::applyTransformationToVector(ActualCenter, trasformation);
+
 		glm::vec3 Actualnormal = glm::normalize(glm::cross((v1 - v0), (v2 - v0)));
 
-		glm::vec3 normalizedNormal = Actualnormal;
+		Actualnormal = Utils::applyTransformationToNormal(Actualnormal, trasformation);
 
+		glm::vec3 normalizedNormal = Actualnormal;
+		
 		Actualnormal = Actualnormal * mesh.FaceNormalsLength;
+
 		//face normals check
 		if (mesh.displayFaceNormals) {
 			DrawLine(ActualCenter, ActualCenter + Actualnormal, glm::fvec3(1, 1, 1));
@@ -434,6 +881,7 @@ void Renderer::CreateBuffers(int w, int h)
 	CreateOpenGLBuffer(); //Do not remove this line.
 	color_buffer_ = new float[3 * w * h];
 	allocateZBuffer();
+	allocateColorBuffer();
 	ClearColorBuffer(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
@@ -557,19 +1005,19 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 		for (int j = 0; j < viewport_height_; j++)
 		{
 			Zbuffer[i][j] = FLT_MAX;
-			PutPixel(i, j, 4000, color);
+			PutPixel(i, j, 0 , color);
 		}
 	}
 }
 
 void Renderer::Render(const Scene& scene)
 {
+	
 	int windowsWidth = viewport_width_;
 	int windowsHeight = viewport_height_;
 
 	int centerX = windowsWidth / 2;
 	int centerY = windowsHeight / 2;
-	int boundingBoxEdgeLength = glm::min(centerX, centerY);
 
 	
 	if (scene.getShowAxis()) {
@@ -582,37 +1030,45 @@ void Renderer::Render(const Scene& scene)
 		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
 			MeshModel& mesh = scene.GetModel(i);
-			float proportion = 400.0f/mesh.getMaxDitancePoints();
+			float proportion = 200.0f/mesh.getMaxDitancePoints();
 
 			
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
-			glm::fmat4x4 transformationMatrix = glm::inverse(mesh.getWorldTransformation()) * mesh.getObjectTransformation();
+			glm::fmat4x4 transformationMatrix = mesh.getTransformation();
 
 
 			glm::fmat4x4 finalTransformation =   transformationMatrix * scale   ;
 
-			if (scene.GetCamOrWorldView())  // rendering the active camera view
-			{
-				Camera& currentCam = scene.GetActiveCamera();
-				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
-				glm::fmat4x4 viewVolumeTransformation;
+			//rendering active camera view
+			Camera& currentCam = scene.GetActiveCamera();
+			glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+			glm::fmat4x4 viewVolumeTransformation= currentCam.GetViewTransformation();
 
-				viewVolumeTransformation = currentCam.GetViewTransformation();
-				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
-				finalTransformation = CameraTransformation * finalTransformation;
-				
-			}
+			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+			finalTransformation = CameraTransformation * finalTransformation;
+
 
 			//transfer objects to center screen with transalte transformation
 			finalTransformation = translate * finalTransformation;
+			mesh.finalTransformation = finalTransformation;
 			//bounding box check
+
 			if (mesh.displayBoundingBox) {
 				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));
 			}
 
 			std::vector<Face> faces = mesh.getFaces();
 
+			std::vector<glm::vec3> verticesTransformation;
+			for (int j = 0; j < mesh.GetVerticesCount(); j++)
+			{
+				glm::fvec3  vertex = mesh.GetVertexAtIndex(j);
+				glm::fvec3 transformedVertex = Utils::applyTransformationToVector(vertex, finalTransformation); 
+				verticesTransformation.push_back(transformedVertex);
+			}
+
+			
 			//draw faces
 			for (int j = 0; j < mesh.GetFacesCount(); j++)
 			{
@@ -623,8 +1079,7 @@ void Renderer::Render(const Scene& scene)
 				//extract verices of face
 				for (int k = 0; k < 3; k++) {
 					int index = face.GetVertexIndex(k) - 1;
-					glm::vec3 v =mesh.GetVertexAtIndex(index);
-					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
+					vectorArray[k] = verticesTransformation[index];
 				}
 
 				
@@ -633,7 +1088,7 @@ void Renderer::Render(const Scene& scene)
 				
 				
 
-				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor());
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], mesh.GetColor(), mesh , scene , face);
 			}
 
 			//call function 
@@ -653,10 +1108,15 @@ void Renderer::Render(const Scene& scene)
 	}
 
 	//rendering the  camers to the screen
-	if (scene.GetCameraCount() > 0 && !scene.GetCamOrWorldView()) {
+	if (scene.GetCameraCount() > 0 ) {
 		for (int i = 0; i < scene.GetCameraCount(); i++) {
+
+			if (scene.GetActiveCameraIndex() == i) {
+				continue;
+			}
+
 			Camera& tempCam = scene.GetCamera(i);
-			float proportion = 100.0f / tempCam.getMaxDitancePoints();
+			float proportion = 50.0f / tempCam.getMaxDitancePoints();
 
 			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
 			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
@@ -665,13 +1125,25 @@ void Renderer::Render(const Scene& scene)
 
 			//check if we are using LookAt or Transformation
 			if (tempCam.GetLookAtOrTransformation() == true) {
-				 transformationMatrix = glm::inverse(tempCam.getWorldTransformation()) * tempCam.getObjectTransformation();
+				transformationMatrix = tempCam.getTransformation();
 			}
 			else {
-				transformationMatrix =  glm::inverse(glm::lookAt(tempCam.getEye(), tempCam.getAt(), tempCam.getUp()));
+				transformationMatrix = glm::inverse(glm::lookAt(tempCam.getEye(), tempCam.getAt(), tempCam.getUp()));
 			}
 
-			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale;
+			glm::fmat4x4 finalTransformation =  transformationMatrix * scale;
+
+			
+			//rendering active camera view
+			Camera& currentCam = scene.GetActiveCamera();
+			glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+			glm::fmat4x4 viewVolumeTransformation;
+			viewVolumeTransformation = currentCam.GetViewTransformation();
+			glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+			finalTransformation = translate *  CameraTransformation * finalTransformation;
+			
+
+			tempCam.finalTransformation =  finalTransformation;
 
 			std::vector<Face> faces = tempCam.getFaces();
 
@@ -687,14 +1159,60 @@ void Renderer::Render(const Scene& scene)
 					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
 				}
 
-				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(0.5f, 0.5f, 0.5f), tempCam, scene, face);
 
 			}
 		}
 	}
-	
-	
 
+	//rendering the  lights to the screen
+	if (scene.GetLightCount() > 0 ) {
+		for (int i = 0; i < scene.GetLightCount(); i++) {
+			Light& tempLight = scene.GetLight(i);
+			float proportion = 50.0f / tempLight.getMaxDitancePoints();
+
+			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
+			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
+
+			glm::fmat4x4 transformationMatrix = tempLight.getTransformation();
+
+			glm::fmat4x4 finalTransformation = transformationMatrix * scale;
+
+			if (scene.GetCamOrWorldView())  // rendering the active camera view
+			{
+				Camera& currentCam = scene.GetActiveCamera();
+				glm::fmat4x4 inverserCameraTransformation = glm::lookAt(currentCam.getEye(), currentCam.getAt(), currentCam.getUp());
+				glm::fmat4x4 viewVolumeTransformation;
+
+				viewVolumeTransformation = currentCam.GetViewTransformation();
+				glm::fmat4x4 CameraTransformation = viewVolumeTransformation * inverserCameraTransformation;
+				finalTransformation = CameraTransformation * finalTransformation;
+			}
+
+			finalTransformation = translate * finalTransformation;
+
+			tempLight.finalTransformation = finalTransformation;
+			std::vector<Face> faces = tempLight.getFaces();
+
+			for (int j = 0; j < tempLight.GetFacesCount(); j++)
+			{
+				Face& face = faces[j];
+
+				glm::vec3 vectorArray[3];
+
+				for (int k = 0; k < 3; k++) {
+					int index = face.GetVertexIndex(k) - 1;
+					glm::vec3 v = tempLight.GetVertexAtIndex(index);
+					vectorArray[k] = Utils::applyTransformationToVector(v, finalTransformation);
+				}
+
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 1, 1) , tempLight, scene , face);
+
+			}
+		}
+	}
+	PostProcessing();
+	
 }
 
 int Renderer::GetViewportWidth() const
@@ -713,3 +1231,4 @@ void Renderer::SetViewport(int width, int height)
 	viewport_width_ = width;
 	CreateBuffers(width, height);
 }
+
