@@ -1,9 +1,11 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 #include "Renderer.h"
 #include "InitShader.h"
+#include "Utils.h"
 
 #define INDEX(width,x,y,c) ((x)+(y)*(width))*3+(c)
 #define Z_INDEX(width,x,y) ((x)+(y)*(width))
@@ -118,11 +120,78 @@ void Renderer::plotLineHigh(int x0, int y0, int x1, int y1, const glm::vec3& col
 	}
 }
 
-void Renderer::plotTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color)
+void Renderer::DrawTriangle(const glm::fvec2& v1, const glm::fvec2& v2, const glm::fvec2& v3, const glm::vec3& color)
 {
 	DrawLine( v1, v2, color);
 	DrawLine(v2, v3, color);
 	DrawLine(v1, v3, color);
+}
+
+void Renderer::DrawBoundingBox(MeshModel& model, const Scene& scene, glm::fmat4x4 trasformation , const glm::vec3& color)
+{
+	float BoxEdge = model.getMaxDitancePoints()/2;
+	glm::fvec3 vecArray[8] = {
+	glm::fvec3(BoxEdge, BoxEdge, BoxEdge),
+	glm::fvec3(BoxEdge, BoxEdge, -BoxEdge),
+	glm::fvec3(BoxEdge, -BoxEdge, BoxEdge),
+	glm::fvec3(BoxEdge, -BoxEdge, -BoxEdge),
+	glm::fvec3(-BoxEdge, BoxEdge, BoxEdge),
+	glm::fvec3(-BoxEdge, BoxEdge, -BoxEdge),
+	glm::fvec3(-BoxEdge, -BoxEdge, BoxEdge),
+	glm::fvec3(-BoxEdge, -BoxEdge, -BoxEdge)
+	};
+	
+	for (int i = 0; i < 8; i++) {
+		vecArray[i] =  Utils::applyTransformationToVector(vecArray[i], trasformation);
+	}
+	/*cubes look like this:
+	   e-------f
+	  /|      /|
+	 / |#1   / |
+	a--|----b  |
+	|  g----|--h
+	| / #2   | /
+	c-------d*/
+
+	//face #1 up
+	DrawLine(vecArray[0], vecArray[1], color);
+	DrawLine(vecArray[0], vecArray[2], color);
+	DrawLine(vecArray[3], vecArray[1], color);
+	DrawLine(vecArray[3], vecArray[2], color);
+
+	//face #2 down
+	DrawLine(vecArray[7], vecArray[6], color);
+	DrawLine(vecArray[7], vecArray[5], color);
+	DrawLine(vecArray[4], vecArray[6], color);
+	DrawLine(vecArray[4], vecArray[5], color);
+
+	//connectors of two faces
+	DrawLine(vecArray[0], vecArray[4], color);
+	DrawLine(vecArray[1], vecArray[5], color);
+	DrawLine(vecArray[2], vecArray[6], color);
+	DrawLine(vecArray[3], vecArray[7], color);
+
+}
+
+void Renderer::DrawFaceNormal(MeshModel& mesh , glm::vec3 vectorArray[3], const Scene& scene, glm::fmat4x4 trasformation, const glm::vec3& color)
+{
+	
+	glm::fvec3 v0 = vectorArray[0];
+	glm::fvec3 v1 = vectorArray[1];
+	glm::fvec3 v2 = vectorArray[2];
+	
+	glm::fvec3 center = (v0 + v1 + v2) / 3.0f;
+
+	glm::fvec3 normal = glm::cross((v1 - v0), (v2 - v0));
+
+	float EdgeLength = glm::distance(v0,v1)/4;
+	float NormaleLength = glm::distance(center, center + normal);
+	float scale = EdgeLength / NormaleLength;
+
+	normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(scale, scale, scale)));
+	//normal = Utils::applyTransformationToVector(normal, Utils::TransformationScale(glm::fvec3(100, 100, 100)));
+	DrawLine(center, center + normal , color);
+
 }
 
 void Renderer::CreateBuffers(int w, int h)
@@ -258,59 +327,58 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 
 void Renderer::Render(const Scene& scene)
 {
-	// TODO: Replace this code with real scene rendering code
-	/*int half_width = viewport_width_ / 2;
-	int half_height = viewport_height_ / 2;
-	int thickness = 15;
+	int windowsWidth = viewport_width_;
+	int windowsHeight = viewport_height_;
+
+	int centerX = windowsWidth / 2;
+	int centerY = windowsHeight / 2;
+	int boundingBoxEdgeLength = glm::min(centerX, centerY);
 	
-	for(int i = 0; i < viewport_width_; i++)
-	{
-		for (int j = half_height - thickness; j < half_height + thickness; j++)
+	if (scene.GetModelCount() > 0) {
+		for (int i = 0; i < scene.GetModelCount(); i++)
 		{
-			PutPixel(i, j, glm::vec3(1, 0, 0));
+			MeshModel& mesh = scene.GetModel(i);
+			float proportion = 400.0f/mesh.getMaxDitancePoints();
+
+			
+			glm::fmat4x4 scale = Utils::TransformationScale(glm::fvec3(proportion, proportion, proportion));
+			glm::fmat4x4 translate = Utils::TransformationTransition(glm::fvec3(centerX, centerY, 0));
+			glm::fmat4x4 transformationMatrix = glm::inverse(mesh.getWorldTransformation()) * mesh.getObjectTransformation();
+
+			glm::fmat4x4 finalTransformation = translate * transformationMatrix * scale   ;
+
+			//bounding box check
+			if (mesh.displayBoundingBox) {
+				DrawBoundingBox(mesh, scene, finalTransformation, glm::vec3(0, 0, 1));
+			}
+
+			std::vector<Face> faces = mesh.getFaces();
+
+			for (int j = 0; j < mesh.GetFacesCount(); j++)
+			{
+				Face& face = faces[j];
+
+				glm::vec3 vectorArray[3];
+
+				for (int k = 0; k < 3; k++) {
+					int index = face.GetVertexIndex(k) - 1;
+					glm::vec3 v =mesh.GetVertexAtIndex(index);
+					vectorArray[k] = Utils::applyTransformationToVector(v , finalTransformation);
+				}
+				
+				
+				//face normals check
+				if (mesh.displayFaceNormals) {
+					DrawFaceNormal( mesh, vectorArray , scene, finalTransformation, glm::vec3(1, 0, 1));
+				}
+
+				DrawTriangle(vectorArray[0], vectorArray[1], vectorArray[2], glm::vec3(1, 0, 0));
+
+			}
 		}
 	}
-
-	for (int i = 0; i < viewport_height_; i++)
-	{
-		for (int j = half_width - thickness; j < half_width + thickness; j++)
-		{
-			PutPixel(j, i, glm::vec3(1, 0, 1));
-		}
-	}*/
 	
-	/* Drawing the circle */
-	int x0 = 500;
-	int y0 = 300;
-	DrawLine(glm::ivec2(x0, y0), glm::ivec2(x0, y0), glm::vec3(1, 0, 0));
-	float radius  = 200;
-	int ateration = 100;
-
 	
-	for (int i = 1; i<= ateration;i++) {
-		float x1 = x0 + radius * sin(2 * M_PI *i / ateration);
-		float y1 = y0 + radius * cos(2 * M_PI* i / ateration);
-		DrawLine(glm::ivec2(x0, y0), glm::ivec2(x1,  y1), glm::vec3(1, 0, 0));
-	}
-
-	// Drawing the trinagle that surrounds the circle, with the feeling of the illuminati
-	plotTriangle(glm::fvec2(150, 100), glm::fvec2(850, 100), glm::fvec2(500, 700), glm::vec3(0,0,0));
-
-	// Drawing the Star of David
-	plotTriangle(glm::fvec2(1000, 500), glm::fvec2(1150, 500), glm::fvec2(1075, 650), glm::vec3(0, 0, 1));
-	plotTriangle(glm::fvec2(1000, 600), glm::fvec2(1150, 600), glm::fvec2(1075, 450), glm::vec3(0, 0, 1));
-
-	// Drawing Cross
-	DrawLine(glm::fvec2(1000, 300), glm::fvec2(1150, 300), glm::vec3(1, 1, 0));
-	DrawLine(glm::fvec2(1075, 350), glm::fvec2(1075, 100), glm::vec3(1, 1, 0));
-
-
-	//Drawing the Bluetooth mark
-	plotTriangle(glm::fvec2(850, 600), glm::fvec2(850, 500), glm::fvec2(900, 550), glm::vec3(0, 1, 1));
-	plotTriangle(glm::fvec2(850, 500), glm::fvec2(850, 400), glm::fvec2(900, 450), glm::vec3(0, 1, 1));
-	DrawLine(glm::fvec2(800, 550), glm::fvec2(850, 500), glm::vec3(0, 1, 1));
-	DrawLine(glm::fvec2(800, 450), glm::fvec2(850, 500), glm::vec3(0, 1, 1));
-
 
 }
 
@@ -322,4 +390,11 @@ int Renderer::GetViewportWidth() const
 int Renderer::GetViewportHeight() const
 {
 	return viewport_height_;
+}
+
+void Renderer::SetViewport(int width, int height)
+{
+	viewport_height_ = height;
+	viewport_width_ = width;
+	CreateBuffers(width, height);
 }

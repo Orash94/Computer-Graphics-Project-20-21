@@ -3,6 +3,7 @@
 #include <string>
 #include "Face.h"
 
+
 class MeshModel
 {
 public:
@@ -10,21 +11,70 @@ public:
 	virtual ~MeshModel();
 	const Face& GetFace(int index) const;
 	int GetFacesCount() const;
+	int GetVerticesCount() const;
 	const std::string& GetModelName() const;
 	const glm::vec3& GetVertexAtIndex(int i) const;
 
-	glm::fmat4x4 TansformationScale(const glm::fvec3 position);
-	glm::fmat4x4 TansformationTransition(const glm::fvec3 position);
-	glm::fmat4x4 TansformationRotateX(const float angle);
-	glm::fmat4x4 TansformationRotateY(const float angle);
-	glm::fmat4x4 TansformationRotateZ(const float angle);
+	
 
-	glm::fvec3 Homogeneous2Euclidean(const glm::fvec4 vec);
-	glm::fvec4 Euclidean2Homogeneous(const glm::fvec3 vec);
+	std::vector<Face> getFaces() const;
+	void outputFacesAndVertices();
 
-private:
+	glm::vec3 getScale();
+	glm::vec3 getRotate();
+	glm::vec3 getTranslate();
+	glm::fmat4x4 getObjectTransformation();
+
+	glm::vec3 getWorldScale();
+	glm::vec3 getWorldRotate();
+	glm::vec3 getWorldTranslate();
+	glm::fmat4x4 getWorldTransformation();
+
+
+	float getMaxDitancePoints();
+	void getMiddleOfModel();
+	void setMinMaxVertices();
+
+	void setObjectTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
+	void setWorldTransformationUpdates(const glm::vec3 nScale, const glm::vec3 nRotate, const glm::vec3 nTrasnlate);
+	void setObjectTransformation(const glm::fmat4x4 transform);
+	void setWorldTransformation(const glm::fmat4x4 transform);
+
+	void setFrame(glm::fvec3 center, glm::fmat3x3 CoordinateSystem);
+	void updateFrame( glm::fmat4x4 transform);
+
+	const glm::vec3& getCenter();
+	const glm::fmat3x3& getCoordinateSystem();
+
+	bool displayBoundingBox = false;
+	bool displayFaceNormals = false;
+
+protected:
+	
+	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 Rotate = glm::vec3(0, 0, 0);
+	glm::vec3 Translate = glm::vec3(0, 0, 0);
+
+	glm::vec3 WorldScale = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 WorldRotate = glm::vec3(0, 0, 0);
+	glm::vec3 WorldTranslate = glm::vec3(0, 0, 0);
+
+	glm::fmat4x4 ObjectTransformation;
+	glm::fmat4x4 WorldTransformation;
+
 	std::vector<Face> faces_;
 	std::vector<glm::vec3> vertices_;
 	std::vector<glm::vec3> normals_;
 	std::string model_name_;
+
+	float minX_ = FLT_MAX;
+	float minY_ = FLT_MAX;
+	float minZ_ = FLT_MAX;
+	float maxX_ = FLT_MIN;
+	float maxY_ = FLT_MIN;
+	float maxZ_ = FLT_MIN;
+	
+
+	glm::vec3 center;
+	glm::fmat3x3 CoordinateSystem;
 };

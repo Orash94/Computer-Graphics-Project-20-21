@@ -1,10 +1,12 @@
 #include <memory>
 #include <string>
+#define _USE_MATH_DEFINES
+#include <iostream>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
 #include "Utils.h"
+#include <cmath>
 
 glm::vec3 Utils::Vec3fFromStream(std::istream& issLine)
 {
@@ -104,4 +106,178 @@ std::string Utils::GetFileName(const std::string& filePath)
 	}
 
 	return filePath.substr(index + 1, len - index);
+}
+
+
+
+glm::fmat4x4  Utils::TransformationScale(const glm::fvec3 position)
+{
+	float x = position[0];
+	float y = position[1];
+	float z = position[2];
+
+	glm::fvec4 vec1 = glm::fvec4(x, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, y, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, z, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return  glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+
+}
+
+glm::fmat4x4 Utils::TransformationTransition(const glm::fvec3 position)
+{
+	float x = position[0];
+	float y = position[1];
+	float z = position[2];
+
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, x);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, 0, y);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 1.0f, z);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return  glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::TransformationRotateX(const float angle)
+{
+
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, cos(angle), -sin(angle), 0);
+	glm::fvec4 vec3 = glm::fvec4(0, sin(angle), cos(angle), 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::TransformationRotateY(const float angle)
+{
+
+	glm::fvec4 vec1 = glm::fvec4(cos(angle), 0, sin(angle), 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(-sin(angle), 0, cos(angle), 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::TransformationRotateZ(const float angle)
+{
+	glm::fvec4 vec1 = glm::fvec4(cos(angle), -sin(angle), 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(sin(angle), cos(angle), 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 1.0f, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::TransformationShear(const glm::fvec2 vector)
+{
+	float shearx = vector[0];
+	float sheary = vector[1];
+
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, shearx, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, sheary, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 1.0f, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::TransformationOrthographic()
+{
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 0, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 0);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::TransformationPerspective(const float d)
+{
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 0, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 1/d, 0);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::SetViewVolumeOrthographicTransformation(const float right, const float left, const float top, const float bottom, const float near, const float far)
+{
+	glm::fvec4 vec1 = glm::fvec4(2/(right-left), 0, 0, -((right+left)/(right - left)));
+	glm::fvec4 vec2 = glm::fvec4(0, 2/(top-bottom), 0, -((top + bottom) / (top - bottom)));
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 2/(near - far), -((far + near) / (far - near)));
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::SetViewVolumePerspectiveTransformation(const float right, const float left, const float top, const float bottom, const float near, const float far)
+{
+	glm::fvec4 vec1 = glm::fvec4(2*near/(right-left), 0, (right+left)/(right-left), 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 2*near/(top - bottom), (top + bottom)/(top - bottom), 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, -((far+near)/(far-near)), -((2*far*near)/(far-near)));
+	glm::fvec4 vec4 = glm::fvec4(0, 0, -1.0f, 0);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fmat4x4 Utils::getIdMat()
+{
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 1.0f, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	return glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+}
+
+glm::fvec3 Utils::applyTransformationToVector(const glm::fvec3 vec, glm::fmat4x4& mat)
+{
+	glm::fvec4 newv0 = Utils::Euclidean2Homogeneous(vec);
+	newv0 = mat * newv0;
+	return  Utils::Homogeneous2Euclidean(newv0);
+}
+
+float Utils::degrees2Radians(float degree)
+{
+	float pi = (2 * acos(0.0));
+	return degree*(pi / 180);
+}
+
+float Utils::radians2Degrees(float radian)
+{
+	float pi = (2 * acos(0.0));
+	return radian * (180 / pi);
+}
+
+glm::fvec3 Utils::Homogeneous2Euclidean(const glm::fvec4 vec)
+{
+	float x = vec[0];
+	float y = vec[1];
+	float z = vec[2];
+	float w = vec[3];
+	return glm::fvec3(x / w, y / w, z / w);
+}
+
+glm::fvec4 Utils::Euclidean2Homogeneous(const glm::fvec3 vec)
+{
+	float x = vec[0];
+	float y = vec[1];
+	float z = vec[2];
+
+	return glm::fvec4(x, y, z, 1);
+}
+
+void Utils::resetMatrix(glm::fmat4x4& mat)
+{
+	glm::fvec4 vec1 = glm::fvec4(1.0f, 0, 0, 0);
+	glm::fvec4 vec2 = glm::fvec4(0, 1.0f, 0, 0);
+	glm::fvec4 vec3 = glm::fvec4(0, 0, 1.0f, 0);
+	glm::fvec4 vec4 = glm::fvec4(0, 0, 0, 1.0f);
+
+	mat = glm::transpose(glm::fmat4x4(vec1, vec2, vec3, vec4));
+
 }

@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "MeshModel.h"
 #include "Renderer.h"
+#include <iostream>
 #include <string>
 
 Scene::Scene() :
@@ -13,7 +14,10 @@ Scene::Scene() :
 void Scene::AddModel(const std::shared_ptr<MeshModel>& mesh_model)
 {
 	mesh_models_.push_back(mesh_model);
-	
+	std::cout << std::endl << "A model has been added" << std::endl;
+	std::cout << "Model name: " << mesh_model->GetModelName() << std::endl;
+	std::cout << "There are now " << mesh_models_.size() << " models" << std::endl;
+
 }
 
 int Scene::GetModelCount() const
@@ -74,5 +78,10 @@ void Scene::SetActiveModelIndex(int index)
 int Scene::GetActiveModelIndex() const
 {
 	return active_model_index_;
+}
+
+void Scene::cleanupScene()
+{
+	mesh_models_.clear();
 }
 
